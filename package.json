@@ -1,0 +1,15 @@
+{
+  "name": "wm-tippspiel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web-App für das WM-Tippspiel: Excel-Vorlage hochladen, tippen, ausgefüllte Excel herunterladen",
+  "scripts": {
+    "test": "node --test test/parser.test.js test/app.smoke.test.js",
+    "make-sample": "node tools/make-sample.js",
+    "start": "npx --yes serve -l 8000 ."
+  },
+  "devDependencies": {
+    "exceljs": "^4.4.0",
+    "jsdom": "^29.1.1"
+  }
+}
