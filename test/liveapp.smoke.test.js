@@ -52,6 +52,12 @@ function waitFor(cond, ms = 5000) {
   });
 }
 
+test('CSS: [hidden] schlägt display-Regeln (Sheet-Overlay darf Seite nicht verdecken)', () => {
+  const css = fs.readFileSync(path.join(root, 'css', 'liquid.css'), 'utf-8');
+  assert.match(css, /\[hidden\]\s*\{\s*display:\s*none\s*!important/,
+    'globale [hidden]-Regel mit !important fehlt');
+});
+
 test('Offline-Modus: alle Ansichten rendern', async () => {
   const dom = makeApp();
   const doc = dom.window.document;
