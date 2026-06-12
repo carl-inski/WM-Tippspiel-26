@@ -111,7 +111,7 @@ async function main() {
     r += 1;
   }
 
-  const outDir = path.join(__dirname, '..', 'sample');
+  const outDir = path.join(__dirname, '..', 'tippzettel-tool', 'sample');
   fs.mkdirSync(outDir, { recursive: true });
   const out = path.join(outDir, 'Tippspiel_Vorlage.xlsx');
   await wb.xlsx.writeFile(out);

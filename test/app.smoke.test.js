@@ -10,7 +10,7 @@ const path = require('node:path');
 const { JSDOM } = require('jsdom');
 const ExcelJS = require('exceljs');
 
-const root = path.join(__dirname, '..');
+const root = path.join(__dirname, '..', 'tippzettel-tool');
 
 test('kompletter Ablauf: Upload -> Tippen -> Download', async () => {
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf-8');
@@ -18,7 +18,7 @@ test('kompletter Ablauf: Upload -> Tippen -> Download', async () => {
   const { window } = dom;
 
   // Skripte wie der Browser in Reihenfolge ausführen
-  for (const src of ['js/vendor/exceljs.min.js', 'js/parser.js', 'js/app.js']) {
+  for (const src of ['vendor/exceljs.min.js', 'parser.js', 'app.js']) {
     window.eval(fs.readFileSync(path.join(root, src), 'utf-8'));
   }
 

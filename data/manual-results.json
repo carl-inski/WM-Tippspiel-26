@@ -1,0 +1,4 @@
+{
+  "_hinweis": "Manueller Ergebnis-Fallback. Wird über die Excel-Stände gelegt, die Live-API gewinnt immer. Format: \"results\": { \"m003\": { \"home\": 1, \"away\": 0, \"finished\": true } }. Die Spiel-IDs (m001..m104) stehen in data/tippspiel.json.",
+  "results": {}
+}

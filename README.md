@@ -1,73 +1,102 @@
-# ⚽ WM-Tippspiel
+# 🏆 WM 2026 – Familien-Tippspiel (Live-App)
 
-Eine kleine Web-App für das WM-Tippspiel: Die Excel-Vorlage vom Tippspiel-Organisator
-hochladen, alle Spiele bequem in einer schönen Oberfläche tippen und die fertig
-ausgefüllte Excel-Datei herunterladen — benannt nach dem eigenen Namen
-(z. B. `Tippspiel_Carl.xlsx`). Die Datei muss dann nur noch per E-Mail verschickt werden.
+Interaktive Web-App zum Excel-Tippspiel: **Live-Spielstände, Live-Torschützenliste,
+Einzelwertung und Familienwertung** – automatisch aktualisiert, im
+Liquid-Glass-Design. Die Tipps aller 72 Mittipper stammen aus der
+Original-Excel des Organisators und werden mit Live-Daten von
+football-data.org verrechnet.
 
-## So funktioniert's
+## Wie es funktioniert
 
-1. **Name eingeben** und die **Excel-Vorlage** (.xlsx) hochladen bzw. per Drag & Drop ablegen.
-2. Die App erkennt automatisch alle Spiele in der Tabelle und zeigt sie als Liste an —
-   inklusive Gruppen-/Rundenüberschriften, Flaggen und Spieldatum.
-3. **Alle Spiele tippen** — der Fortschrittsbalken zeigt, wie viele Spiele noch fehlen.
-4. **„Excel mit meinen Tipps herunterladen"** klicken: Die Tipps werden in die
-   Original-Datei geschrieben (Formatierung bleibt erhalten) und als
-   `Tippspiel_<Name>.xlsx` heruntergeladen.
-
-🔒 **Datenschutz:** Alles läuft komplett im Browser. Die Excel-Datei wird nirgendwohin
-hochgeladen, es gibt keinen Server und es werden keine Daten gespeichert.
-
-## App starten
-
-Es handelt sich um eine rein statische Web-App — es reicht, `index.html` im Browser zu öffnen.
-
-Alternativ mit einem lokalen Webserver:
-
-```bash
-npm start          # startet http://localhost:8000
+```
+Excel des Onkels ──> tools/import-excel.js ──> data/tippspiel.json ─┐
+                                                                    ├─> Web-App (statisch)
+football-data.org ──> Cloudflare-Worker-Proxy ──> Live-Ergebnisse ──┘
 ```
 
-### Auf GitHub Pages veröffentlichen
+- **Keine Datenbank, kein eigener Server:** Die App ist eine statische Seite
+  (GitHub Pages). Die Wertung – exakt = Wert × 1,5, Tendenz = Wert × 1,
+  Zusatzfragen – wird live im Browser berechnet und ist
+  **gegen die Original-Excel-Formeln validiert** (siehe `test/scoring.test.js`).
+- **Live-Daten:** alle 60 s werden Spielstände und Torschützen geholt.
+  Läuft ein Spiel, fließen die Punkte als „Live-Punkte" (rot pulsierend)
+  in Tabelle und Familienwertung ein.
+- **Ohne Live-Anbindung** zeigt die App den Stand aus der Excel
+  plus optional manuell gepflegte Ergebnisse (`data/manual-results.json`).
 
-Im Repository unter **Settings → Pages** als Quelle „Deploy from a branch" und den
-gewünschten Branch mit Ordner `/ (root)` auswählen. Danach ist die App unter
-`https://<benutzer>.github.io/<repo>/` für alle Mittipper erreichbar.
+## Einmalige Einrichtung der Live-Daten (~10 Minuten, kostenlos)
 
-## Welche Excel-Layouts werden erkannt?
+1. **API-Key holen:** Auf https://www.football-data.org/client/register
+   kostenlos registrieren → Key kommt per E-Mail.
+2. **Cloudflare-Worker anlegen** (Proxy, damit der Key geheim bleibt und
+   CORS funktioniert):
+   - https://dash.cloudflare.com → *Workers & Pages* → *Create Worker*
+   - Inhalt von [`proxy/cloudflare-worker.js`](proxy/cloudflare-worker.js)
+     einfügen → *Deploy*
+   - *Settings → Variables and Secrets* → Secret `FOOTBALL_DATA_API_KEY`
+     mit dem API-Key anlegen
+3. **Worker-URL eintragen:** In [`js/config.js`](js/config.js) die URL
+   (`https://<name>.<account>.workers.dev`) als `proxyUrl` setzen, committen,
+   fertig.
 
-Die App sucht in allen Tabellenblättern nach Zeilen mit Spielpaarungen und freien
-Zellen für den Tipp. Unterstützt werden u. a.:
+## Veröffentlichen (GitHub Pages)
 
-- Teams in zwei Zellen mit Tippzellen dazwischen: `Deutschland | _ | _ | Spanien`
-- Teams nebeneinander mit Tippzellen rechts: `Deutschland | Spanien | _ | _`
-- Layouts mit `:`-Trennzelle: `Deutschland | Spanien | _ | : | _`
-- Beide Teams in einer Zelle: `Deutschland - Spanien` (Tipp wird als `2:1` eingetragen)
-- K.-o.-Platzhalter wie `1. Gruppe A`, `2B`, `Sieger Spiel 74`, `W73`
-- Deutsche und englische Ländernamen, auch mit Flaggen-Emoji
-- Unbekannte Teamnamen, sofern das Blatt einem erkennbaren Spaltenmuster folgt
+Repository → **Settings → Pages** → Source „Deploy from a branch" →
+Branch wählen, Ordner `/ (root)`. Die App ist dann unter
+`https://<benutzer>.github.io/<repo>/` erreichbar.
 
-Steht neben einem Feld wie `Name:` eine freie Zelle, trägt die App dort automatisch
-den Namen des Tippers ein.
+## Neue Excel vom Organisator einspielen
 
-Eine Beispiel-Vorlage zum Ausprobieren liegt unter
-[`sample/Tippspiel_Vorlage.xlsx`](sample/Tippspiel_Vorlage.xlsx)
-(neu erzeugen mit `npm run make-sample`).
+Wenn eine aktualisierte Excel kommt (z. B. mit den K.o.-Tipps):
+
+```bash
+# Datei ablegen und importieren
+cp ~/Downloads/WM_Tippspiel_2026.xlsx data/source/
+npm run import
+npm test          # prüft u. a., dass die Wertung zur Excel passt
+git add data/ && git commit -m "Tippdaten aktualisiert" && git push
+```
+
+## Manuelle Ergebnisse (Fallback)
+
+Sollte die Live-API einmal ausfallen, können Ergebnisse in
+[`data/manual-results.json`](data/manual-results.json) gepflegt werden
+(Spiel-IDs `m001`–`m104` stehen in `data/tippspiel.json`):
+
+```json
+{ "results": { "m003": { "home": 1, "away": 0, "finished": true } } }
+```
+
+Priorität: Live-API > manuelle Ergebnisse > Excel-Stand.
 
 ## Entwicklung
 
 ```bash
-npm install        # einmalig (nur für Tests/Tools, die App selbst braucht kein Build)
-npm test           # Parser-Tests (node:test)
+npm install        # einmalig (nur für Tests/Import)
+npm test           # alle Tests
+npm run import     # Excel -> data/tippspiel.json
+npm start          # lokaler Server auf http://localhost:8000
 ```
-
-Projektstruktur:
 
 | Pfad | Inhalt |
 | --- | --- |
-| `index.html`, `css/style.css` | Oberfläche |
-| `js/app.js` | UI-Logik (Upload, Tippliste, Download) |
-| `js/parser.js` | Erkennung der Spiele & Tippzellen, Zurückschreiben der Tipps |
-| `js/vendor/exceljs.min.js` | gebündeltes [ExcelJS](https://github.com/exceljs/exceljs) — die App läuft damit auch offline |
-| `test/parser.test.js` | Tests für den Parser |
-| `tools/make-sample.js` | erzeugt die Beispiel-Vorlage |
+| `index.html`, `css/liquid.css` | Live-App, Liquid-Glass-UI |
+| `js/main.js` | Ansichten (Spiele, Einzelwertung, Familien, Torschützen) |
+| `js/scoring.js` | Wertungslogik (gegen Excel validiert) |
+| `js/api.js` | football-data.org-Anbindung + Spiel-Zuordnung |
+| `js/teams.js` | Teamnamen-Mapping (deutsch ↔ API) + Flaggen |
+| `js/config.js` | Proxy-URL & Poll-Intervall |
+| `tools/import-excel.js` | Excel-Import |
+| `data/source/` | Original-Excel des Organisators |
+| `proxy/cloudflare-worker.js` | API-Proxy zum Selbst-Deployen |
+| `tippzettel-tool/` | ursprüngliche App zum Ausfüllen des Tippzettels |
+
+## Wertungsregeln (aus der Excel übernommen)
+
+- **Spieltipp:** exaktes Ergebnis = Spielwert × 1,5 · richtige Tendenz = Spielwert × 1 · sonst 0.
+  Der Spielwert steigt im Turnierverlauf (1,0 bis 11,6 – die USA-Spiele zählen traditionell 0,2 😉)
+- **Weltmeister:** 15 Punkte
+- **Torjäger:** 3 Punkte pro WM-Tor des getippten Spielers
+- **Anzahl Elfmeterschießen** (bis einschl. Halbfinale): exakt +10, sonst −2 × Abweichung
+  (wird erst am Turnierende gewertet)
+- **Familienwertung:** Durchschnitt der Gesamtpunkte aller Familienmitglieder

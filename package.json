@@ -4,7 +4,8 @@
   "private": true,
   "description": "Web-App für das WM-Tippspiel: Excel-Vorlage hochladen, tippen, ausgefüllte Excel herunterladen",
   "scripts": {
-    "test": "node --test test/parser.test.js test/app.smoke.test.js",
+    "test": "node --test test/scoring.test.js test/api.test.js test/liveapp.smoke.test.js test/parser.test.js test/app.smoke.test.js",
+    "import": "node tools/import-excel.js",
     "make-sample": "node tools/make-sample.js",
     "start": "npx --yes serve -l 8000 ."
   },

@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const ExcelJS = require('exceljs');
-const TippParser = require('../js/parser.js');
+const TippParser = require('../tippzettel-tool/parser.js');
 
 function wb() {
   return new ExcelJS.Workbook();
@@ -154,7 +154,7 @@ test('Beispiel-Vorlage wird vollständig erkannt', async () => {
   execFileSync(process.execPath, [path.join(__dirname, '..', 'tools', 'make-sample.js')]);
 
   const book = wb();
-  await book.xlsx.readFile(path.join(__dirname, '..', 'sample', 'Tippspiel_Vorlage.xlsx'));
+  await book.xlsx.readFile(path.join(__dirname, '..', 'tippzettel-tool', 'sample', 'Tippspiel_Vorlage.xlsx'));
   const matches = TippParser.parseWorkbook(book);
   // 4 Gruppen à 6 Spiele + 4 AF + 2 VF + 1 HF + 1 Finale = 32
   assert.equal(matches.length, 32);

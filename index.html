@@ -2,72 +2,57 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WM-Tippspiel</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;⚽&lt;/text&gt;&lt;/svg&gt;">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>WM 2026 · Familien-Tippspiel</title>
+  <meta name="description" content="Live-Tipptabelle des Familien-Tippspiels zur WM 2026">
+  <link rel="preconnect" href="https://flagcdn.com">
+  <link rel="stylesheet" href="css/liquid.css">
+  <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;🏆&lt;/text&gt;&lt;/svg&gt;">
 </head>
 <body>
-  <header class="hero">
-    <h1>⚽ WM-Tippspiel</h1>
-    <p>Excel-Vorlage hochladen, bequem tippen, fertige Datei herunterladen &ndash; und ab damit an Onkel!</p>
+  <div class="bg-blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <header class="glass topbar">
+    <div class="topbar-title">
+      <h1>🏆 WM 2026 <span>Familien-Tippspiel</span></h1>
+    </div>
+    <div class="topbar-status">
+      <span id="live-dot" class="status-dot offline" title="Live-Status"></span>
+      <span id="status-text">lädt …</span>
+    </div>
   </header>
 
-  <main>
-    <!-- Schritt 1: Name + Upload -->
-    <section id="step-upload" class="card">
-      <h2>1. Name &amp; Tippzettel</h2>
-      <label class="field-label" for="name-input">Dein Name</label>
-      <input id="name-input" type="text" placeholder="z. B. Carl" autocomplete="name">
+  <nav class="glass segmented" id="tabs" role="tablist">
+    <button class="seg-btn active" data-tab="spiele" role="tab">Spiele</button>
+    <button class="seg-btn" data-tab="tabelle" role="tab">Einzelwertung</button>
+    <button class="seg-btn" data-tab="familien" role="tab">Familien</button>
+    <button class="seg-btn" data-tab="torjaeger" role="tab">Torschützen</button>
+  </nav>
 
-      <label class="field-label">Excel-Tippzettel</label>
-      <div id="dropzone" class="dropzone" role="button" tabindex="0"
-           aria-label="Excel-Datei auswählen oder hierher ziehen">
-        <div class="dropzone-icon">📄</div>
-        <p><strong>Excel-Datei hier ablegen</strong> oder klicken zum Auswählen</p>
-        <p class="hint">.xlsx &ndash; die Vorlage von deinem Onkel</p>
-        <p id="file-label" class="file-label"></p>
-      </div>
-      <input id="file-input" type="file" accept=".xlsx,.xlsm" hidden>
-      <div id="error-box" class="error" hidden></div>
-      <p class="privacy-note">🔒 Alles passiert direkt in deinem Browser &ndash; die Datei wird nirgendwohin hochgeladen.</p>
-    </section>
-
-    <!-- Schritt 2: Tippen + Download -->
-    <section id="step-tips" class="card" hidden>
-      <div class="tips-header">
-        <h2>2. Deine Tipps</h2>
-        <button id="reset-btn" class="btn-secondary" type="button">Andere Datei wählen</button>
-      </div>
-
-      <div class="progress">
-        <div class="progress-track"><div id="progress-bar" class="progress-fill"></div></div>
-        <span id="progress-label">0 von 0 Spielen getippt</span>
-      </div>
-
-      <div id="match-list"></div>
-
-      <div class="download-area">
-        <label class="field-label" for="name-input-2">Dein Name (wird Teil des Dateinamens)</label>
-        <input id="name-input-2" type="text" placeholder="z. B. Carl" autocomplete="name">
-        <p id="download-hint" class="hint" hidden>Gib deinen Namen ein, um herunterladen zu können.</p>
-        <button id="download-btn" class="btn-primary" type="button" disabled>
-          📥 Excel mit meinen Tipps herunterladen
-        </button>
-        <div id="done-box" class="done" hidden>
-          ✅ <strong id="done-filename"></strong> wurde heruntergeladen.<br>
-          Jetzt nur noch per E-Mail an deinen Onkel schicken &ndash; viel Glück! 🍀
-        </div>
-      </div>
-    </section>
+  <main id="app">
+    <section id="view-spiele" class="view"></section>
+    <section id="view-tabelle" class="view" hidden></section>
+    <section id="view-familien" class="view" hidden></section>
+    <section id="view-torjaeger" class="view" hidden></section>
   </main>
 
+  <div id="sheet-backdrop" class="sheet-backdrop" hidden>
+    <div id="sheet" class="glass sheet" role="dialog" aria-modal="true"></div>
+  </div>
+
   <footer>
-    <p>Es werden keine Daten gespeichert oder übertragen.</p>
+    <p id="footer-info">Wertung: exakt = Wert × 1,5 · Tendenz = Wert × 1 · Zusatzfragen: Weltmeister 15 P., Torjäger 3 P./Tor, Elferschießen +10/−2×Δ</p>
+    <p id="footer-source"></p>
   </footer>
 
-  <script src="js/vendor/exceljs.min.js"></script>
-  <script src="js/parser.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/teams.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

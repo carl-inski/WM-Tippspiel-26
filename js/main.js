@@ -1,0 +1,578 @@
+/* WM 2026 Familien-Tippspiel – Live-App */
+(function () {
+  'use strict';
+
+  const CFG = window.APP_CONFIG || {};
+  const state = {
+    data: null,          // data/tippspiel.json
+    manual: {},          // data/manual-results.json -> results
+    apiState: null,      // { results, matchInfo, extras } von der Live-API
+    results: {},         // zusammengeführt
+    standings: [],
+    families: [],
+    openMatch: null,
+    tab: 'spiele',
+    lastUpdate: null,
+    apiError: null
+  };
+
+  const $ = (sel) => document.querySelector(sel);
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  };
+
+  const fmtPts = (x) => (Math.round(x * 100) / 100).toLocaleString('de-DE');
+  const WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+  function flagImg(team) {
+    const info = window.Teams.TEAMS[team];
+    if (!info) {
+      const ph = el('span', 'flag placeholder-flag', '?');
+      return ph;
+    }
+    const img = el('img', 'flag');
+    img.src = 'https://flagcdn.com/w40/' + info.flag + '.png';
+    img.srcset = 'https://flagcdn.com/w80/' + info.flag + '.png 2x';
+    img.alt = team;
+    img.loading = 'lazy';
+    return img;
+  }
+
+  // ------------------------------------------------------------------ Daten --
+
+  async function loadStatic() {
+    const [data, manual] = await Promise.all([
+      fetch('data/tippspiel.json').then((r) => r.json()),
+      fetch('data/manual-results.json').then((r) => r.json()).catch(() => ({ results: {} }))
+    ]);
+    state.data = data;
+    state.manual = manual.results || {};
+  }
+
+  function excelResults() {
+    const res = {};
+    for (const m of state.data.matches) {
+      if (m.result) res[m.id] = { home: m.result.home, away: m.result.away, finished: true };
+    }
+    return res;
+  }
+
+  function recompute() {
+    const apiResults = state.apiState ? state.apiState.results : null;
+    state.results = window.Scoring.mergeResults(excelResults(), state.manual, apiResults);
+    const extras = state.apiState ? state.apiState.extras : {};
+    state.standings = window.Scoring.computeStandings(state.data, state.results, extras);
+    state.families = window.Scoring.computeFamilyStandings(state.data, state.standings);
+  }
+
+  async function refreshLive() {
+    if (!CFG.proxyUrl) return;
+    try {
+      const { apiMatches, apiScorers } = await window.LiveApi.fetchLive(CFG.proxyUrl);
+      state.apiState = window.LiveApi.mapLiveData(state.data, apiMatches, apiScorers);
+      state.apiError = null;
+      state.lastUpdate = new Date();
+    } catch (err) {
+      console.error('Live-Update fehlgeschlagen:', err);
+      state.apiError = err.message;
+    }
+    recompute();
+    render();
+  }
+
+  // --------------------------------------------------------------- Helpers --
+
+  function matchInfo(id) {
+    return (state.apiState && state.apiState.matchInfo[id]) || null;
+  }
+
+  function isLive(id) {
+    const r = state.results[id];
+    return !!(r && r.live);
+  }
+
+  function teamsOf(m) {
+    const info = matchInfo(m.id);
+    return {
+      home: m.home || (info && info.homeDE) || null,
+      away: m.away || (info && info.awayDE) || null
+    };
+  }
+
+  function anyLive() {
+    return Object.values(state.results).some((r) => r.live);
+  }
+
+  // ---------------------------------------------------------------- Render --
+
+  function render() {
+    renderStatus();
+    renderSpiele();
+    renderTabelle();
+    renderFamilien();
+    renderTorjaeger();
+    $('#footer-source').textContent = CFG.proxyUrl
+      ? 'Live-Daten: football-data.org · Aktualisierung alle ' + (CFG.pollSeconds || 60) + ' s'
+      : 'Offline-Modus: Stände aus der Excel-Datei' +
+        (Object.keys(state.manual).length ? ' + manuelle Ergebnisse' : '');
+  }
+
+  function renderStatus() {
+    const dot = $('#live-dot');
+    const txt = $('#status-text');
+    if (!CFG.proxyUrl) {
+      dot.className = 'status-dot offline';
+      txt.textContent = 'Offline-Modus';
+      return;
+    }
+    if (state.apiError) {
+      dot.className = 'status-dot offline';
+      txt.textContent = 'Live-Daten gestört';
+      return;
+    }
+    if (anyLive()) {
+      dot.className = 'status-dot live';
+      txt.textContent = 'LIVE';
+    } else {
+      dot.className = 'status-dot online';
+      txt.textContent = state.lastUpdate
+        ? 'Stand ' + state.lastUpdate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+        : 'verbunden';
+    }
+  }
+
+  // ------- Spiele -------
+
+  function renderSpiele() {
+    const view = $('#view-spiele');
+    view.innerHTML = '';
+
+    if (!CFG.proxyUrl) {
+      const b = el('div', 'banner');
+      b.innerHTML = '⚙️ <strong>Live-Daten noch nicht verbunden.</strong> ' +
+        'Sobald der Daten-Proxy in <code>js/config.js</code> eingetragen ist, ' +
+        'aktualisieren sich Spielstände, Torschützen und Wertung automatisch. ' +
+        'Anleitung: siehe README im Repository.';
+      view.appendChild(b);
+    }
+
+    const live = state.data.matches.filter((m) => isLive(m.id));
+    if (live.length) {
+      const label = el('div', 'day-label', '🔴 Jetzt live');
+      view.appendChild(label);
+      live.forEach((m) => view.appendChild(matchCard(m)));
+    }
+
+    // nach Tagen gruppieren
+    const groups = new Map();
+    for (const m of state.data.matches) {
+      if (isLive(m.id)) continue;
+      const d = new Date(m.kickoff);
+      const key = d.toISOString().slice(0, 10);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(m);
+    }
+
+    const todayKey = localDateKey(new Date());
+    for (const [key, ms] of groups) {
+      const d = new Date(key + 'T12:00:00');
+      const label = WEEKDAYS[d.getDay()] + ', ' +
+        d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+        (key === todayKey ? ' · heute' : '') +
+        (ms[0].round ? ' — ' + ms[0].round : '');
+      view.appendChild(el('div', 'day-label', label));
+      ms.forEach((m) => view.appendChild(matchCard(m)));
+    }
+  }
+
+  function localDateKey(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') +
+      '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function matchCard(m) {
+    const { home, away } = teamsOf(m);
+    const res = state.results[m.id];
+    const live = isLive(m.id);
+    const card = el('div', 'glass match-card');
+
+    const row = el('button', 'match-row');
+    row.setAttribute('aria-expanded', state.openMatch === m.id ? 'true' : 'false');
+
+    const t = el('div', 'match-time');
+    const ko = new Date(m.kickoff);
+    if (live) {
+      t.appendChild(el('span', 'live-badge', 'LIVE'));
+    } else {
+      t.textContent = ko.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    }
+    row.appendChild(t);
+
+    const th = el('div', 'mteam' + (home ? '' : ' placeholder'));
+    if (home) th.appendChild(flagImg(home));
+    th.appendChild(el('span', 'name', home || offenLabel(m)));
+    row.appendChild(th);
+
+    const sc = el('div', 'mscore' + (live ? ' live' : res ? '' : ' upcoming'));
+    if (res) {
+      sc.textContent = res.home + ' : ' + res.away;
+      const info = matchInfo(m.id);
+      if (info && info.penalties && info.penalties.home != null) {
+        sc.textContent += ' (' + info.penalties.home + ':' + info.penalties.away + ' i. E.)';
+      }
+    } else {
+      sc.textContent = '– : –';
+    }
+    row.appendChild(sc);
+
+    const ta = el('div', 'mteam right' + (away ? '' : ' placeholder'));
+    ta.appendChild(el('span', 'name', away || offenLabel(m)));
+    if (away) ta.appendChild(flagImg(away));
+    row.appendChild(ta);
+
+    const meta = el('div', 'match-meta');
+    meta.appendChild(el('span', 'wert-chip', 'Wert ' + fmtPts(m.wert)));
+    row.appendChild(meta);
+
+    row.addEventListener('click', () => {
+      state.openMatch = state.openMatch === m.id ? null : m.id;
+      renderSpiele();
+    });
+    card.appendChild(row);
+
+    if (state.openMatch === m.id) card.appendChild(matchTips(m));
+    return card;
+  }
+
+  function offenLabel(m) {
+    return m.round ? 'offen (' + m.round + ')' : 'offen';
+  }
+
+  function matchTips(m) {
+    const wrap = el('div', 'match-tips');
+    const res = state.results[m.id];
+    const tippers = state.data.players
+      .map((p) => ({ name: p.name, tip: p.tips[m.id] }))
+      .filter((x) => x.tip);
+
+    if (!tippers.length) {
+      wrap.appendChild(el('p', 'empty-hint', 'Für dieses Spiel liegen noch keine Tipps vor.'));
+      return wrap;
+    }
+
+    const rows = tippers.map((x) => {
+      const pts = res ? window.Scoring.matchPoints(x.tip, res, m.wert) : null;
+      return { ...x, pts };
+    });
+    rows.sort((a, b) => (b.pts ?? -1) - (a.pts ?? -1) || a.name.localeCompare(b.name, 'de'));
+
+    for (const r of rows) {
+      const cls = r.pts === null ? '' :
+        r.pts === 0 ? ' miss' : (r.pts > m.wert ? ' hit-exact' : ' hit-tend');
+      const chip = el('div', 'tip-chip' + cls);
+      chip.appendChild(el('span', '', r.name));
+      const right = el('span', '');
+      right.appendChild(el('span', 'tipscore', r.tip[0] + ':' + r.tip[1] + ' '));
+      if (r.pts !== null) right.appendChild(el('span', 'pts', fmtPts(r.pts)));
+      chip.appendChild(right);
+      wrap.appendChild(chip);
+    }
+    return wrap;
+  }
+
+  // ------- Einzelwertung -------
+
+  function renderTabelle() {
+    const view = $('#view-tabelle');
+    view.innerHTML = '';
+    const card = el('div', 'glass card');
+    card.appendChild(el('h2', '', 'Einzelwertung · ' + state.standings.length + ' Tipper'));
+
+    const famOf = new Map();
+    state.data.families.forEach((f) => f.members.forEach((m2) => famOf.set(m2, f.name)));
+
+    const table = el('table', 'table');
+    table.innerHTML = '<thead><tr>' +
+      '<th class="rank">#</th><th>Name</th>' +
+      '<th class="num" title="exakte Ergebnisse">🎯</th>' +
+      '<th class="num" title="richtige Tendenzen">↕</th>' +
+      '<th class="num">Bonus</th><th class="num">Punkte</th><th class="bar-cell"></th>' +
+      '</tr></thead>';
+    const tbody = el('tbody');
+    const max = Math.max(1, ...state.standings.map((r) => r.totalLive));
+
+    for (const r of state.standings) {
+      const tr = el('tr', r.rank <= 3 ? 'top' + r.rank : '');
+      tr.appendChild(el('td', 'rank', String(r.rank)));
+
+      const nameTd = el('td');
+      nameTd.appendChild(el('span', 'pname', r.name));
+      const fam = famOf.get(r.name);
+      if (fam) nameTd.appendChild(el('span', 'fam-tag', ' · ' + fam.replace('Fam. ', '')));
+      tr.appendChild(nameTd);
+
+      tr.appendChild(el('td', 'num', String(r.exact)));
+      tr.appendChild(el('td', 'num', String(r.tendency)));
+      tr.appendChild(el('td', 'num', fmtPts(r.bonusPoints)));
+
+      const totalTd = el('td', 'num total-cell', fmtPts(r.total));
+      if (r.livePoints > 0) totalTd.appendChild(el('span', 'live-delta', '+' + fmtPts(r.livePoints)));
+      tr.appendChild(totalTd);
+
+      const barTd = el('td', 'bar-cell');
+      const bar = el('div', 'score-bar');
+      const fill = el('i');
+      fill.style.width = Math.max(2, (r.totalLive / max) * 100) + '%';
+      bar.appendChild(fill);
+      barTd.appendChild(bar);
+      tr.appendChild(barTd);
+
+      tr.addEventListener('click', () => openPlayerSheet(r.name));
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    card.appendChild(table);
+    view.appendChild(card);
+  }
+
+  // ------- Familien -------
+
+  function renderFamilien() {
+    const view = $('#view-familien');
+    view.innerHTML = '';
+    const byName = new Map(state.standings.map((r) => [r.name, r]));
+
+    const grid = el('div', 'family-grid');
+    for (const f of state.families) {
+      const card = el('div', 'glass family-card');
+      const head = el('div', 'family-head');
+      head.appendChild(el('span', 'fname', f.name));
+      head.appendChild(el('span', 'frank', '#' + f.rank));
+      card.appendChild(head);
+
+      const avg = el('div', 'family-avg', fmtPts(f.average));
+      avg.appendChild(el('small', '', 'Ø Punkte (' + f.memberCount + ' Tipper)'));
+      card.appendChild(avg);
+
+      const chips = el('div', 'member-chips');
+      [...f.members]
+        .sort((a, b) => (byName.get(b)?.totalLive ?? 0) - (byName.get(a)?.totalLive ?? 0))
+        .forEach((m) => {
+          const r = byName.get(m);
+          const chip = el('span', 'member-chip', m + (r ? ' · ' + fmtPts(r.totalLive) : ''));
+          chip.style.cursor = 'pointer';
+          chip.addEventListener('click', () => openPlayerSheet(m));
+          chips.appendChild(chip);
+        });
+      card.appendChild(chips);
+      grid.appendChild(card);
+    }
+    view.appendChild(grid);
+  }
+
+  // ------- Torschützen -------
+
+  function renderTorjaeger() {
+    const view = $('#view-torjaeger');
+    view.innerHTML = '';
+    const card = el('div', 'glass card');
+    card.appendChild(el('h2', '', 'Torschützenliste'));
+
+    const liveScorers = state.apiState && state.apiState.extras.scorers.length
+      ? state.apiState.extras.scorers
+      : state.data.manualScorers.map((s) => ({ name: s.name, goals: s.goals, teamDE: null }));
+
+    const scorers = [...liveScorers].sort((a, b) => b.goals - a.goals);
+
+    // Wer hat auf wen getippt?
+    const picksByScorer = new Map();
+    for (const p of state.data.players) {
+      if (!p.bonus.topscorer) continue;
+      const hit = scorers.find((s) => window.Scoring.samePerson(s.name, p.bonus.topscorer));
+      const key = hit ? hit.name : '__none__' + p.bonus.topscorer;
+      if (!picksByScorer.has(key)) picksByScorer.set(key, []);
+      picksByScorer.get(key).push(p.name);
+    }
+
+    if (!scorers.length) {
+      card.appendChild(el('p', 'empty-hint', 'Noch keine Torschützen-Daten.'));
+    }
+
+    scorers.slice(0, 25).forEach((s, i) => {
+      const row = el('div', 'scorer-row');
+      row.appendChild(el('span', 'rank', String(i + 1)));
+      if (s.teamDE) row.appendChild(flagImg(s.teamDE));
+      else row.appendChild(el('span', 'flag placeholder-flag', '⚽'));
+      const nameWrap = el('span');
+      nameWrap.appendChild(el('span', '', s.name + ' '));
+      const picks = picksByScorer.get(s.name);
+      if (picks) {
+        nameWrap.appendChild(el('span', 'picks',
+          '· getippt von ' + picks.slice(0, 6).join(', ') +
+          (picks.length > 6 ? ' +' + (picks.length - 6) : '')));
+      }
+      row.appendChild(nameWrap);
+      row.appendChild(el('span', 'picks',
+        picks ? '+' + fmtPts(s.goals * state.data.bonus.topscorer.pointsPerGoal) + ' P.' : ''));
+      row.appendChild(el('span', 'goals', s.goals + ' ⚽'));
+      card.appendChild(row);
+    });
+
+    view.appendChild(card);
+
+    // Tipps ohne Treffer in der Liste
+    const misses = [...picksByScorer.entries()].filter(([k]) => k.startsWith('__none__'));
+    if (misses.length) {
+      const mcard = el('div', 'glass card');
+      mcard.appendChild(el('h2', '', 'Getippte Torjäger ohne WM-Tor (bisher)'));
+      for (const [key, names] of misses) {
+        const row = el('div', 'scorer-row');
+        row.appendChild(el('span', 'rank', '–'));
+        row.appendChild(el('span', 'flag placeholder-flag', '⚽'));
+        const nm = el('span');
+        nm.appendChild(el('span', '', key.replace('__none__', '') + ' '));
+        nm.appendChild(el('span', 'picks', '· getippt von ' + names.join(', ')));
+        row.appendChild(nm);
+        row.appendChild(el('span', 'picks', ''));
+        row.appendChild(el('span', 'goals', '0 ⚽'));
+        mcard.appendChild(row);
+      }
+      view.appendChild(mcard);
+    }
+  }
+
+  // ------- Tipper-Detail-Sheet -------
+
+  function openPlayerSheet(name) {
+    const p = state.data.players.find((x) => x.name === name);
+    const r = state.standings.find((x) => x.name === name);
+    if (!p || !r) return;
+
+    const sheet = $('#sheet');
+    sheet.innerHTML = '';
+
+    const head = el('div', 'sheet-head');
+    head.appendChild(el('h2', '', name));
+    const close = el('button', 'sheet-close', '✕');
+    close.setAttribute('aria-label', 'Schließen');
+    close.addEventListener('click', closeSheet);
+    head.appendChild(close);
+    sheet.appendChild(head);
+
+    sheet.appendChild(el('p', 'sheet-sub',
+      'Platz ' + r.rank + ' · ' + fmtPts(r.totalLive) + ' Punkte' +
+      (r.livePoints > 0 ? ' (davon ' + fmtPts(r.livePoints) + ' live)' : '') +
+      ' · ' + r.exact + '× exakt, ' + r.tendency + '× Tendenz'));
+
+    const pills = el('div', 'bonus-pills');
+    const champ = el('span', 'bonus-pill');
+    champ.innerHTML = 'Weltmeister: <b></b>';
+    champ.querySelector('b').textContent = p.bonus.champion || '–';
+    pills.appendChild(champ);
+    const ts = el('span', 'bonus-pill');
+    ts.innerHTML = 'Torjäger: <b></b>';
+    ts.querySelector('b').textContent = p.bonus.topscorer || '–';
+    if (r.bonusDetail.topscorer) {
+      ts.appendChild(document.createTextNode(' (+' + fmtPts(r.bonusDetail.topscorer) + ' P.)'));
+    }
+    pills.appendChild(ts);
+    const em = el('span', 'bonus-pill');
+    em.innerHTML = 'Elferschießen: <b></b>';
+    em.querySelector('b').textContent = p.bonus.shootouts != null ? String(p.bonus.shootouts) : '–';
+    pills.appendChild(em);
+    sheet.appendChild(pills);
+
+    // Spiele mit Ergebnis zuerst, dann kommende
+    const played = [];
+    const upcoming = [];
+    for (const m of state.data.matches) {
+      const tip = p.tips[m.id];
+      if (!tip) continue;
+      (state.results[m.id] ? played : upcoming).push(m);
+    }
+
+    const addRow = (m) => {
+      const { home, away } = teamsOf(m);
+      const res = state.results[m.id];
+      const tip = p.tips[m.id];
+      const row = el('div', 'sheet-match');
+      row.appendChild(el('span', '', (home || 'offen') + ' – ' + (away || 'offen')));
+      row.appendChild(el('span', 'res', res ? res.home + ':' + res.away : '–:–'));
+      row.appendChild(el('span', 'tip', 'Tipp ' + tip[0] + ':' + tip[1]));
+      if (res) {
+        const pts = window.Scoring.matchPoints(tip, res, m.wert);
+        const cls = pts === 0 ? 'zero' : pts > m.wert ? 'exact' : 'tend';
+        row.appendChild(el('span', 'pts ' + cls, fmtPts(pts) + (res.live ? ' 🔴' : '')));
+      } else {
+        row.appendChild(el('span', 'pts zero', ''));
+      }
+      sheet.appendChild(row);
+    };
+
+    played.forEach(addRow);
+    if (upcoming.length) {
+      sheet.appendChild(el('p', 'sheet-sub', 'Noch offen:'));
+      upcoming.slice(0, 30).forEach(addRow);
+      if (upcoming.length > 30) {
+        sheet.appendChild(el('p', 'empty-hint', '… und ' + (upcoming.length - 30) + ' weitere Tipps'));
+      }
+    }
+
+    $('#sheet-backdrop').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSheet() {
+    $('#sheet-backdrop').hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  // ------------------------------------------------------------------ Tabs --
+
+  function initTabs() {
+    $('#tabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('.seg-btn');
+      if (!btn) return;
+      state.tab = btn.dataset.tab;
+      document.querySelectorAll('.seg-btn').forEach((b) =>
+        b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.view').forEach((v) =>
+        v.hidden = v.id !== 'view-' + state.tab);
+    });
+
+    $('#sheet-backdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'sheet-backdrop') closeSheet();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSheet();
+    });
+  }
+
+  // ------------------------------------------------------------------ Start --
+
+  async function start() {
+    initTabs();
+    try {
+      await loadStatic();
+    } catch (err) {
+      $('#app').innerHTML = '';
+      const b = el('div', 'banner', 'Daten konnten nicht geladen werden: ' + err.message);
+      $('#app').appendChild(b);
+      return;
+    }
+    recompute();
+    render();
+    if (CFG.proxyUrl) {
+      refreshLive();
+      setInterval(refreshLive, Math.max(30, CFG.pollSeconds || 60) * 1000);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshLive();
+      });
+    }
+  }
+
+  start();
+})();
