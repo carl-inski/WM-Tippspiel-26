@@ -38,7 +38,14 @@
   }
 }
 
-html { color-scheme: dark; }
+html {
+  color-scheme: dark;
+  /* Gradient on html so it covers the full viewport including areas outside
+     body's overflow:hidden box (safe areas, browser chrome). mobile Safari
+     ignores background-attachment:fixed on body anyway. */
+  background: radial-gradient(120% 90% at 20% 0%, #14233c 0%, #0b1322 45%, #070b14 100%);
+  min-height: 100%;
+}
 
 html, body { height: 100%; }
 
@@ -51,8 +58,6 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
     Roboto, "Helvetica Neue", sans-serif;
   color: var(--text);
-  background: radial-gradient(120% 90% at 20% 0%, #14233c 0%, #0b1322 45%, #070b14 100%);
-  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
 }
 
