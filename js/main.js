@@ -181,15 +181,32 @@
       groups.get(key).push(m);
     }
 
+    // User Journey: Heute zuerst, dann kommende Tage; Vergangenes ans Ende
     const todayKey = localDateKey(new Date());
+    const past = [], current = [];
     for (const [key, ms] of groups) {
+      (key < todayKey ? past : current).push([key, ms]);
+    }
+    past.reverse(); // jüngste zuerst
+
+    const dayLabel = (key, ms) => {
       const d = new Date(key + 'T12:00:00');
-      const label = WEEKDAYS[d.getDay()] + ', ' +
+      return WEEKDAYS[d.getDay()] + ', ' +
         d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
         (key === todayKey ? ' · heute' : '') +
         (ms[0].round ? ' — ' + ms[0].round : '');
-      view.appendChild(el('div', 'day-label', label));
+    };
+
+    for (const [key, ms] of current) {
+      view.appendChild(el('div', 'day-label', dayLabel(key, ms)));
       ms.forEach((m) => view.appendChild(matchCard(m)));
+    }
+    if (past.length) {
+      view.appendChild(el('div', 'section-divider', 'Bereits gespielt'));
+      for (const [key, ms] of past) {
+        view.appendChild(el('div', 'day-label', dayLabel(key, ms)));
+        ms.forEach((m) => view.appendChild(matchCard(m)));
+      }
     }
   }
 
@@ -288,11 +305,27 @@
 
   // ------- Einzelwertung -------
 
+  function applyTableFilter(tbody, q) {
+    const needle = q.trim().toLowerCase();
+    for (const tr of tbody.children) {
+      tr.style.display = !needle || tr.textContent.toLowerCase().includes(needle) ? '' : 'none';
+    }
+  }
+
   function renderTabelle() {
     const view = $('#view-tabelle');
     view.innerHTML = '';
     const card = el('div', 'glass card');
-    card.appendChild(el('h2', '', 'Einzelwertung · ' + state.standings.length + ' Tipper'));
+
+    const head = el('div', 'card-head');
+    head.appendChild(el('h2', '', 'Einzelwertung · ' + state.standings.length + ' Tipper'));
+    const search = el('input', 'search-input');
+    search.type = 'search';
+    search.placeholder = 'Namen suchen …';
+    search.setAttribute('aria-label', 'Tipper suchen');
+    search.value = state.tableFilter || '';
+    head.appendChild(search);
+    card.appendChild(head);
 
     const famOf = new Map();
     state.data.families.forEach((f) => f.members.forEach((m2) => famOf.set(m2, f.name)));
@@ -339,6 +372,12 @@
     table.appendChild(tbody);
     card.appendChild(table);
     view.appendChild(card);
+
+    search.addEventListener('input', () => {
+      state.tableFilter = search.value;
+      applyTableFilter(tbody, search.value);
+    });
+    if (state.tableFilter) applyTableFilter(tbody, state.tableFilter);
   }
 
   // ------- Familien -------
@@ -560,13 +599,23 @@
   function initTabs() {
     $('#tabs').addEventListener('click', (e) => {
       const btn = e.target.closest('.seg-btn');
-      if (!btn) return;
+      if (!btn || btn.dataset.tab === state.tab) return;
       state.tab = btn.dataset.tab;
-      document.querySelectorAll('.seg-btn').forEach((b) =>
-        b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.seg-btn').forEach((b) => {
+        b.classList.toggle('active', b === btn);
+        b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+      });
       document.querySelectorAll('.view').forEach((v) =>
         v.hidden = v.id !== 'view-' + state.tab);
+      window.scrollTo({ top: 0 }); // jede Ansicht beginnt oben
     });
+
+    // Tipp auf den Status = sofort aktualisieren
+    const statusArea = document.querySelector('.topbar-status');
+    if (CFG.proxyUrl && statusArea) {
+      statusArea.title = 'Jetzt aktualisieren';
+      statusArea.addEventListener('click', refreshLive);
+    }
 
     $('#sheet-backdrop').addEventListener('click', (e) => {
       if (e.target.id === 'sheet-backdrop') closeSheet();
