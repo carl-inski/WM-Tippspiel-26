@@ -7,6 +7,9 @@
  * wird über Anstoßzeit gematcht (siehe api.js), so dass auch bei
  * abweichenden API-Schreibweisen nichts verloren geht.
  */
+(function () {
+  'use strict';
+
 
 const TEAMS = {
   'Algerien':        { flag: 'dz', aliases: ['Algeria', 'ALG'] },
@@ -97,3 +100,5 @@ function flagEmoji(germanName) {
 const api = { TEAMS, toGermanName, flagEmoji, normTeam };
 if (typeof module === 'object' && module.exports) module.exports = api;
 if (typeof window !== 'undefined') window.Teams = api;
+
+})();

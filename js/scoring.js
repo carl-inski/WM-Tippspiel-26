@@ -11,6 +11,9 @@
  * Elfmeterschießen (Anzahl bis einschl. Halbfinale):
  *               exakt +10, sonst −2 × Abweichung
  */
+(function () {
+  'use strict';
+
 
 function matchPoints(tip, result, wert) {
   if (!tip || !result || wert == null) return null;
@@ -162,3 +165,5 @@ const api = { matchPoints, computeStandings, computeFamilyStandings, mergeResult
 
 if (typeof module === 'object' && module.exports) module.exports = api;
 if (typeof window !== 'undefined') window.Scoring = api;
+
+})();

@@ -11,8 +11,12 @@ const { JSDOM } = require('jsdom');
 const root = path.join(__dirname, '..');
 
 function makeApp({ proxyUrl = '', apiPayloads = null } = {}) {
-  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf-8');
-  const dom = new JSDOM(html, { runScripts: 'outside-only', url: 'http://localhost/' });
+  // <script src>-Tags entfernen – die Dateien werden unten als echte
+  // Inline-Skripte eingefügt (geteilter globaler Scope wie im Browser,
+  // deckt z. B. doppelte Top-Level-const-Deklarationen auf)
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf-8')
+    .replace(/<script src=[^>]+><\/script>\s*/g, '');
+  const dom = new JSDOM(html, { runScripts: 'dangerously', url: 'http://localhost/' });
   const { window } = dom;
 
   window.fetch = async (url) => {
@@ -32,12 +36,18 @@ function makeApp({ proxyUrl = '', apiPayloads = null } = {}) {
     throw new Error('Unerwarteter fetch: ' + u);
   };
 
-  for (const src of ['js/config.js', 'js/teams.js', 'js/scoring.js', 'js/api.js']) {
-    window.eval(fs.readFileSync(path.join(root, src), 'utf-8'));
+  const addScript = (src) => {
+    const s = window.document.createElement('script');
+    s.textContent = fs.readFileSync(path.join(root, src), 'utf-8');
+    window.document.body.appendChild(s);
+  };
+  ['js/config.js', 'js/teams.js', 'js/scoring.js', 'js/api.js'].forEach(addScript);
+  if (!window.Scoring || !window.Teams || !window.LiveApi) {
+    throw new Error('Skripte haben sich nicht global registriert (Scope-Kollision?)');
   }
   window.APP_CONFIG.proxyUrl = proxyUrl;
   window.APP_CONFIG.pollSeconds = 3600;
-  window.eval(fs.readFileSync(path.join(root, 'js', 'main.js'), 'utf-8'));
+  addScript('js/main.js');
   return dom;
 }
 
