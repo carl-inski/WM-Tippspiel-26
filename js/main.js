@@ -414,15 +414,23 @@
   function renderTorjaeger() {
     const view = $('#view-torjaeger');
     view.innerHTML = '';
-    const card = el('div', 'glass card');
-    card.appendChild(el('h2', '', 'Torschützenliste'));
 
     const canon = window.Scoring.canonicalScorer;
+    const ppg = state.data.bonus.topscorer.pointsPerGoal;
     const liveScorers = state.apiState && state.apiState.extras.scorers.length
       ? state.apiState.extras.scorers
       : state.data.manualScorers.map((s) => ({ name: s.name, goals: s.goals, teamDE: null }));
 
-    const scorers = [...liveScorers].sort((a, b) => b.goals - a.goals);
+    // WM-Torschützen auf kanonische Namen zusammenführen (Tore summieren,
+    // Team merken), damit "Kane" und "Harry Kane" eine Zeile bilden
+    const goalsByCanon = new Map();
+    const teamByCanon = new Map();
+    for (const s of liveScorers) {
+      const c = canon(s.name);
+      goalsByCanon.set(c.name, (goalsByCanon.get(c.name) || 0) + (s.goals || 0));
+      const team = s.teamDE || c.team;
+      if (team && !teamByCanon.has(c.name)) teamByCanon.set(c.name, team);
+    }
 
     // Tipps unter dem vollen Namen zusammenführen ("Kane" + "Harry Kane" usw.)
     const picksByCanon = new Map();
@@ -433,63 +441,69 @@
       picksByCanon.get(key).push(p.name);
     }
 
-    if (!scorers.length) {
-      card.appendChild(el('p', 'empty-hint', 'Noch keine Torschützen-Daten.'));
-    }
+    const teamFor = (name) => teamByCanon.get(name) || canon(name).team;
 
-    const shownCanon = new Set();
-    scorers.slice(0, 25).forEach((s, i) => {
-      const c = canon(s.name);
-      shownCanon.add(c.name);
+    function scorerRow(rank, name, goals, team, picks, showPts) {
       const row = el('div', 'scorer-row');
-      row.appendChild(el('span', 'rank', String(i + 1)));
-      const team = s.teamDE || c.team;
+      row.appendChild(el('span', 'rank', rank));
       if (team) row.appendChild(flagImg(team));
       else row.appendChild(ballPlaceholder());
       const nameWrap = el('span');
-      nameWrap.appendChild(el('span', '', c.name + ' '));
-      const picks = picksByCanon.get(c.name);
-      if (picks) {
+      nameWrap.appendChild(el('span', '', name + ' '));
+      if (picks && picks.length) {
         nameWrap.appendChild(el('span', 'picks',
           '· getippt von ' + picks.slice(0, 6).join(', ') +
           (picks.length > 6 ? ' +' + (picks.length - 6) : '')));
       }
       row.appendChild(nameWrap);
-      row.appendChild(el('span', 'picks',
-        picks ? '+' + fmtPts(s.goals * state.data.bonus.topscorer.pointsPerGoal) + ' P.' : ''));
-      const g = el('span', 'goals', String(s.goals) + ' ');
+      if (showPts) {
+        row.appendChild(el('span', 'picks',
+          goals ? '+' + fmtPts(goals * ppg) + ' P.' : '0 P.'));
+      } else {
+        row.appendChild(el('span', 'picks', ''));
+      }
+      const g = el('span', 'goals', String(goals) + ' ');
       g.appendChild(window.Icons.node('ball'));
       row.appendChild(g);
-      card.appendChild(row);
-    });
-
-    view.appendChild(card);
-
-    // Getippte Spieler, die (noch) nicht in der Torschützenliste stehen
-    const misses = [...picksByCanon.entries()].filter(([k]) => !shownCanon.has(k));
-    if (misses.length) {
-      const mcard = el('div', 'glass card');
-      mcard.appendChild(el('h2', '', 'Getippte Torjäger ohne WM-Tor (bisher)'));
-      for (const [key, names] of misses) {
-        const row = el('div', 'scorer-row');
-        row.appendChild(el('span', 'rank', '–'));
-        const team = canon(key).team;
-        if (team) row.appendChild(flagImg(team));
-        else row.appendChild(ballPlaceholder());
-        const nm = el('span');
-        nm.appendChild(el('span', '', key + ' '));
-        nm.appendChild(el('span', 'picks',
-          '· getippt von ' + names.slice(0, 8).join(', ') +
-          (names.length > 8 ? ' +' + (names.length - 8) : '')));
-        row.appendChild(nm);
-        row.appendChild(el('span', 'picks', ''));
-        const g0 = el('span', 'goals', '0 ');
-        g0.appendChild(window.Icons.node('ball'));
-        row.appendChild(g0);
-        mcard.appendChild(row);
-      }
-      view.appendChild(mcard);
+      return row;
     }
+
+    // ---- 1) Alle getippten Torjäger, sortiert nach bereits erzielten Toren ----
+    const tippCard = el('div', 'glass card');
+    tippCard.appendChild(el('h2', '', 'Getippte Torjäger'));
+
+    const tipped = [...picksByCanon.entries()]
+      .map(([name, names]) => ({ name, names, goals: goalsByCanon.get(name) || 0 }))
+      .sort((a, b) => b.goals - a.goals
+        || b.names.length - a.names.length
+        || a.name.localeCompare(b.name));
+
+    if (!tipped.length) {
+      tippCard.appendChild(el('p', 'empty-hint', 'Es wurde noch kein Torjäger getippt.'));
+    }
+    tipped.forEach((t, i) => {
+      tippCard.appendChild(
+        scorerRow(String(i + 1), t.name, t.goals, teamFor(t.name), t.names, true));
+    });
+    view.appendChild(tippCard);
+
+    // ---- 2) Komplette WM-Torschützenliste ----
+    const allCard = el('div', 'glass card');
+    allCard.appendChild(el('h2', '', 'Torschützenliste der WM'));
+
+    const merged = [...goalsByCanon.entries()]
+      .map(([name, goals]) => ({ name, goals }))
+      .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
+
+    if (!merged.length) {
+      allCard.appendChild(el('p', 'empty-hint', 'Noch keine Tore bei der WM.'));
+    }
+    merged.slice(0, 40).forEach((s, i) => {
+      allCard.appendChild(
+        scorerRow(String(i + 1), s.name, s.goals, teamFor(s.name),
+          picksByCanon.get(s.name), false));
+    });
+    view.appendChild(allCard);
   }
 
   // ------- Tipper-Detail-Sheet -------

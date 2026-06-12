@@ -40,19 +40,22 @@
 
 html {
   color-scheme: dark;
-  /* Solider Fallback im App-Navy hinter dem fixierten Verlauf */
-  background: #0b1322;
+  /* Solider Fallback im App-Navy hinter dem fixierten Verlauf; identisch zur
+     theme-color, damit die iOS-Leisten nahtlos in die Seite übergehen */
+  background: #12203a;
 }
 
 /* Verlauf als fixiertes Pseudo-Element: deckt den GESAMTEN sichtbaren
    Viewport ab – inklusive der Safe-Areas hinter Statusleiste & Safari-
-   Toolbar. So fließt der Hintergrund nahtlos hinter die iOS-Elemente. */
+   Toolbar. So fließt der Hintergrund nahtlos hinter die iOS-Elemente.
+   Bewusst durchgehend Navy (kein Fast-Schwarz an den Rändern), damit weder
+   oben noch unten ein schwarzer Balken entsteht. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -2;
-  background: radial-gradient(120% 90% at 20% 0%, #14233c 0%, #0b1322 45%, #070b14 100%);
+  background: radial-gradient(130% 100% at 50% 0%, #1b2c45 0%, #14233c 45%, #0f1c33 100%);
 }
 
 body {
