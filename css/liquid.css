@@ -40,11 +40,20 @@
 
 html {
   color-scheme: dark;
-  /* Gradient on html so it covers the full viewport including areas outside
-     body's overflow:hidden box (safe areas, browser chrome). mobile Safari
-     ignores background-attachment:fixed on body anyway. */
+  /* Solid fallback so no gap ever shows through */
+  background: #070b14;
+}
+
+/* position:fixed pseudo-element is the only reliable way to paint a background
+   that covers the FULL screen on iOS Safari — it reaches beyond the layout
+   viewport into the safe-area / browser-chrome zones where body's background
+   cannot reach when overflow:hidden is set. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
   background: radial-gradient(120% 90% at 20% 0%, #14233c 0%, #0b1322 45%, #070b14 100%);
-  min-height: 100%;
 }
 
 html, body { height: 100%; }
