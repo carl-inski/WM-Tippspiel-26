@@ -1,0 +1,12 @@
+# Wrangler-Konfiguration für den Tippspiel-Proxy.
+#
+# Deployment per Kommandozeile (Alternative zum Dashboard-Editor):
+#   cd proxy
+#   npx wrangler deploy            # öffnet einmalig den Browser-Login
+#   npx wrangler secret put FOOTBALL_DATA_API_KEY   # Key eingeben, Enter
+#
+# Danach läuft der Worker unter https://wm-tippspiel-proxy.<account>.workers.dev
+
+name = "wm-tippspiel-proxy"
+main = "cloudflare-worker.js"
+compatibility_date = "2026-01-01"
