@@ -40,16 +40,30 @@
 
 html { color-scheme: dark; }
 
+html, body { height: 100%; }
+
 body {
   margin: 0;
-  min-height: 100vh;
+  padding: 0;
+  /* Das Fenster scrollt nie - so bleibt die Safari-Leiste stabil und die
+     Tab-Bar springt beim Ansichtswechsel nicht mehr */
+  overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
     Roboto, "Helvetica Neue", sans-serif;
   color: var(--text);
   background: radial-gradient(120% 90% at 20% 0%, #14233c 0%, #0b1322 45%, #070b14 100%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
-  padding: 16px clamp(10px, 3vw, 28px) 60px;
+}
+
+/* innerer Scroll-Container statt Fenster-Scroll */
+.page-scroll {
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 16px clamp(10px, 3vw, 28px) 0;
 }
 
 /* ------- animierte Hintergrund-Blobs ------- */
@@ -213,7 +227,8 @@ body {
 .segmented {
   position: fixed;
   left: 50%;
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  /* so dicht wie möglich an die Unterkante; Safe-Area nur wenn nötig */
+  bottom: max(10px, env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
   width: min(540px, calc(100vw - 24px));
   margin: 0;
