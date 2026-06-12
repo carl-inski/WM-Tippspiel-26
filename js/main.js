@@ -204,15 +204,6 @@
     const row = el('button', 'match-row');
     row.setAttribute('aria-expanded', state.openMatch === m.id ? 'true' : 'false');
 
-    const t = el('div', 'match-time');
-    if (live) {
-      t.appendChild(el('span', 'live-badge', 'LIVE'));
-    } else {
-      // Uhrzeit direkt aus dem Kickoff-String (deutsche Zeit), Safari-sicher
-      t.textContent = String(m.kickoff).slice(11, 16);
-    }
-    row.appendChild(t);
-
     const th = el('div', 'mteam' + (home ? '' : ' placeholder'));
     if (home) th.appendChild(flagImg(home));
     th.appendChild(el('span', 'name', home || offenLabel(m)));
@@ -235,9 +226,16 @@
     if (away) ta.appendChild(flagImg(away));
     row.appendChild(ta);
 
-    const meta = el('div', 'match-meta');
-    meta.appendChild(el('span', 'wert-chip', 'Wert ' + fmtPts(m.wert)));
-    row.appendChild(meta);
+    // Unterzeile: LIVE/Uhrzeit + Spielwert, mittig unter dem Ergebnis
+    const sub = el('div', 'match-sub');
+    if (live) {
+      sub.appendChild(el('span', 'live-badge', 'LIVE'));
+    } else {
+      // Uhrzeit direkt aus dem Kickoff-String (deutsche Zeit), Safari-sicher
+      sub.appendChild(el('span', 'sub-time', String(m.kickoff).slice(11, 16) + ' Uhr'));
+    }
+    sub.appendChild(el('span', 'wert-chip', 'Wert ' + fmtPts(m.wert)));
+    row.appendChild(sub);
 
     row.addEventListener('click', () => {
       state.openMatch = state.openMatch === m.id ? null : m.id;
@@ -383,34 +381,38 @@
     const card = el('div', 'glass card');
     card.appendChild(el('h2', '', 'Torschützenliste'));
 
+    const canon = window.Scoring.canonicalScorer;
     const liveScorers = state.apiState && state.apiState.extras.scorers.length
       ? state.apiState.extras.scorers
       : state.data.manualScorers.map((s) => ({ name: s.name, goals: s.goals, teamDE: null }));
 
     const scorers = [...liveScorers].sort((a, b) => b.goals - a.goals);
 
-    // Wer hat auf wen getippt?
-    const picksByScorer = new Map();
+    // Tipps unter dem vollen Namen zusammenführen ("Kane" + "Harry Kane" usw.)
+    const picksByCanon = new Map();
     for (const p of state.data.players) {
       if (!p.bonus.topscorer) continue;
-      const hit = scorers.find((s) => window.Scoring.samePerson(s.name, p.bonus.topscorer));
-      const key = hit ? hit.name : '__none__' + p.bonus.topscorer;
-      if (!picksByScorer.has(key)) picksByScorer.set(key, []);
-      picksByScorer.get(key).push(p.name);
+      const key = canon(p.bonus.topscorer).name;
+      if (!picksByCanon.has(key)) picksByCanon.set(key, []);
+      picksByCanon.get(key).push(p.name);
     }
 
     if (!scorers.length) {
       card.appendChild(el('p', 'empty-hint', 'Noch keine Torschützen-Daten.'));
     }
 
+    const shownCanon = new Set();
     scorers.slice(0, 25).forEach((s, i) => {
+      const c = canon(s.name);
+      shownCanon.add(c.name);
       const row = el('div', 'scorer-row');
       row.appendChild(el('span', 'rank', String(i + 1)));
-      if (s.teamDE) row.appendChild(flagImg(s.teamDE));
+      const team = s.teamDE || c.team;
+      if (team) row.appendChild(flagImg(team));
       else row.appendChild(el('span', 'flag placeholder-flag', '⚽'));
       const nameWrap = el('span');
-      nameWrap.appendChild(el('span', '', s.name + ' '));
-      const picks = picksByScorer.get(s.name);
+      nameWrap.appendChild(el('span', '', c.name + ' '));
+      const picks = picksByCanon.get(c.name);
       if (picks) {
         nameWrap.appendChild(el('span', 'picks',
           '· getippt von ' + picks.slice(0, 6).join(', ') +
@@ -425,18 +427,22 @@
 
     view.appendChild(card);
 
-    // Tipps ohne Treffer in der Liste
-    const misses = [...picksByScorer.entries()].filter(([k]) => k.startsWith('__none__'));
+    // Getippte Spieler, die (noch) nicht in der Torschützenliste stehen
+    const misses = [...picksByCanon.entries()].filter(([k]) => !shownCanon.has(k));
     if (misses.length) {
       const mcard = el('div', 'glass card');
       mcard.appendChild(el('h2', '', 'Getippte Torjäger ohne WM-Tor (bisher)'));
       for (const [key, names] of misses) {
         const row = el('div', 'scorer-row');
         row.appendChild(el('span', 'rank', '–'));
-        row.appendChild(el('span', 'flag placeholder-flag', '⚽'));
+        const team = canon(key).team;
+        if (team) row.appendChild(flagImg(team));
+        else row.appendChild(el('span', 'flag placeholder-flag', '⚽'));
         const nm = el('span');
-        nm.appendChild(el('span', '', key.replace('__none__', '') + ' '));
-        nm.appendChild(el('span', 'picks', '· getippt von ' + names.join(', ')));
+        nm.appendChild(el('span', '', key + ' '));
+        nm.appendChild(el('span', 'picks',
+          '· getippt von ' + names.slice(0, 8).join(', ') +
+          (names.length > 8 ? ' +' + (names.length - 8) : '')));
         row.appendChild(nm);
         row.appendChild(el('span', 'picks', ''));
         row.appendChild(el('span', 'goals', '0 ⚽'));
@@ -476,7 +482,8 @@
     pills.appendChild(champ);
     const ts = el('span', 'bonus-pill');
     ts.innerHTML = 'Torjäger: <b></b>';
-    ts.querySelector('b').textContent = p.bonus.topscorer || '–';
+    ts.querySelector('b').textContent = p.bonus.topscorer
+      ? window.Scoring.canonicalScorer(p.bonus.topscorer).name : '–';
     if (r.bonusDetail.topscorer) {
       ts.appendChild(document.createTextNode(' (+' + fmtPts(r.bonusDetail.topscorer) + ' P.)'));
     }

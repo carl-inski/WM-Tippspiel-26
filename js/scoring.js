@@ -44,6 +44,35 @@ function samePerson(a, b) {
     nb.includes(na) || na.includes(nb);
 }
 
+/* Bekannte Torjäger: getippte Kurzformen -> voller Name + Team.
+ * Deckt alle in der Excel getippten Spieler ab; unbekannte Namen
+ * bleiben unverändert. */
+const KNOWN_SCORERS = [
+  ['Harry Kane', 'England'],
+  ['Kylian Mbappé', 'Frankreich'],
+  ['Erling Haaland', 'Norwegen'],
+  ['Mikel Oyarzabal', 'Spanien'],
+  ['Julián Álvarez', 'Argentinien'],
+  ['Raúl Jiménez', 'Mexiko'],
+  ['Ousmane Dembélé', 'Frankreich'],
+  ['Crysencio Summerville', 'Niederlande'],
+  ['Raphinha', 'Brasilien'],
+  ['Michael Olise', 'Frankreich'],
+  ['Aymen Hussein', 'Irak'],
+  ['Ferran Torres', 'Spanien'],
+  ['Lamine Yamal', 'Spanien']
+];
+
+/* Liefert zum getippten/gelisteten Namen den vollen Namen + Team. */
+function canonicalScorer(name) {
+  const n = String(name || '').trim();
+  if (!n) return { name: '', team: null };
+  for (const [full, team] of KNOWN_SCORERS) {
+    if (samePerson(full, n)) return { name: full, team };
+  }
+  return { name: n, team: null };
+}
+
 /*
  * Berechnet die komplette Wertung.
  *  data:    Inhalt von data/tippspiel.json
@@ -161,7 +190,7 @@ function mergeResults(...sources) {
   return out;
 }
 
-const api = { matchPoints, computeStandings, computeFamilyStandings, mergeResults, samePerson, normName, round2 };
+const api = { matchPoints, computeStandings, computeFamilyStandings, mergeResults, samePerson, normName, round2, canonicalScorer };
 
 if (typeof module === 'object' && module.exports) module.exports = api;
 if (typeof window !== 'undefined') window.Scoring = api;

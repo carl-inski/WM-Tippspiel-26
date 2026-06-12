@@ -77,6 +77,12 @@ test('Offline-Modus: alle Ansichten rendern', async () => {
   assert.ok(doc.querySelector('.banner'), 'Offline-Banner sichtbar');
   assert.equal(doc.querySelectorAll('#view-tabelle tbody tr').length, 72);
   assert.equal(doc.querySelectorAll('#view-familien .family-card').length, 14);
+  // Torjäger: Schreibweisen werden unter vollem Namen zusammengeführt
+  const tj = doc.getElementById('view-torjaeger').textContent;
+  assert.ok(tj.includes('Harry Kane'), 'voller Name statt "Kane"');
+  assert.ok(tj.includes('Kylian Mbappé'), 'voller Name statt "Mbappé"');
+  assert.ok(!tj.includes('Getippte Torjäger ohne WM-Tor'),
+    'keine verwaisten Schreibweisen mehr: ' + tj.slice(0, 300));
   assert.ok(doc.querySelectorAll('#view-torjaeger .scorer-row').length >= 13);
   assert.equal(doc.getElementById('status-text').textContent, 'Offline-Modus');
 

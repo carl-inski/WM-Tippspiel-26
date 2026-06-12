@@ -89,3 +89,22 @@ test('Torjäger-Bonus über Namensvergleich', () => {
   assert.ok(Scoring.samePerson('Harry Kane', 'H. Kane'));
   assert.ok(!Scoring.samePerson('Kane', 'Yamal'));
 });
+
+test('canonicalScorer führt Schreibweisen auf volle Namen zusammen', () => {
+  assert.equal(Scoring.canonicalScorer('Kane').name, 'Harry Kane');
+  assert.equal(Scoring.canonicalScorer('Harry Kane').name, 'Harry Kane');
+  assert.equal(Scoring.canonicalScorer('Mbappe').name, 'Kylian Mbappé');
+  assert.equal(Scoring.canonicalScorer('Mbappé').name, 'Kylian Mbappé');
+  assert.equal(Scoring.canonicalScorer('Olisé').name, 'Michael Olise');
+  assert.equal(Scoring.canonicalScorer('Dembele').name, 'Ousmane Dembélé');
+  assert.equal(Scoring.canonicalScorer('Yamal').team, 'Spanien');
+  // unbekannte Namen bleiben unverändert
+  assert.equal(Scoring.canonicalScorer('Max Mustermann').name, 'Max Mustermann');
+
+  // alle in der Excel getippten Torjäger werden erkannt
+  const tipped = new Set(data.players.map((p) => p.bonus.topscorer).filter(Boolean));
+  for (const t of tipped) {
+    assert.ok(Scoring.canonicalScorer(t).team,
+      'kein kanonischer Eintrag für getippten Torjäger: ' + t);
+  }
+});
