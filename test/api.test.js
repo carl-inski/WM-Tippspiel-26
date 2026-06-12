@@ -85,6 +85,15 @@ test('Elfmeterschießen bis HF werden gezählt, Finale liefert Weltmeister', () 
   assert.equal(results[af.id].away, 1);
 });
 
+test('parseKickoff parst ISO-Zeiten ohne Sekunden (Safari-Fall)', () => {
+  assert.equal(LiveApi.parseKickoff('2026-06-11T21:00+02:00').getTime(),
+    Date.UTC(2026, 5, 11, 19, 0, 0));
+  assert.equal(LiveApi.parseKickoff('2026-06-11T19:00:00Z').getTime(),
+    Date.UTC(2026, 5, 11, 19, 0, 0));
+  assert.equal(LiveApi.parseKickoff('2026-07-19T21:00+02:00').getTime(),
+    Date.UTC(2026, 6, 19, 19, 0, 0));
+});
+
 test('Torschützen werden übersetzt', () => {
   const scorers = [{ player: { name: 'Kylian Mbappé' }, team: { name: 'France' }, goals: 3 }];
   const { extras } = LiveApi.mapLiveData(data, [], scorers);

@@ -15,6 +15,16 @@
   const LIVE_STATUSES = ['IN_PLAY', 'PAUSED'];
   const KO_STAGES_BIS_HF = ['LAST_32', 'LAST_16', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINALS', 'SEMI_FINALS'];
 
+  /* Robustes Parsen der Anstoßzeit (z. B. "2026-06-11T21:00+02:00").
+   * Safari lehnt ISO-Strings ohne Sekunden teils ab, daher manuell. */
+  function parseKickoff(s) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(?:([+-])(\d{2}):(\d{2})|Z)?$/.exec(String(s || ''));
+    if (!m) return new Date(s);
+    let t = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
+    if (m[7]) t -= (m[7] === '+' ? 1 : -1) * ((+m[8]) * 60 + (+m[9])) * 60000;
+    return new Date(t);
+  }
+
   async function fetchJson(url) {
     const resp = await fetch(url, { headers: { accept: 'application/json' } });
     if (!resp.ok) throw new Error('HTTP ' + resp.status + ' für ' + url);
@@ -49,12 +59,12 @@
       const hit = data.matches.find((m) => !used.has(m.id) && m.home === gH && m.away === gA);
       if (hit) return hit;
     }
-    const t = Date.parse(am.utcDate);
+    const t = parseKickoff(am.utcDate).getTime();
     if (!isNaN(t)) {
-      const exact = data.matches.filter((m) => !used.has(m.id) && Date.parse(m.kickoff) === t);
+      const exact = data.matches.filter((m) => !used.has(m.id) && parseKickoff(m.kickoff).getTime() === t);
       if (exact.length === 1) return exact[0];
       const near = data.matches.filter((m) => !used.has(m.id) &&
-        Math.abs(Date.parse(m.kickoff) - t) <= 60 * 60 * 1000 && !m.home && !m.away);
+        Math.abs(parseKickoff(m.kickoff).getTime() - t) <= 60 * 60 * 1000 && !m.home && !m.away);
       if (near.length === 1) return near[0];
     }
     return null;
@@ -117,7 +127,7 @@
     return { results, matchInfo, extras: { championTeam, scorers, shootoutCount, tournamentFinished } };
   }
 
-  const api = { fetchLive, mapLiveData, findExcelMatch };
+  const api = { fetchLive, mapLiveData, findExcelMatch, parseKickoff };
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (typeof window !== 'undefined') window.LiveApi = api;
 })();

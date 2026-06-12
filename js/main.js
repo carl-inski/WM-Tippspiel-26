@@ -45,7 +45,10 @@
 
   async function loadStatic() {
     const [data, manual] = await Promise.all([
-      fetch('data/tippspiel.json').then((r) => r.json()),
+      fetch('data/tippspiel.json').then((r) => {
+        if (!r.ok) throw new Error('data/tippspiel.json nicht erreichbar (HTTP ' + r.status + ')');
+        return r.json();
+      }),
       fetch('data/manual-results.json').then((r) => r.json()).catch(() => ({ results: {} }))
     ]);
     state.data = data;
@@ -166,12 +169,11 @@
       live.forEach((m) => view.appendChild(matchCard(m)));
     }
 
-    // nach Tagen gruppieren
+    // nach Tagen gruppieren (Schlüssel direkt aus dem String, Safari-sicher)
     const groups = new Map();
     for (const m of state.data.matches) {
       if (isLive(m.id)) continue;
-      const d = new Date(m.kickoff);
-      const key = d.toISOString().slice(0, 10);
+      const key = String(m.kickoff).slice(0, 10);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(m);
     }
@@ -203,11 +205,11 @@
     row.setAttribute('aria-expanded', state.openMatch === m.id ? 'true' : 'false');
 
     const t = el('div', 'match-time');
-    const ko = new Date(m.kickoff);
     if (live) {
       t.appendChild(el('span', 'live-badge', 'LIVE'));
     } else {
-      t.textContent = ko.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      // Uhrzeit direkt aus dem Kickoff-String (deutsche Zeit), Safari-sicher
+      t.textContent = String(m.kickoff).slice(11, 16);
     }
     row.appendChild(t);
 
@@ -553,18 +555,26 @@
 
   // ------------------------------------------------------------------ Start --
 
+  function showFatal(err) {
+    console.error(err);
+    const app = $('#app');
+    app.innerHTML = '';
+    app.appendChild(el('div', 'banner',
+      '⚠️ Fehler beim Start der App: ' + (err && err.message ? err.message : err)));
+    const st = $('#status-text');
+    if (st) st.textContent = 'Fehler';
+  }
+
   async function start() {
     initTabs();
     try {
       await loadStatic();
+      recompute();
+      render();
     } catch (err) {
-      $('#app').innerHTML = '';
-      const b = el('div', 'banner', 'Daten konnten nicht geladen werden: ' + err.message);
-      $('#app').appendChild(b);
+      showFatal(err);
       return;
     }
-    recompute();
-    render();
     if (CFG.proxyUrl) {
       refreshLive();
       setInterval(refreshLive, Math.max(30, CFG.pollSeconds || 60) * 1000);
@@ -573,6 +583,14 @@
       });
     }
   }
+
+  // Unerwartete Fehler sichtbar machen statt still zu scheitern
+  window.addEventListener('error', (e) => {
+    const st = $('#status-text');
+    if (st && st.textContent === 'lädt …') {
+      st.textContent = 'Fehler: ' + e.message;
+    }
+  });
 
   start();
 })();
