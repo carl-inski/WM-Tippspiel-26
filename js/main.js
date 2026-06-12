@@ -165,48 +165,42 @@
       view.appendChild(b);
     }
 
-    const live = state.data.matches.filter((m) => isLive(m.id));
-    if (live.length) {
-      const label = el('div', 'day-label live-label', 'Jetzt live');
-      view.appendChild(label);
-      live.forEach((m) => view.appendChild(matchCard(m)));
-    }
-
-    // nach Tagen gruppieren (Schlüssel direkt aus dem String, Safari-sicher)
+    // chronologisch nach Tagen gruppieren (Schlüssel direkt aus dem
+    // Kickoff-String, Safari-sicher)
     const groups = new Map();
     for (const m of state.data.matches) {
-      if (isLive(m.id)) continue;
       const key = String(m.kickoff).slice(0, 10);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(m);
     }
 
-    // User Journey: Heute zuerst, dann kommende Tage; Vergangenes ans Ende
     const todayKey = localDateKey(new Date());
-    const past = [], current = [];
-    for (const [key, ms] of groups) {
-      (key < todayKey ? past : current).push([key, ms]);
-    }
-    past.reverse(); // jüngste zuerst
+    state.scrollAnchor = null;
+    let firstUpcomingLabel = null;
 
-    const dayLabel = (key, ms) => {
+    for (const [key, ms] of groups) {
       const d = new Date(key + 'T12:00:00');
-      return WEEKDAYS[d.getDay()] + ', ' +
+      const hasLive = ms.some((m) => isLive(m.id));
+      const label = el('div', 'day-label' + (hasLive ? ' live-label' : ''),
+        WEEKDAYS[d.getDay()] + ', ' +
         d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
         (key === todayKey ? ' · heute' : '') +
-        (ms[0].round ? ' — ' + ms[0].round : '');
-    };
-
-    for (const [key, ms] of current) {
-      view.appendChild(el('div', 'day-label', dayLabel(key, ms)));
+        (ms[0].round ? ' — ' + ms[0].round : ''));
+      view.appendChild(label);
+      if (key === todayKey && !state.scrollAnchor) state.scrollAnchor = label;
+      if (key > todayKey && !firstUpcomingLabel) firstUpcomingLabel = label;
       ms.forEach((m) => view.appendChild(matchCard(m)));
     }
-    if (past.length) {
-      view.appendChild(el('div', 'section-divider', 'Bereits gespielt'));
-      for (const [key, ms] of past) {
-        view.appendChild(el('div', 'day-label', dayLabel(key, ms)));
-        ms.forEach((m) => view.appendChild(matchCard(m)));
-      }
+
+    // Auto-Scroll-Ziel: heutiger Tag, sonst der nächste anstehende
+    if (!state.scrollAnchor) state.scrollAnchor = firstUpcomingLabel;
+  }
+
+  /* Springt zum aktuellen Spieltag (Ältere stehen darüber). */
+  function scrollToCurrentMatchday() {
+    const a = state.scrollAnchor;
+    if (a && typeof a.scrollIntoView === 'function') {
+      try { a.scrollIntoView({ block: 'start' }); } catch (e) { /* jsdom o. Ä. */ }
     }
   }
 
@@ -596,6 +590,15 @@
     });
   }
 
+  /* Schiebt die Glas-Pille unter den aktiven Tab. */
+  function moveIndicator() {
+    const ind = $('#seg-indicator');
+    const active = document.querySelector('.seg-btn.active');
+    if (!ind || !active) return;
+    ind.style.width = active.offsetWidth + 'px';
+    ind.style.transform = 'translateX(' + active.offsetLeft + 'px)';
+  }
+
   function initTabs() {
     $('#tabs').addEventListener('click', (e) => {
       const btn = e.target.closest('.seg-btn');
@@ -607,8 +610,12 @@
       });
       document.querySelectorAll('.view').forEach((v) =>
         v.hidden = v.id !== 'view-' + state.tab);
-      window.scrollTo({ top: 0 }); // jede Ansicht beginnt oben
+      moveIndicator();
+      // Spiele: zum aktuellen Spieltag springen, andere Ansichten oben starten
+      if (state.tab === 'spiele') scrollToCurrentMatchday();
+      else window.scrollTo({ top: 0 });
     });
+    window.addEventListener('resize', moveIndicator);
 
     // Tipp auf den Status = sofort aktualisieren
     const statusArea = document.querySelector('.topbar-status');
@@ -644,6 +651,14 @@
       await loadStatic();
       recompute();
       render();
+      // Beim Laden direkt am aktuellen Spieltag landen
+      const afterLayout = window.requestAnimationFrame
+        ? window.requestAnimationFrame.bind(window)
+        : (fn) => setTimeout(fn, 0);
+      afterLayout(() => {
+        moveIndicator();
+        scrollToCurrentMatchday();
+      });
     } catch (err) {
       showFatal(err);
       return;
