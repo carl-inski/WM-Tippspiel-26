@@ -6,7 +6,7 @@
   <title>WM 2026 · Familien-Tippspiel</title>
   <meta name="description" content="Live-Tipptabelle des Familien-Tippspiels zur WM 2026">
   <link rel="preconnect" href="https://flagcdn.com">
-  <link rel="stylesheet" href="css/liquid.css?v=6">
+  <link rel="stylesheet" href="css/liquid.css?v=7">
   <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;🏆&lt;/text&gt;&lt;/svg&gt;">
 </head>
 <body>
@@ -18,7 +18,7 @@
 
   <header class="glass topbar">
     <div class="topbar-title">
-      <h1>🏆 WM 2026 <span>Familien-Tippspiel</span></h1>
+      <h1><span class="icon-bubble" id="title-icon"></span> WM 2026 <span>Familien-Tippspiel</span></h1>
     </div>
     <div class="topbar-status">
       <span id="live-dot" class="status-dot offline" title="Live-Status"></span>
@@ -27,10 +27,10 @@
   </header>
 
   <nav class="glass segmented" id="tabs" role="tablist">
-    <button class="seg-btn active" data-tab="spiele" role="tab">Spiele</button>
-    <button class="seg-btn" data-tab="tabelle" role="tab">Einzelwertung</button>
-    <button class="seg-btn" data-tab="familien" role="tab">Familien</button>
-    <button class="seg-btn" data-tab="torjaeger" role="tab">Torschützen</button>
+    <button class="seg-btn active" data-tab="spiele" role="tab" data-icon="calendar">Spiele</button>
+    <button class="seg-btn" data-tab="tabelle" role="tab" data-icon="chart">Einzelwertung</button>
+    <button class="seg-btn" data-tab="familien" role="tab" data-icon="users">Familien</button>
+    <button class="seg-btn" data-tab="torjaeger" role="tab" data-icon="ball">Torschützen</button>
   </nav>
 
   <main id="app">
@@ -49,10 +49,11 @@
     <p id="footer-source"></p>
   </footer>
 
-  <script src="js/config.js?v=6"></script>
-  <script src="js/teams.js?v=6"></script>
-  <script src="js/scoring.js?v=6"></script>
-  <script src="js/api.js?v=6"></script>
-  <script src="js/main.js?v=6"></script>
+  <script src="js/icons.js?v=7"></script>
+  <script src="js/config.js?v=7"></script>
+  <script src="js/teams.js?v=7"></script>
+  <script src="js/scoring.js?v=7"></script>
+  <script src="js/api.js?v=7"></script>
+  <script src="js/main.js?v=7"></script>
 </body>
 </html>

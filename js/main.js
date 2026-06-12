@@ -27,12 +27,15 @@
   const fmtPts = (x) => (Math.round(x * 100) / 100).toLocaleString('de-DE');
   const WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
+  function ballPlaceholder() {
+    const ph = el('span', 'flag placeholder-flag');
+    ph.appendChild(window.Icons.node('ball'));
+    return ph;
+  }
+
   function flagImg(team) {
     const info = window.Teams.TEAMS[team];
-    if (!info) {
-      const ph = el('span', 'flag placeholder-flag', '?');
-      return ph;
-    }
+    if (!info) return ballPlaceholder();
     const img = el('img', 'flag');
     img.src = 'https://flagcdn.com/w40/' + info.flag + '.png';
     img.srcset = 'https://flagcdn.com/w80/' + info.flag + '.png 2x';
@@ -155,7 +158,7 @@
 
     if (!CFG.proxyUrl) {
       const b = el('div', 'banner');
-      b.innerHTML = '⚙️ <strong>Live-Daten noch nicht verbunden.</strong> ' +
+      b.innerHTML = window.Icons.svg('info') + ' <strong>Live-Daten noch nicht verbunden.</strong> ' +
         'Sobald der Daten-Proxy in <code>js/config.js</code> eingetragen ist, ' +
         'aktualisieren sich Spielstände, Torschützen und Wertung automatisch. ' +
         'Anleitung: siehe README im Repository.';
@@ -164,7 +167,7 @@
 
     const live = state.data.matches.filter((m) => isLive(m.id));
     if (live.length) {
-      const label = el('div', 'day-label', '🔴 Jetzt live');
+      const label = el('div', 'day-label live-label', 'Jetzt live');
       view.appendChild(label);
       live.forEach((m) => view.appendChild(matchCard(m)));
     }
@@ -297,8 +300,8 @@
     const table = el('table', 'table');
     table.innerHTML = '<thead><tr>' +
       '<th class="rank">#</th><th>Name</th>' +
-      '<th class="num" title="exakte Ergebnisse">🎯</th>' +
-      '<th class="num" title="richtige Tendenzen">↕</th>' +
+      '<th class="num" title="exakte Ergebnisse">' + window.Icons.svg('target') + '</th>' +
+      '<th class="num" title="richtige Tendenzen">' + window.Icons.svg('updown') + '</th>' +
       '<th class="num">Bonus</th><th class="num">Punkte</th><th class="bar-cell"></th>' +
       '</tr></thead>';
     const tbody = el('tbody');
@@ -409,7 +412,7 @@
       row.appendChild(el('span', 'rank', String(i + 1)));
       const team = s.teamDE || c.team;
       if (team) row.appendChild(flagImg(team));
-      else row.appendChild(el('span', 'flag placeholder-flag', '⚽'));
+      else row.appendChild(ballPlaceholder());
       const nameWrap = el('span');
       nameWrap.appendChild(el('span', '', c.name + ' '));
       const picks = picksByCanon.get(c.name);
@@ -421,7 +424,9 @@
       row.appendChild(nameWrap);
       row.appendChild(el('span', 'picks',
         picks ? '+' + fmtPts(s.goals * state.data.bonus.topscorer.pointsPerGoal) + ' P.' : ''));
-      row.appendChild(el('span', 'goals', s.goals + ' ⚽'));
+      const g = el('span', 'goals', String(s.goals) + ' ');
+      g.appendChild(window.Icons.node('ball'));
+      row.appendChild(g);
       card.appendChild(row);
     });
 
@@ -437,7 +442,7 @@
         row.appendChild(el('span', 'rank', '–'));
         const team = canon(key).team;
         if (team) row.appendChild(flagImg(team));
-        else row.appendChild(el('span', 'flag placeholder-flag', '⚽'));
+        else row.appendChild(ballPlaceholder());
         const nm = el('span');
         nm.appendChild(el('span', '', key + ' '));
         nm.appendChild(el('span', 'picks',
@@ -445,7 +450,9 @@
           (names.length > 8 ? ' +' + (names.length - 8) : '')));
         row.appendChild(nm);
         row.appendChild(el('span', 'picks', ''));
-        row.appendChild(el('span', 'goals', '0 ⚽'));
+        const g0 = el('span', 'goals', '0 ');
+        g0.appendChild(window.Icons.node('ball'));
+        row.appendChild(g0);
         mcard.appendChild(row);
       }
       view.appendChild(mcard);
@@ -464,7 +471,8 @@
 
     const head = el('div', 'sheet-head');
     head.appendChild(el('h2', '', name));
-    const close = el('button', 'sheet-close', '✕');
+    const close = el('button', 'sheet-close');
+    close.appendChild(window.Icons.node('x'));
     close.setAttribute('aria-label', 'Schließen');
     close.addEventListener('click', closeSheet);
     head.appendChild(close);
@@ -541,6 +549,14 @@
 
   // ------------------------------------------------------------------ Tabs --
 
+  function initIcons() {
+    const t = $('#title-icon');
+    if (t) t.appendChild(window.Icons.node('trophy'));
+    document.querySelectorAll('.seg-btn[data-icon]').forEach((b) => {
+      b.insertBefore(window.Icons.node(b.dataset.icon), b.firstChild);
+    });
+  }
+
   function initTabs() {
     $('#tabs').addEventListener('click', (e) => {
       const btn = e.target.closest('.seg-btn');
@@ -573,6 +589,7 @@
   }
 
   async function start() {
+    initIcons();
     initTabs();
     try {
       await loadStatic();

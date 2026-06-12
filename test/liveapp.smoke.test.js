@@ -41,8 +41,8 @@ function makeApp({ proxyUrl = '', apiPayloads = null } = {}) {
     s.textContent = fs.readFileSync(path.join(root, src), 'utf-8');
     window.document.body.appendChild(s);
   };
-  ['js/config.js', 'js/teams.js', 'js/scoring.js', 'js/api.js'].forEach(addScript);
-  if (!window.Scoring || !window.Teams || !window.LiveApi) {
+  ['js/icons.js', 'js/config.js', 'js/teams.js', 'js/scoring.js', 'js/api.js'].forEach(addScript);
+  if (!window.Scoring || !window.Teams || !window.LiveApi || !window.Icons) {
     throw new Error('Skripte haben sich nicht global registriert (Scope-Kollision?)');
   }
   window.APP_CONFIG.proxyUrl = proxyUrl;

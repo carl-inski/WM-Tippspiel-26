@@ -95,6 +95,33 @@ body {
   opacity: 0.16;
 }
 
+/* ------- Icons ------- */
+.icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  vertical-align: -0.12em;
+}
+
+.icon-bubble {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.20), rgba(255,255,255,0.05));
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 4px 14px rgba(0,0,0,0.25);
+  color: var(--accent-warm);
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.icon-bubble .icon { width: 20px; height: 20px; }
+
+.banner .icon { margin-right: 4px; }
+
 /* ------- Topbar ------- */
 .topbar {
   max-width: 1060px;
@@ -174,6 +201,10 @@ body {
 
 .seg-btn {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   border: none;
   background: transparent;
   color: var(--text-dim);
@@ -186,6 +217,8 @@ body {
   transition: background 0.25s, color 0.25s, transform 0.15s;
   white-space: nowrap;
 }
+
+.seg-btn .icon { width: 16px; height: 16px; opacity: 0.9; }
 
 .seg-btn:hover { color: var(--text); }
 
@@ -228,6 +261,19 @@ main { max-width: 1060px; margin: 0 auto; }
   letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--text-dim);
+}
+
+.live-label { color: var(--live); }
+
+.live-label::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--live);
+  margin-right: 7px;
+  animation: blink 1.6s ease-in-out infinite;
 }
 
 .match-card {
@@ -473,7 +519,16 @@ main { max-width: 1060px; margin: 0 auto; }
 
 .scorer-row:last-child { border-bottom: none; }
 .scorer-row .rank { color: var(--text-dim); font-weight: 700; }
-.scorer-row .goals { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.scorer-row .goals {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.scorer-row .goals .icon { opacity: 0.7; }
 .scorer-row .picks { color: var(--text-dim); font-size: 0.8rem; }
 
 /* ------- Sheet / Modal ------- */
@@ -514,6 +569,9 @@ main { max-width: 1060px; margin: 0 auto; }
 .sheet-head h2 { margin: 0; font-size: 1.25rem; }
 
 .sheet-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   background: rgba(255,255,255,0.1);
   color: var(--text);
@@ -522,6 +580,8 @@ main { max-width: 1060px; margin: 0 auto; }
   font-size: 1rem;
   cursor: pointer;
 }
+
+.sheet-close .icon { width: 16px; height: 16px; }
 
 .sheet-sub { color: var(--text-dim); font-size: 0.88rem; margin: 0 0 14px; }
 
@@ -575,6 +635,15 @@ footer {
 
 /* ------- Responsive ------- */
 @media (max-width: 620px) {
+  /* Tabs wie eine iOS-Tab-Bar: Icon über dem Label */
+  .seg-btn {
+    flex-direction: column;
+    gap: 3px;
+    padding: 8px 4px;
+    font-size: 0.68rem;
+  }
+  .seg-btn .icon { width: 18px; height: 18px; }
+
   .bar-cell { display: none; }
   .table td, .table th { padding: 8px 6px; }
   .sheet { border-radius: 22px 22px 0 0; }
