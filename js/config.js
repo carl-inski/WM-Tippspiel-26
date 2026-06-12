@@ -6,6 +6,6 @@
  * Stände aus der importierten Excel + data/manual-results.json.
  */
 window.APP_CONFIG = {
-  proxyUrl: '',
+  proxyUrl: 'https://wm-tippspiel-proxy.f655fr7vs6.workers.dev',
   pollSeconds: 60
 };
