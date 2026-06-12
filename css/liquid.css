@@ -40,8 +40,9 @@
 
 html {
   color-scheme: dark;
-  /* Solid fallback so no gap ever shows through */
-  background: #070b14;
+  /* Solider Fallback im selben Navy wie theme-color, damit weder Safari-
+     Sampling noch ein etwaiger Spalt jemals Schwarz zeigt */
+  background: #0b1322;
 }
 
 /* position:fixed pseudo-element is the only reliable way to paint a background
