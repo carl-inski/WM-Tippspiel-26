@@ -572,14 +572,13 @@
     }
 
     $('#sheet-backdrop').hidden = false;
-    const scroller = $('#scroll');
-    if (scroller) scroller.style.overflow = 'hidden';
+    // Hintergrund-Scroll sperren, solange das Sheet offen ist
+    document.documentElement.style.overflow = 'hidden';
   }
 
   function closeSheet() {
     $('#sheet-backdrop').hidden = true;
-    const scroller = $('#scroll');
-    if (scroller) scroller.style.overflow = '';
+    document.documentElement.style.overflow = '';
   }
 
   // ------------------------------------------------------------------ Tabs --
@@ -605,10 +604,10 @@
     $('#tabs').addEventListener('click', (e) => {
       const btn = e.target.closest('.seg-btn');
       if (!btn || btn.dataset.tab === state.tab) return;
-      const scroller = $('#scroll');
+      const scroller = document.scrollingElement || document.documentElement;
       // Scroll-Position der verlassenen Ansicht merken
       state.scrollPos = state.scrollPos || {};
-      if (scroller) state.scrollPos[state.tab] = scroller.scrollTop;
+      state.scrollPos[state.tab] = scroller.scrollTop;
 
       state.tab = btn.dataset.tab;
       document.querySelectorAll('.seg-btn').forEach((b) => {
@@ -619,14 +618,12 @@
         v.hidden = v.id !== 'view-' + state.tab);
       moveIndicator();
       // Position wiederherstellen; Spiele starten beim aktuellen Spieltag
-      if (scroller) {
-        if (state.scrollPos[state.tab] != null) {
-          scroller.scrollTop = state.scrollPos[state.tab];
-        } else if (state.tab === 'spiele') {
-          scrollToCurrentMatchday();
-        } else {
-          scroller.scrollTop = 0;
-        }
+      if (state.scrollPos[state.tab] != null) {
+        scroller.scrollTop = state.scrollPos[state.tab];
+      } else if (state.tab === 'spiele') {
+        scrollToCurrentMatchday();
+      } else {
+        scroller.scrollTop = 0;
       }
     });
     window.addEventListener('resize', moveIndicator);

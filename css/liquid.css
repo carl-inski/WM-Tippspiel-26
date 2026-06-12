@@ -40,15 +40,13 @@
 
 html {
   color-scheme: dark;
-  /* Solider Fallback im selben Navy wie theme-color, damit weder Safari-
-     Sampling noch ein etwaiger Spalt jemals Schwarz zeigt */
+  /* Solider Fallback im App-Navy hinter dem fixierten Verlauf */
   background: #0b1322;
 }
 
-/* position:fixed pseudo-element is the only reliable way to paint a background
-   that covers the FULL screen on iOS Safari — it reaches beyond the layout
-   viewport into the safe-area / browser-chrome zones where body's background
-   cannot reach when overflow:hidden is set. */
+/* Verlauf als fixiertes Pseudo-Element: deckt den GESAMTEN sichtbaren
+   Viewport ab – inklusive der Safe-Areas hinter Statusleiste & Safari-
+   Toolbar. So fließt der Hintergrund nahtlos hinter die iOS-Elemente. */
 body::before {
   content: '';
   position: fixed;
@@ -57,29 +55,20 @@ body::before {
   background: radial-gradient(120% 90% at 20% 0%, #14233c 0%, #0b1322 45%, #070b14 100%);
 }
 
-html, body { height: 100%; }
-
 body {
   margin: 0;
-  padding: 0;
-  /* Das Fenster scrollt nie - so bleibt die Safari-Leiste stabil und die
-     Tab-Bar springt beim Ansichtswechsel nicht mehr */
-  overflow: hidden;
+  /* Das Fenster scrollt natürlich -> der Inhalt fließt edge-to-edge hinter
+     die iOS-Leisten. Safe-Area-Padding oben hält den Titel lesbar unterhalb
+     der Statusleiste; die schwebende Tab-Bar regelt den unteren Rand selbst. */
+  padding: max(14px, env(safe-area-inset-top, 0px)) clamp(10px, 3vw, 28px) 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
     Roboto, "Helvetica Neue", sans-serif;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
 
-/* innerer Scroll-Container statt Fenster-Scroll */
-.page-scroll {
-  height: 100vh;
-  height: 100dvh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  padding: 16px clamp(10px, 3vw, 28px) 0;
-}
+/* Wrapper läuft im normalen Fluss – kein eigener Scroll-Container mehr */
+.page-scroll { display: block; }
 
 /* ------- animierte Hintergrund-Blobs ------- */
 .bg-blobs {
