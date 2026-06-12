@@ -573,7 +573,12 @@ footer {
 /* ------- Responsive ------- */
 @media (max-width: 620px) {
   .match-row { grid-template-columns: 46px 1fr auto 1fr; }
-  .match-meta { display: none; }
+  /* Spielwert auch mobil zeigen: als eigene Zeile unter der Paarung */
+  .match-meta {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-top: 2px;
+  }
   .bar-cell { display: none; }
   .table td, .table th { padding: 8px 6px; }
   .sheet { border-radius: 22px 22px 0 0; }
