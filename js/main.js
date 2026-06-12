@@ -481,9 +481,12 @@
     if (!tipped.length) {
       tippCard.appendChild(el('p', 'empty-hint', 'Es wurde noch kein Torjäger getippt.'));
     }
-    tipped.forEach((t, i) => {
+    // Dichte Platzierung: gleiche Toranzahl = gleicher Platz (1,1,1,2,2,3 …)
+    let tRank = 0, tPrev = NaN;
+    tipped.forEach((t) => {
+      if (t.goals !== tPrev) { tRank += 1; tPrev = t.goals; }
       tippCard.appendChild(
-        scorerRow(String(i + 1), t.name, t.goals, teamFor(t.name), t.names, true));
+        scorerRow(String(tRank), t.name, t.goals, teamFor(t.name), t.names, true));
     });
     view.appendChild(tippCard);
 
@@ -498,9 +501,11 @@
     if (!merged.length) {
       allCard.appendChild(el('p', 'empty-hint', 'Noch keine Tore bei der WM.'));
     }
-    merged.slice(0, 40).forEach((s, i) => {
+    let aRank = 0, aPrev = NaN;
+    merged.slice(0, 40).forEach((s) => {
+      if (s.goals !== aPrev) { aRank += 1; aPrev = s.goals; }
       allCard.appendChild(
-        scorerRow(String(i + 1), s.name, s.goals, teamFor(s.name),
+        scorerRow(String(aRank), s.name, s.goals, teamFor(s.name),
           picksByCanon.get(s.name), false));
     });
     view.appendChild(allCard);

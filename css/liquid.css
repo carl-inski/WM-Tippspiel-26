@@ -234,8 +234,9 @@ body {
 .segmented {
   position: fixed;
   left: 50%;
-  /* so dicht wie möglich an die Unterkante; Safe-Area nur wenn nötig */
-  bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  /* dicht an die Unterkante: Safe-Area um ~20px reduziert, damit die Bar
+     etwas tiefer sitzt (näher an der Home-Indicator-Kante) */
+  bottom: max(6px, calc(env(safe-area-inset-bottom, 0px) - 20px));
   transform: translateX(-50%);
   width: min(540px, calc(100vw - 24px));
   margin: 0;
@@ -482,6 +483,18 @@ main { max-width: 1060px; margin: 0 auto; }
   color: var(--accent-warm);
   background: rgba(255, 209, 102, 0.12);
   border: 1px solid rgba(255, 209, 102, 0.25);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* Uhrzeit als eigenes Chip-Feld mit Rahmen – analog zum Wert-Chip */
+.sub-time {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
   padding: 2px 8px;
   border-radius: 999px;
 }
