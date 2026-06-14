@@ -89,6 +89,24 @@
     render();
   }
 
+  /* Adaptives Polling: während laufender Spiele schnell aktualisieren,
+     sonst sparsam (schont das API-/Worker-Limit). Das Intervall wird nach
+     jedem Abruf anhand des aktuellen Live-Status neu bestimmt. */
+  function pollIntervalMs() {
+    const sec = anyLive()
+      ? Math.max(10, CFG.livePollSeconds || CFG.pollSeconds || 20)
+      : Math.max(30, CFG.idlePollSeconds || CFG.pollSeconds || 60);
+    return sec * 1000;
+  }
+
+  function scheduleNextPoll() {
+    clearTimeout(state.pollTimer);
+    state.pollTimer = setTimeout(async () => {
+      await refreshLive();
+      scheduleNextPoll();
+    }, pollIntervalMs());
+  }
+
   // --------------------------------------------------------------- Helpers --
 
   function matchInfo(id) {
@@ -121,7 +139,8 @@
     renderFamilien();
     renderTorjaeger();
     $('#footer-source').textContent = CFG.proxyUrl
-      ? 'Live-Daten: football-data.org · Aktualisierung alle ' + (CFG.pollSeconds || 60) + ' s'
+      ? 'Live-Daten: football-data.org · Aktualisierung alle ' +
+        (CFG.livePollSeconds || CFG.pollSeconds || 20) + ' s während laufender Spiele'
       : 'Offline-Modus: Stände aus der Excel-Datei' +
         (Object.keys(state.manual).length ? ' + manuelle Ergebnisse' : '');
   }
@@ -694,10 +713,10 @@
       return;
     }
     if (CFG.proxyUrl) {
-      refreshLive();
-      setInterval(refreshLive, Math.max(30, CFG.pollSeconds || 60) * 1000);
+      refreshLive().finally(scheduleNextPoll);
+      // Bei Rückkehr in den Tab sofort aktualisieren und Takt neu setzen
       document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) refreshLive();
+        if (!document.hidden) refreshLive().finally(scheduleNextPoll);
       });
     }
   }

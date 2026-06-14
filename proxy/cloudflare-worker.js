@@ -4,7 +4,8 @@
  * Warum? football-data.org erlaubt keine direkten Browser-Zugriffe (CORS)
  * und der API-Key darf nicht im öffentlichen Frontend stehen. Dieser Worker
  * leitet genau zwei Endpunkte weiter, hängt den Key serverseitig an und
- * cached die Antworten 30 Sekunden (schont das Limit von 10 Anfragen/Minute).
+ * cached die Antworten 20 Sekunden (schont das Limit von 10 Anfragen/Minute:
+ * 2 Endpunkte / 20 s = max. 6 Upstream-Aufrufe pro Minute).
  *
  * Einrichtung (einmalig, ~10 Minuten, alles kostenlos):
  *  1. Kostenlosen API-Key holen: https://www.football-data.org/client/register
@@ -43,7 +44,7 @@ export default {
 
     const upstream = await fetch('https://api.football-data.org' + target, {
       headers: { 'X-Auth-Token': env.FOOTBALL_DATA_API_KEY },
-      cf: { cacheTtl: 30, cacheEverything: true }
+      cf: { cacheTtl: 20, cacheEverything: true }
     });
 
     const body = await upstream.text();
@@ -51,7 +52,7 @@ export default {
       status: upstream.status,
       headers: {
         'content-type': 'application/json; charset=utf-8',
-        'cache-control': 'public, max-age=30',
+        'cache-control': 'public, max-age=20',
         ...CORS_HEADERS
       }
     });

@@ -7,5 +7,8 @@
  */
 window.APP_CONFIG = {
   proxyUrl: 'https://wm-tippspiel-proxy.f655fr7vs6.workers.dev',
-  pollSeconds: 60
+  // Aktualisierungsintervall in Sekunden: schnell während laufender Spiele,
+  // sparsam wenn gerade kein Spiel live ist (schont das API-/Worker-Limit).
+  livePollSeconds: 20,
+  idlePollSeconds: 60
 };
