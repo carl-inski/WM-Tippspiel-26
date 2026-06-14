@@ -75,12 +75,21 @@ test('Familienwertung entspricht den Excel-Durchschnittsformeln', () => {
   const standings = Scoring.computeStandings(data, excelResults());
   const fams = Scoring.computeFamilyStandings(data, standings);
   assert.equal(fams.length, 14);
-  // Excel (Stand der Datei): Fam. Klesbiehl führt mit 2.7, Fam. Hofmann 2.0
-  const top = fams[0];
-  assert.equal(top.name, 'Fam. Klesbiehl');
-  assert.ok(Math.abs(top.average - 2.7) < 1e-3, 'Klesbiehl-Durchschnitt: ' + top.average);
-  const hofmann = fams.find((f) => f.name === 'Fam. Hofmann');
-  assert.ok(Math.abs(hofmann.average - 2.0) < 1e-3, 'Hofmann-Durchschnitt: ' + hofmann.average);
+  // Fam. Klesbiehl führt das Feld an
+  assert.equal(fams[0].name, 'Fam. Klesbiehl');
+  // Jeder Familien-Durchschnitt = Mittel der Mitglieder-Gesamtpunkte
+  const byName = new Map(standings.map((r) => [r.name, r]));
+  for (const f of fams) {
+    const totals = f.members.map((m) => byName.get(m)).filter(Boolean).map((r) => r.totalLive);
+    const mean = totals.reduce((a, b) => a + b, 0) / totals.length;
+    const expected = Math.round(mean * 1000) / 1000;
+    assert.ok(Math.abs(f.average - expected) < 1e-9,
+      `${f.name}: Durchschnitt=${f.average}, erwartet=${expected}`);
+  }
+  // Liste ist absteigend nach Durchschnitt sortiert
+  for (let i = 1; i < fams.length; i++) {
+    assert.ok(fams[i - 1].average >= fams[i].average, 'Familien absteigend sortiert');
+  }
 });
 
 test('Torjäger-Bonus über Namensvergleich', () => {

@@ -1,7 +1,7 @@
 {
  "meta": {
   "title": "WM 2026 – Offizielles Tippspiel",
-  "importedAt": "2026-06-12T10:28:22.524Z",
+  "importedAt": "2026-06-14T17:35:28.009Z",
   "sourceFile": "WM_Tippspiel_2026.xlsx",
   "scoring": {
    "exactFactor": 1.5,
@@ -44,7 +44,10 @@
    "home": "Kanada",
    "away": "Bosnien-Herzeg.",
    "wert": 1.2,
-   "result": null
+   "result": {
+    "home": 1,
+    "away": 1
+   }
   },
   {
    "id": "m004",
@@ -54,7 +57,10 @@
    "home": "USA",
    "away": "Paraguay",
    "wert": 0.2,
-   "result": null
+   "result": {
+    "home": 4,
+    "away": 1
+   }
   },
   {
    "id": "m005",
@@ -64,7 +70,10 @@
    "home": "Katar",
    "away": "Schweiz",
    "wert": 1.4,
-   "result": null
+   "result": {
+    "home": 1,
+    "away": 1
+   }
   },
   {
    "id": "m006",
@@ -74,7 +83,10 @@
    "home": "Brasilien",
    "away": "Marokko",
    "wert": 1.6,
-   "result": null
+   "result": {
+    "home": 1,
+    "away": 1
+   }
   },
   {
    "id": "m007",
@@ -84,7 +96,10 @@
    "home": "Haiti",
    "away": "Schottland",
    "wert": 1.6,
-   "result": null
+   "result": {
+    "home": 0,
+    "away": 1
+   }
   },
   {
    "id": "m008",
@@ -94,7 +109,10 @@
    "home": "Australien",
    "away": "Türkei",
    "wert": 1.6,
-   "result": null
+   "result": {
+    "home": 2,
+    "away": 0
+   }
   },
   {
    "id": "m009",
@@ -1356,7 +1374,7 @@
     "topscorer": "Harry Kane",
     "shootouts": 3
    },
-   "excelScore": null
+   "excelScore": 1.8
   },
   {
    "id": 1,
@@ -1656,7 +1674,7 @@
     "topscorer": "Harry Kane",
     "shootouts": 7
    },
-   "excelScore": 1.5
+   "excelScore": 3.9000000000000004
   },
   {
    "id": 2,
@@ -1956,7 +1974,7 @@
     "topscorer": "Mbappe",
     "shootouts": 9
    },
-   "excelScore": 1.5
+   "excelScore": 4.9
   },
   {
    "id": 3,
@@ -2256,7 +2274,7 @@
     "topscorer": "Harry Kane",
     "shootouts": 10
    },
-   "excelScore": null
+   "excelScore": 1.6
   },
   {
    "id": 4,
@@ -2556,7 +2574,7 @@
     "topscorer": "Mbappé",
     "shootouts": 3
    },
-   "excelScore": 1
+   "excelScore": 2.8
   },
   {
    "id": 5,
@@ -2856,7 +2874,7 @@
     "topscorer": "Harry Kane",
     "shootouts": 4
    },
-   "excelScore": 2.2
+   "excelScore": 5.6
   },
   {
    "id": 6,
@@ -3156,7 +3174,7 @@
     "topscorer": "Oyarzabal",
     "shootouts": 5
    },
-   "excelScore": 1.5
+   "excelScore": 5.7
   },
   {
    "id": 7,
@@ -3456,7 +3474,7 @@
     "topscorer": "Mbappé",
     "shootouts": 9
    },
-   "excelScore": 1
+   "excelScore": 2.6
   },
   {
    "id": 8,
@@ -3564,7 +3582,7 @@
     "topscorer": "Jiménez",
     "shootouts": 7
    },
-   "excelScore": 4
+   "excelScore": 7.2
   },
   {
    "id": 9,
@@ -3864,7 +3882,7 @@
     "topscorer": "Harry Kane",
     "shootouts": 5
    },
-   "excelScore": 2.7
+   "excelScore": 6.1
   },
   {
    "id": 10,
@@ -4164,7 +4182,7 @@
     "topscorer": "Kane",
     "shootouts": 4
    },
-   "excelScore": 1
+   "excelScore": 2.8
   },
   {
    "id": 11,
@@ -4272,7 +4290,7 @@
     "topscorer": "Kane",
     "shootouts": 8
    },
-   "excelScore": 1.5
+   "excelScore": 5.9
   },
   {
    "id": 12,
@@ -4572,7 +4590,7 @@
     "topscorer": "Mbappé",
     "shootouts": 5
    },
-   "excelScore": 1
+   "excelScore": 1.2
   },
   {
    "id": 13,
@@ -4872,7 +4890,7 @@
     "topscorer": "Mbappé",
     "shootouts": 7
    },
-   "excelScore": 1
+   "excelScore": 3.4000000000000004
   },
   {
    "id": 14,
@@ -5172,7 +5190,7 @@
     "topscorer": "Mbappé",
     "shootouts": 8
    },
-   "excelScore": null
+   "excelScore": 1.6
   },
   {
    "id": 15,
@@ -5472,7 +5490,7 @@
     "topscorer": "Mbappé",
     "shootouts": 9
    },
-   "excelScore": 3.3
+   "excelScore": 4.9
   },
   {
    "id": 16,
@@ -5772,7 +5790,7 @@
     "topscorer": "Mbappé",
     "shootouts": 10
    },
-   "excelScore": 3.3
+   "excelScore": 6.300000000000001
   },
   {
    "id": 17,
@@ -5880,7 +5898,7 @@
     "topscorer": "Kane",
     "shootouts": 11
    },
-   "excelScore": 1.5
+   "excelScore": 5.5
   },
   {
    "id": 18,
@@ -6180,7 +6198,7 @@
     "topscorer": "Kane",
     "shootouts": 7
    },
-   "excelScore": 1
+   "excelScore": 2.8
   },
   {
    "id": 19,
@@ -6480,7 +6498,7 @@
     "topscorer": "Kane",
     "shootouts": 9
    },
-   "excelScore": 1
+   "excelScore": 2.8
   },
   {
    "id": 20,
@@ -6780,7 +6798,7 @@
     "topscorer": "Mbappé",
     "shootouts": 12
    },
-   "excelScore": null
+   "excelScore": 1.6
   },
   {
    "id": 21,
@@ -7080,7 +7098,7 @@
     "topscorer": "Kane",
     "shootouts": 4
    },
-   "excelScore": 1.5
+   "excelScore": 3.3
   },
   {
    "id": 22,
@@ -7188,7 +7206,7 @@
     "topscorer": "Haaland",
     "shootouts": 8
    },
-   "excelScore": 3.3
+   "excelScore": 4.9
   },
   {
    "id": 23,
@@ -7488,7 +7506,7 @@
     "topscorer": "Dembelé",
     "shootouts": 7
    },
-   "excelScore": 1
+   "excelScore": 5.4
   },
   {
    "id": 24,
@@ -7788,7 +7806,7 @@
     "topscorer": "Kane",
     "shootouts": 2
    },
-   "excelScore": null
+   "excelScore": 5.4
   },
   {
    "id": 25,
@@ -8088,7 +8106,7 @@
     "topscorer": "Harry Kane",
     "shootouts": 7
    },
-   "excelScore": 1.5
+   "excelScore": 8.9
   },
   {
    "id": 26,
@@ -8388,7 +8406,7 @@
     "topscorer": "Mbappé",
     "shootouts": 8
    },
-   "excelScore": 1.5
+   "excelScore": 5.1
   },
   {
    "id": 27,
@@ -8688,7 +8706,7 @@
     "topscorer": "Mbappé",
     "shootouts": 7
    },
-   "excelScore": 1
+   "excelScore": 2.8
   },
   {
    "id": 28,
@@ -8796,7 +8814,7 @@
     "topscorer": "Kane",
     "shootouts": 10
    },
-   "excelScore": 1.5
+   "excelScore": 6.699999999999999
   },
   {
    "id": 29,
@@ -8904,7 +8922,7 @@
     "topscorer": "Kane",
     "shootouts": 13
    },
-   "excelScore": 1.5
+   "excelScore": 1.7
   },
   {
    "id": 30,
@@ -9012,7 +9030,7 @@
     "topscorer": "Mbappé",
     "shootouts": 9
    },
-   "excelScore": 1
+   "excelScore": 2.6
   },
   {
    "id": 31,
@@ -9612,7 +9630,7 @@
     "topscorer": "Mbappé",
     "shootouts": 4
    },
-   "excelScore": 1
+   "excelScore": 2.6
   },
   {
    "id": 33,
@@ -9912,7 +9930,7 @@
     "topscorer": "Summerville",
     "shootouts": 7
    },
-   "excelScore": 1.2
+   "excelScore": 1.4
   },
   {
    "id": 34,
@@ -10212,7 +10230,7 @@
     "topscorer": "Kane",
     "shootouts": 6
    },
-   "excelScore": 1.5
+   "excelScore": 5.1
   },
   {
    "id": 35,
@@ -10512,7 +10530,7 @@
     "topscorer": "Mbappé",
     "shootouts": 6
    },
-   "excelScore": 2.7
+   "excelScore": 6.700000000000001
   },
   {
    "id": 36,
@@ -10812,7 +10830,7 @@
     "topscorer": "Kane",
     "shootouts": 12
    },
-   "excelScore": 1
+   "excelScore": 4.2
   },
   {
    "id": 37,
@@ -11016,7 +11034,7 @@
     "topscorer": "Mbappé",
     "shootouts": 6
    },
-   "excelScore": 1.5
+   "excelScore": 3.1
   },
   {
    "id": 38,
@@ -11316,7 +11334,7 @@
     "topscorer": "Mbappé",
     "shootouts": 6
    },
-   "excelScore": 1.5
+   "excelScore": 5.700000000000001
   },
   {
    "id": 39,
@@ -11616,7 +11634,7 @@
     "topscorer": "Kane",
     "shootouts": 6
    },
-   "excelScore": 1
+   "excelScore": 4.9
   },
   {
    "id": 40,
@@ -11916,7 +11934,7 @@
     "topscorer": "Mbappé",
     "shootouts": 10
    },
-   "excelScore": 1.5
+   "excelScore": 4.9
   },
   {
    "id": 41,
@@ -12516,7 +12534,7 @@
     "topscorer": "Raphinha",
     "shootouts": 6
    },
-   "excelScore": 1
+   "excelScore": 5.2
   },
   {
    "id": 43,
@@ -12816,7 +12834,7 @@
     "topscorer": "Olisé",
     "shootouts": 8
    },
-   "excelScore": 1
+   "excelScore": 2.6
   },
   {
    "id": 44,
@@ -13116,7 +13134,7 @@
     "topscorer": "Mbappé",
     "shootouts": 9
    },
-   "excelScore": 1
+   "excelScore": 2.6
   },
   {
    "id": 45,
@@ -13412,7 +13430,7 @@
     "topscorer": "Kane",
     "shootouts": 9
    },
-   "excelScore": 1
+   "excelScore": 4.2
   },
   {
    "id": 46,
@@ -13712,7 +13730,7 @@
     "topscorer": "Mbappé",
     "shootouts": 7
    },
-   "excelScore": 1.5
+   "excelScore": 3.3
   },
   {
    "id": 47,
@@ -14012,7 +14030,7 @@
     "topscorer": "Kane",
     "shootouts": 5
    },
-   "excelScore": 1
+   "excelScore": 2.8
   },
   {
    "id": 48,
@@ -14308,7 +14326,7 @@
     "topscorer": "Kane",
     "shootouts": 6
    },
-   "excelScore": 1.5
+   "excelScore": 3.3
   },
   {
    "id": 49,
@@ -14608,7 +14626,7 @@
     "topscorer": "Mbappé",
     "shootouts": 4
    },
-   "excelScore": 1
+   "excelScore": 1.2
   },
   {
    "id": 50,
@@ -14908,7 +14926,7 @@
     "topscorer": "Kane",
     "shootouts": 8
    },
-   "excelScore": 1
+   "excelScore": 2.6
   },
   {
    "id": 51,
@@ -15208,7 +15226,7 @@
     "topscorer": "Kane",
     "shootouts": 7
    },
-   "excelScore": null
+   "excelScore": 3.1999999999999997
   },
   {
    "id": 52,
@@ -15508,7 +15526,7 @@
     "topscorer": "Kane",
     "shootouts": 6
    },
-   "excelScore": null
+   "excelScore": 0.2
   },
   {
    "id": 53,
@@ -15616,7 +15634,7 @@
     "topscorer": "Kane",
     "shootouts": 6
    },
-   "excelScore": 1
+   "excelScore": 2.8
   },
   {
    "id": 54,
@@ -15724,7 +15742,7 @@
     "topscorer": "Haaland",
     "shootouts": 7
    },
-   "excelScore": 1
+   "excelScore": 2.8
   },
   {
    "id": 55,
@@ -16024,7 +16042,7 @@
     "topscorer": "Mbappé",
     "shootouts": 7
    },
-   "excelScore": 1
+   "excelScore": 2.6
   },
   {
    "id": 56,
@@ -16132,7 +16150,7 @@
     "topscorer": "Oyarzabal",
     "shootouts": 4
    },
-   "excelScore": 2.8
+   "excelScore": 6.4
   },
   {
    "id": 57,
@@ -16240,7 +16258,7 @@
     "topscorer": "Aymen Hussein",
     "shootouts": 7
    },
-   "excelScore": 1
+   "excelScore": 3.6000000000000005
   },
   {
    "id": 58,
@@ -16540,7 +16558,7 @@
     "topscorer": "Haaland",
     "shootouts": 3
    },
-   "excelScore": 1
+   "excelScore": 4.4
   },
   {
    "id": 59,
@@ -16840,7 +16858,7 @@
     "topscorer": "Kane",
     "shootouts": 5
    },
-   "excelScore": 1.2
+   "excelScore": 2.8
   },
   {
    "id": 60,
@@ -17140,7 +17158,7 @@
     "topscorer": "Mbappe",
     "shootouts": 5
    },
-   "excelScore": 1
+   "excelScore": 5.200000000000001
   },
   {
    "id": 61,
@@ -17440,7 +17458,7 @@
     "topscorer": "Ferran Torres",
     "shootouts": 8
    },
-   "excelScore": null
+   "excelScore": 3.2
   },
   {
    "id": 62,
@@ -17740,7 +17758,7 @@
     "topscorer": "Lamine Yamal",
     "shootouts": 18
    },
-   "excelScore": null
+   "excelScore": 1.8
   },
   {
    "id": 63,
@@ -18040,7 +18058,7 @@
     "topscorer": "Dembele",
     "shootouts": 6
    },
-   "excelScore": 1
+   "excelScore": 2.6
   },
   {
    "id": 64,
@@ -18340,7 +18358,7 @@
     "topscorer": "Kane",
     "shootouts": 6
    },
-   "excelScore": 2.7
+   "excelScore": 4.300000000000001
   },
   {
    "id": 65,
@@ -18640,7 +18658,7 @@
     "topscorer": "Kane",
     "shootouts": 6
    },
-   "excelScore": 1.5
+   "excelScore": 1.7
   },
   {
    "id": 66,
@@ -18748,7 +18766,7 @@
     "topscorer": "Alvarez",
     "shootouts": 5
    },
-   "excelScore": 2.7
+   "excelScore": 4.300000000000001
   },
   {
    "id": 67,
@@ -19044,7 +19062,7 @@
     "topscorer": "Haaland",
     "shootouts": 4
    },
-   "excelScore": null
+   "excelScore": 2.4000000000000004
   },
   {
    "id": 68,
@@ -19340,7 +19358,7 @@
     "topscorer": "Mbappé",
     "shootouts": 5
    },
-   "excelScore": null
+   "excelScore": 1.6
   },
   {
    "id": 69,
@@ -19636,7 +19654,7 @@
     "topscorer": "Mbappé",
     "shootouts": 7
    },
-   "excelScore": null
+   "excelScore": 1.6
   },
   {
    "id": 70,
@@ -19932,7 +19950,7 @@
     "topscorer": "Alvarez",
     "shootouts": 6
    },
-   "excelScore": null
+   "excelScore": 1.6
   },
   {
    "id": 71,
@@ -20228,7 +20246,7 @@
     "topscorer": "Mbappé",
     "shootouts": 10
    },
-   "excelScore": null
+   "excelScore": 1.6
   }
  ],
  "families": [
