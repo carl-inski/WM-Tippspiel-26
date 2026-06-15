@@ -228,16 +228,15 @@
     for (const [key, ms] of groups) {
       const d = new Date(key + 'T12:00:00');
       const hasLive = ms.some((m) => isLive(m.id));
+      // Spieltag-Indikator (nur Gruppenphase; an Übergangstagen z. B. "1./2.")
+      const mds = matchdaysForDay(ms);
+      const spieltag = mds.length ? ' — ' + mds.join('./') + '. Spieltag' : '';
       const label = el('div', 'day-label' + (hasLive ? ' live-label' : ''),
         WEEKDAYS[d.getDay()] + ', ' +
         d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
         (key === todayKey ? ' · heute' : '') +
-        (ms[0].round ? ' — ' + ms[0].round : ''));
-      // Spieltag-Indikator (nur Gruppenphase; an Übergangstagen z. B. "1./2.")
-      const mds = matchdaysForDay(ms);
-      if (mds.length) {
-        label.appendChild(el('span', 'matchday-badge', mds.join('./') + '. Spieltag'));
-      }
+        (ms[0].round ? ' — ' + ms[0].round : '') +
+        spieltag);
       view.appendChild(label);
       if (key === todayKey && !state.scrollAnchor) state.scrollAnchor = label;
       if (key > todayKey && !firstUpcomingLabel) firstUpcomingLabel = label;

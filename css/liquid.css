@@ -372,21 +372,6 @@ main { max-width: 1060px; margin: 0 auto; }
   color: var(--text-dim);
 }
 
-/* Spieltag-Indikator als kleines Akzent-Pill in der Tages-Überschrift */
-.matchday-badge {
-  display: inline-block;
-  margin-left: 10px;
-  padding: 2px 9px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-  color: var(--accent);
-  background: rgba(110, 231, 160, 0.12);
-  border: 1px solid rgba(110, 231, 160, 0.25);
-  vertical-align: middle;
-}
-
 .live-label { color: var(--live); }
 
 .live-label::before {
