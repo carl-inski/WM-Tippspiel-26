@@ -171,6 +171,34 @@
 
   // ------- Spiele -------
 
+  /* Leitet den Gruppenphasen-Spieltag (1–3) je Spiel ab: in chronologischer
+     Reihenfolge ist der n-te Auftritt einer Mannschaft ihr n-ter Spieltag.
+     Robust gegen die Tagesplanung (an zwei Tagen überlappen zwei Spieltage). */
+  function matchdayMap() {
+    if (state._matchdays) return state._matchdays;
+    const map = {};
+    const isGroup = (m) => /grupp/i.test(m.round || '');
+    const group = state.data.matches.filter(isGroup).slice()
+      .sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
+    const appear = {};
+    for (const m of group) {
+      const md = Math.max(appear[m.home] || 0, appear[m.away] || 0) + 1;
+      if (m.home) appear[m.home] = md;
+      if (m.away) appear[m.away] = md;
+      map[m.id] = md;
+    }
+    state._matchdays = map;
+    return map;
+  }
+
+  /* Sortierte, eindeutige Spieltage der Spiele eines Tages (nur Gruppenphase). */
+  function matchdaysForDay(ms) {
+    const map = matchdayMap();
+    const set = new Set();
+    for (const m of ms) if (map[m.id]) set.add(map[m.id]);
+    return [...set].sort((a, b) => a - b);
+  }
+
   function renderSpiele() {
     const view = $('#view-spiele');
     view.innerHTML = '';
@@ -205,6 +233,11 @@
         d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
         (key === todayKey ? ' · heute' : '') +
         (ms[0].round ? ' — ' + ms[0].round : ''));
+      // Spieltag-Indikator (nur Gruppenphase; an Übergangstagen z. B. "1./2.")
+      const mds = matchdaysForDay(ms);
+      if (mds.length) {
+        label.appendChild(el('span', 'matchday-badge', mds.join('./') + '. Spieltag'));
+      }
       view.appendChild(label);
       if (key === todayKey && !state.scrollAnchor) state.scrollAnchor = label;
       if (key > todayKey && !firstUpcomingLabel) firstUpcomingLabel = label;
