@@ -883,6 +883,13 @@ footer {
   line-height: 1.6;
 }
 
+#footer-meta {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+#footer-version { font-variant-numeric: tabular-nums; }
+
 /* ------- Responsive ------- */
 @media (max-width: 620px) {
   /* Tabs wie eine iOS-Tab-Bar: Icon über dem Label */

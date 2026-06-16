@@ -229,6 +229,8 @@
     renderTabelle();
     renderFamilien();
     renderTorjaeger();
+    const ver = $('#footer-version');
+    if (ver) ver.textContent = 'v' + (CFG.version || '–');
     $('#footer-source').textContent = CFG.proxyUrl
       ? 'Live-Daten: football-data.org · Aktualisierung alle ' +
         (CFG.livePollSeconds || CFG.pollSeconds || 20) + ' s während laufender Spiele'
