@@ -128,6 +128,28 @@ test('Simulation: manueller Live-Stand bewegt Wertung und Rangliste', async () =
   dom.window.close();
 });
 
+test('Simulation: auch ein zukünftiges Spiel lässt sich simulieren', async () => {
+  const dom = makeApp();
+  const doc = dom.window.document;
+  await waitFor(() => doc.querySelectorAll('#view-spiele .match-card').length > 0);
+
+  // ein noch nicht gespieltes Spiel (Anzeige "– : –") aufklappen
+  const upcoming = [...doc.querySelectorAll('#view-spiele .match-card')]
+    .find((c) => c.querySelector('.mscore.upcoming'));
+  assert.ok(upcoming, 'es gibt ein kommendes Spiel');
+  upcoming.querySelector('.match-row').click();
+  await waitFor(() => doc.querySelector('.sim-box'));
+  assert.ok(doc.querySelector('.sim-box .sim-title').textContent.includes('Spielstand simulieren'),
+    'Titel für kommendes Spiel');
+
+  // Tor simulieren -> Spiel wird als SIMULIERT geführt
+  doc.querySelectorAll('.sim-box .sim-step')[1].click();
+  await waitFor(() => doc.querySelector('.mscore.sim'));
+  assert.ok(doc.querySelector('.sim-badge'), 'SIMULIERT-Badge am kommenden Spiel');
+
+  dom.window.close();
+});
+
 test('Live-Modus: API-Daten fließen in Anzeige und Wertung', async () => {
   const data = JSON.parse(fs.readFileSync(path.join(root, 'data', 'tippspiel.json'), 'utf-8'));
   // drittes Gruppenspiel (Kanada - Bosnien) läuft gerade
