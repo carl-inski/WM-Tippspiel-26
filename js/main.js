@@ -422,7 +422,9 @@
       || (res ? { home: res.home, away: res.away } : { home: 0, away: 0 });
 
     const box = el('div', 'sim-box');
-    box.appendChild(el('div', 'sim-title', 'Live-Stand simulieren'));
+    const future = !state.results[m.id];
+    box.appendChild(el('div', 'sim-title',
+      future ? 'Spielstand simulieren' : 'Live-Stand simulieren'));
 
     const row = el('div', 'sim-row');
     const stepper = (side) => {
@@ -609,6 +611,7 @@
   function renderFamilien() {
     const view = $('#view-familien');
     view.innerHTML = '';
+    if (hasSim()) view.appendChild(simBanner());
     const byName = new Map(state.standings.map((r) => [r.name, r]));
 
     const grid = el('div', 'family-grid');
@@ -644,22 +647,35 @@
   function renderTorjaeger() {
     const view = $('#view-torjaeger');
     view.innerHTML = '';
+    if (hasSim()) view.appendChild(simBanner());
 
     const canon = window.Scoring.canonicalScorer;
     const ppg = state.data.bonus.topscorer.pointsPerGoal;
-    const liveScorers = state.apiState && state.apiState.extras.scorers.length
+    const realScorers = state.apiState && state.apiState.extras.scorers.length
       ? state.apiState.extras.scorers
       : state.data.manualScorers.map((s) => ({ name: s.name, goals: s.goals, teamDE: null }));
 
-    // WM-Torschützen auf kanonische Namen zusammenführen (Tore summieren,
-    // Team merken), damit "Kane" und "Harry Kane" eine Zeile bilden
-    const goalsByCanon = new Map();
+    // Reale WM-Tore je kanonischem Namen ("Kane" + "Harry Kane" = eine Zeile)
+    const realGoalsByCanon = new Map();
     const teamByCanon = new Map();
-    for (const s of liveScorers) {
+    for (const s of realScorers) {
       const c = canon(s.name);
-      goalsByCanon.set(c.name, (goalsByCanon.get(c.name) || 0) + (s.goals || 0));
+      realGoalsByCanon.set(c.name, (realGoalsByCanon.get(c.name) || 0) + (s.goals || 0));
       const team = s.teamDE || c.team;
       if (team && !teamByCanon.has(c.name)) teamByCanon.set(c.name, team);
+    }
+
+    // Simulierte Zusatztore aus der Tor-Simulation (kanonische Keys)
+    const simByCanon = new Map();
+    for (const [nm, extra] of Object.entries(state.simGoals || {})) {
+      if (extra) simByCanon.set(canon(nm).name, extra);
+    }
+
+    // Anzeige-Gesamt = real + simuliert (>= 0); rein simulierte Schützen ergänzen
+    const totalByCanon = new Map(realGoalsByCanon);
+    for (const [nm, extra] of simByCanon) {
+      totalByCanon.set(nm, Math.max(0, (totalByCanon.get(nm) || 0) + extra));
+      if (!teamByCanon.has(nm)) { const t = canon(nm).team; if (t) teamByCanon.set(nm, t); }
     }
 
     // Tipps unter dem vollen Namen zusammenführen ("Kane" + "Harry Kane" usw.)
@@ -673,12 +689,21 @@
 
     const teamFor = (name) => teamByCanon.get(name) || canon(name).team;
 
-    function scorerRow(rank, name, goals, team, picks, showPts, simulatable) {
-      const row = el('div', 'scorer-row');
+    // Farblich markierter simulierter Zuwachs/Abzug (+n / −n)
+    const simAddEl = (value, suffix) =>
+      el('span', 'sim-add', (value > 0 ? '+' : '−') + fmtPts(Math.abs(value)) + (suffix || ''));
+
+    function scorerRow(rank, name, team, picks, showPts, simulatable) {
+      const realG = realGoalsByCanon.get(name) || 0;
+      const extra = simByCanon.get(name) || 0;
+      const totalG = Math.max(0, realG + extra);
+
+      const row = el('div', 'scorer-row' + (extra ? ' sim-on' : ''));
       row.appendChild(el('span', 'rank', rank));
       if (team) row.appendChild(flagImg(team));
       else row.appendChild(ballPlaceholder());
-      const nameWrap = el('span');
+
+      const nameWrap = el('span', 'scorer-name');
       nameWrap.appendChild(el('span', '', name + ' '));
       if (picks && picks.length) {
         nameWrap.appendChild(el('span', 'picks',
@@ -686,18 +711,35 @@
           (picks.length > 6 ? ' +' + (picks.length - 6) : '')));
       }
       row.appendChild(nameWrap);
-      if (showPts) {
-        row.appendChild(el('span', 'picks',
-          goals ? '+' + fmtPts(goals * ppg) + ' P.' : '0 P.'));
-      } else {
-        row.appendChild(el('span', 'picks', ''));
-      }
-      const g = el('span', 'goals', String(goals) + ' ');
-      g.appendChild(window.Icons.node('ball'));
-      row.appendChild(g);
 
-      // Tor-Simulation: getipptem Torjäger ein Tor geben/nehmen und sofort
-      // Torschützenliste + Torjäger-Bonus + Rangliste neu rechnen.
+      const meta = el('span', 'scorer-meta');
+      const figures = el('span', 'scorer-figures');
+
+      if (showPts) {
+        const pts = el('span', 'scorer-pts');
+        if (totalG) {
+          if (realG) pts.appendChild(el('span', '', '+' + fmtPts(realG * ppg)));
+          if (extra) {
+            if (realG) pts.appendChild(document.createTextNode(' '));
+            pts.appendChild(simAddEl(extra * ppg));
+          }
+          pts.appendChild(document.createTextNode(' P.'));
+        } else {
+          pts.textContent = '0 P.';
+        }
+        figures.appendChild(pts);
+      }
+
+      // Tore: realer Stand als Basis, simulierter Zuwachs farblich abgesetzt
+      const g = el('span', 'goals' + (extra ? ' has-sim' : ''));
+      g.appendChild(document.createTextNode(String(realG) + ' '));
+      if (extra) g.appendChild(simAddEl(extra));
+      g.appendChild(window.Icons.node('ball'));
+      figures.appendChild(g);
+      meta.appendChild(figures);
+
+      // Tor-Simulation: getipptem Torjäger ein Tor geben/nehmen → sofort neu rechnen.
+      // Knöpfe sitzen kompakt rechts unter der Toranzeige.
       if (simulatable) {
         const sim = el('span', 'scorer-sim');
         const minus = el('button', 'sim-step', '−');
@@ -708,17 +750,19 @@
         plus.addEventListener('click', () => bumpSimGoal(name, +1));
         sim.appendChild(minus);
         sim.appendChild(plus);
-        row.appendChild(sim);
+        meta.appendChild(sim);
       }
+
+      row.appendChild(meta);
       return row;
     }
 
-    // ---- 1) Alle getippten Torjäger, sortiert nach bereits erzielten Toren ----
+    // ---- 1) Alle getippten Torjäger, sortiert nach (simulierten) Toren ----
     const tippCard = el('div', 'glass card');
     tippCard.appendChild(el('h2', '', 'Getippte Torjäger'));
 
     const tipped = [...picksByCanon.entries()]
-      .map(([name, names]) => ({ name, names, goals: goalsByCanon.get(name) || 0 }))
+      .map(([name, names]) => ({ name, names, goals: totalByCanon.get(name) || 0 }))
       .sort((a, b) => b.goals - a.goals
         || b.names.length - a.names.length
         || a.name.localeCompare(b.name));
@@ -731,15 +775,16 @@
     tipped.forEach((t) => {
       if (t.goals !== tPrev) { tRank += 1; tPrev = t.goals; }
       tippCard.appendChild(
-        scorerRow(String(tRank), t.name, t.goals, teamFor(t.name), t.names, true, true));
+        scorerRow(String(tRank), t.name, teamFor(t.name), t.names, true, true));
     });
     view.appendChild(tippCard);
 
-    // ---- 2) Komplette WM-Torschützenliste ----
+    // ---- 2) Komplette WM-Torschützenliste (inkl. simulierter Tore) ----
     const allCard = el('div', 'glass card');
     allCard.appendChild(el('h2', '', 'Torschützenliste der WM'));
 
-    const merged = [...goalsByCanon.entries()]
+    const merged = [...totalByCanon.entries()]
+      .filter(([, goals]) => goals > 0)
       .map(([name, goals]) => ({ name, goals }))
       .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
 
@@ -750,8 +795,7 @@
     merged.slice(0, 40).forEach((s) => {
       if (s.goals !== aPrev) { aRank += 1; aPrev = s.goals; }
       allCard.appendChild(
-        scorerRow(String(aRank), s.name, s.goals, teamFor(s.name),
-          picksByCanon.get(s.name), false));
+        scorerRow(String(aRank), s.name, teamFor(s.name), picksByCanon.get(s.name), false, false));
     });
     view.appendChild(allCard);
   }
