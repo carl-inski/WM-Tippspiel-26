@@ -100,6 +100,34 @@ test('Offline-Modus: alle Ansichten rendern', async () => {
   dom.window.close(); // Timer freigeben, sonst hängt der Testprozess
 });
 
+test('Simulation: manueller Live-Stand bewegt Wertung und Rangliste', async () => {
+  const dom = makeApp();
+  const doc = dom.window.document;
+  await waitFor(() => doc.querySelectorAll('#view-spiele .match-card').length > 0);
+
+  // Erstes Spiel aufklappen -> Simulator erscheint
+  doc.querySelector('#view-spiele .match-row').click();
+  await waitFor(() => doc.querySelector('.sim-box'));
+  const steps = doc.querySelectorAll('.sim-box .sim-step');
+  assert.ok(steps.length >= 4, 'Stepper für beide Teams vorhanden');
+
+  // Heim-Tor simulieren (Reihenfolge: heim −, heim +, gast −, gast +)
+  steps[1].click();
+  await waitFor(() => doc.querySelector('.sim-banner'));
+  assert.ok(doc.querySelector('.mscore.sim'), 'Spielstand als simuliert markiert');
+  assert.ok(doc.querySelector('.sim-badge'), 'SIMULIERT-Badge sichtbar');
+  // Rangliste zeigt jetzt Live-Punkte und Platzveränderungen
+  assert.ok(doc.querySelectorAll('#view-tabelle .live-delta').length > 0, 'Live-Punkte in Tabelle');
+  assert.ok(doc.querySelectorAll('#view-tabelle .rank-delta').length > 0, 'Platz-Indikator sichtbar');
+
+  // Zurücksetzen räumt die Simulation wieder ab
+  doc.querySelector('.sim-banner .sim-reset').click();
+  await waitFor(() => !doc.querySelector('.sim-banner'));
+  assert.equal(doc.querySelectorAll('.mscore.sim').length, 0, 'keine Simulation mehr aktiv');
+
+  dom.window.close();
+});
+
 test('Live-Modus: API-Daten fließen in Anzeige und Wertung', async () => {
   const data = JSON.parse(fs.readFileSync(path.join(root, 'data', 'tippspiel.json'), 'utf-8'));
   // drittes Gruppenspiel (Kanada - Bosnien) läuft gerade
