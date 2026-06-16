@@ -71,6 +71,23 @@ test('Live-Punkte werden getrennt ausgewiesen', () => {
   }
 });
 
+test('Rangdelta: Basis-Rang ohne Live, Bewegung durch Live-Spiel', () => {
+  // Ohne Live-Spiele ist der Live-Rang = Basis-Rang (keine Bewegung)
+  const base = Scoring.computeStandings(data, excelResults());
+  assert.ok(base.every((r) => r.rankDelta === 0), 'ohne Live keine Platzänderung');
+  assert.ok(base.every((r) => r.baseRank === r.rank), 'baseRank == rank ohne Live');
+
+  // Ein laufendes Spiel bewegt die Rangliste; rankDelta = baseRank - rank
+  const results = excelResults();
+  const open = data.matches.find((m) => !m.result && m.home);
+  results[open.id] = { home: 1, away: 0, live: true };
+  const live = Scoring.computeStandings(data, results);
+  assert.ok(live.every((r) => r.rankDelta === r.baseRank - r.rank), 'Delta-Formel');
+  assert.ok(live.every((r) => r.totalLive >= r.total), 'Live-Punkte nur additiv');
+  assert.ok(live.some((r) => r.rankDelta > 0), 'mindestens ein Aufsteiger');
+  assert.ok(live.some((r) => r.rankDelta < 0), 'mindestens ein Absteiger');
+});
+
 test('Familienwertung entspricht den Excel-Durchschnittsformeln', () => {
   const standings = Scoring.computeStandings(data, excelResults());
   const fams = Scoring.computeFamilyStandings(data, standings);

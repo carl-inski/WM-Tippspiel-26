@@ -13,7 +13,9 @@
     openMatch: null,
     tab: 'spiele',
     lastUpdate: null,
-    apiError: null
+    apiError: null,
+    sim: {},             // { matchId: {home, away} } – manuell simulierte Live-Stände
+    simGoals: {}         // { kanonischerName: +n } – simulierte WM-Tore (Torjäger)
   };
 
   const $ = (sel) => document.querySelector(sel);
@@ -68,10 +70,99 @@
 
   function recompute() {
     const apiResults = state.apiState ? state.apiState.results : null;
-    state.results = window.Scoring.mergeResults(excelResults(), state.manual, apiResults);
-    const extras = state.apiState ? state.apiState.extras : {};
-    state.standings = window.Scoring.computeStandings(state.data, state.results, extras);
+    // Simulierte Stände gewinnen über alles und gelten als "live".
+    state.results = window.Scoring.mergeResults(
+      excelResults(), state.manual, apiResults, simResults());
+    state.standings = window.Scoring.computeStandings(
+      state.data, state.results, simulatedExtras());
     state.families = window.Scoring.computeFamilyStandings(state.data, state.standings);
+  }
+
+  // ---- Simulation ("Was-wäre-wenn"-Vorschau) -----------------------------
+
+  /* Manuell gesetzte Live-Stände als Ergebnis-Quelle (immer als live markiert,
+     zusätzlich sim:true zur Kennzeichnung in der UI). */
+  function simResults() {
+    const out = {};
+    for (const [id, s] of Object.entries(state.sim)) {
+      if (s && s.home != null && s.away != null) {
+        out[id] = { home: s.home, away: s.away, live: true, sim: true };
+      }
+    }
+    return out;
+  }
+
+  /* WM-Torschützen aus der API plus simulierte Zusatztore (kanonisch gemerged),
+     damit Torschützenliste UND Torjäger-Bonus die Vorschau abbilden. */
+  function simulatedExtras() {
+    const base = state.apiState ? state.apiState.extras : {};
+    const sim = state.simGoals || {};
+    if (!Object.keys(sim).length) return base;
+    const canon = window.Scoring.canonicalScorer;
+    const map = new Map();
+    // realer Stand: API-Torschützen, offline ersatzweise die manuelle Liste
+    const seed = (base.scorers && base.scorers.length)
+      ? base.scorers : (state.data.manualScorers || []);
+    for (const s of seed) {
+      const key = canon(s.name).name;
+      const prev = map.get(key);
+      if (prev) prev.goals += (s.goals || 0);
+      else map.set(key, { name: key, goals: s.goals || 0, teamDE: s.teamDE || null, crest: s.crest || null });
+    }
+    const realScorers = [...map.values()].map((s) => Object.assign({}, s));
+    for (const [name, extra] of Object.entries(sim)) {
+      if (!extra) continue;
+      const c = canon(name);
+      const prev = map.get(c.name);
+      if (prev) prev.goals = Math.max(0, prev.goals + extra);
+      else if (extra > 0) map.set(c.name, { name: c.name, goals: extra, teamDE: c.team, crest: null });
+    }
+    return Object.assign({}, base, { scorers: [...map.values()], realScorers });
+  }
+
+  function hasSim() {
+    return Object.keys(state.sim).length > 0 || Object.keys(state.simGoals).length > 0;
+  }
+
+  function setSimScore(id, home, away) {
+    state.sim[id] = { home: Math.max(0, home | 0), away: Math.max(0, away | 0) };
+    recompute();
+    render();
+  }
+
+  function clearSimMatch(id) {
+    delete state.sim[id];
+    recompute();
+    render();
+  }
+
+  /* Basis-Tore eines (kanonischen) Schützen aus der echten API – als Untergrenze
+     fürs Heruntersimulieren. */
+  function baseGoalsFor(canonName) {
+    const ex = state.apiState ? state.apiState.extras : {};
+    const canon = window.Scoring.canonicalScorer;
+    let g = 0;
+    for (const s of (ex.scorers || [])) {
+      if (canon(s.name).name === canonName) g += s.goals || 0;
+    }
+    return g;
+  }
+
+  function bumpSimGoal(name, delta) {
+    const key = window.Scoring.canonicalScorer(name).name;
+    const min = -baseGoalsFor(key); // nicht unter den echten WM-Stand drücken
+    const next = Math.max(min, (state.simGoals[key] || 0) + delta);
+    if (next === 0) delete state.simGoals[key];
+    else state.simGoals[key] = next;
+    recompute();
+    render();
+  }
+
+  function resetSim() {
+    state.sim = {};
+    state.simGoals = {};
+    recompute();
+    render();
   }
 
   async function refreshLive() {
@@ -127,7 +218,7 @@
   }
 
   function anyLive() {
-    return Object.values(state.results).some((r) => r.live);
+    return Object.values(state.results).some((r) => r.live && !r.sim);
   }
 
   // ---------------------------------------------------------------- Render --
@@ -203,6 +294,8 @@
     const view = $('#view-spiele');
     view.innerHTML = '';
 
+    if (hasSim()) view.appendChild(simBanner());
+
     if (!CFG.proxyUrl) {
       const b = el('div', 'banner');
       b.innerHTML = window.Icons.svg('info') + ' <strong>Live-Daten noch nicht verbunden.</strong> ' +
@@ -263,8 +356,9 @@
   function matchCard(m) {
     const { home, away } = teamsOf(m);
     const res = state.results[m.id];
-    const live = isLive(m.id);
-    const card = el('div', 'glass match-card');
+    const sim = !!(res && res.sim);
+    const live = isLive(m.id) && !sim;
+    const card = el('div', 'glass match-card' + (sim ? ' sim' : ''));
 
     const row = el('button', 'match-row');
     row.setAttribute('aria-expanded', state.openMatch === m.id ? 'true' : 'false');
@@ -274,7 +368,7 @@
     th.appendChild(el('span', 'name', home || offenLabel(m)));
     row.appendChild(th);
 
-    const sc = el('div', 'mscore' + (live ? ' live' : res ? '' : ' upcoming'));
+    const sc = el('div', 'mscore' + (sim ? ' sim' : live ? ' live' : res ? '' : ' upcoming'));
     if (res) {
       sc.textContent = res.home + ' : ' + res.away;
       const info = matchInfo(m.id);
@@ -293,7 +387,9 @@
 
     // Unterzeile: LIVE/Uhrzeit + Spielwert, mittig unter dem Ergebnis
     const sub = el('div', 'match-sub');
-    if (live) {
+    if (sim) {
+      sub.appendChild(el('span', 'sim-badge', 'SIMULIERT'));
+    } else if (live) {
       sub.appendChild(el('span', 'live-badge', 'LIVE'));
     } else {
       // Uhrzeit direkt aus dem Kickoff-String (deutsche Zeit), Safari-sicher
@@ -308,8 +404,74 @@
     });
     card.appendChild(row);
 
-    if (state.openMatch === m.id) card.appendChild(matchTips(m));
+    if (state.openMatch === m.id) {
+      card.appendChild(matchTips(m));
+      card.appendChild(simControls(m));
+    }
     return card;
+  }
+
+  /* Manuelle Live-Stand-Simulation eines Spiels: Tor vorwegnehmen und sofort
+     sehen, wie sich Rangliste, Live-Punkte und Bonus verschieben. */
+  function simControls(m) {
+    const { home, away } = teamsOf(m);
+    const res = state.results[m.id];
+    const cur = state.sim[m.id]
+      || (res ? { home: res.home, away: res.away } : { home: 0, away: 0 });
+
+    const box = el('div', 'sim-box');
+    box.appendChild(el('div', 'sim-title', 'Live-Stand simulieren'));
+
+    const row = el('div', 'sim-row');
+    const stepper = (side) => {
+      const wrap = el('div', 'sim-stepper');
+      const minus = el('button', 'sim-step', '−');
+      minus.setAttribute('aria-label', 'Tor abziehen');
+      const val = el('span', 'sim-val', String(cur[side]));
+      const plus = el('button', 'sim-step', '+');
+      plus.setAttribute('aria-label', 'Tor hinzufügen');
+      minus.addEventListener('click', () => setSimScore(m.id,
+        side === 'home' ? cur.home - 1 : cur.home,
+        side === 'away' ? cur.away - 1 : cur.away));
+      plus.addEventListener('click', () => setSimScore(m.id,
+        side === 'home' ? cur.home + 1 : cur.home,
+        side === 'away' ? cur.away + 1 : cur.away));
+      wrap.appendChild(minus);
+      wrap.appendChild(val);
+      wrap.appendChild(plus);
+      return wrap;
+    };
+
+    if (home) row.appendChild(flagImg(home));
+    row.appendChild(stepper('home'));
+    row.appendChild(el('span', 'sim-colon', ':'));
+    row.appendChild(stepper('away'));
+    if (away) row.appendChild(flagImg(away));
+    box.appendChild(row);
+
+    const hint = el('div', 'sim-hint');
+    if (state.sim[m.id]) {
+      const reset = el('button', 'sim-reset', 'Simulation für dieses Spiel verwerfen');
+      reset.addEventListener('click', () => clearSimMatch(m.id));
+      hint.appendChild(reset);
+    } else {
+      hint.textContent = 'Tor vorwegnehmen → Rangliste, Live-Punkte und Bonus aktualisieren sich sofort.';
+    }
+    box.appendChild(hint);
+    return box;
+  }
+
+  /* Hinweisbanner, wenn eine Simulation läuft – mit globalem Reset. */
+  function simBanner() {
+    const b = el('div', 'banner sim-banner');
+    const txt = el('span', '');
+    txt.innerHTML = window.Icons.svg('info') +
+      ' <strong>Simulation aktiv</strong> – angezeigte Stände sind hypothetisch.';
+    b.appendChild(txt);
+    const reset = el('button', 'sim-reset', 'Alles zurücksetzen');
+    reset.addEventListener('click', resetSim);
+    b.appendChild(reset);
+    return b;
   }
 
   function offenLabel(m) {
@@ -360,6 +522,7 @@
   function renderTabelle() {
     const view = $('#view-tabelle');
     view.innerHTML = '';
+    if (hasSim()) view.appendChild(simBanner());
     const card = el('div', 'glass card');
 
     const head = el('div', 'card-head');
@@ -387,7 +550,16 @@
 
     for (const r of state.standings) {
       const tr = el('tr', r.rank <= 3 ? 'top' + r.rank : '');
-      tr.appendChild(el('td', 'rank', String(r.rank)));
+
+      // Platz + Veränderung durch laufende/simulierte Spiele (▲ rauf / ▼ runter)
+      const rankTd = el('td', 'rank');
+      rankTd.appendChild(el('span', 'rank-num', String(r.rank)));
+      if (r.rankDelta) {
+        const up = r.rankDelta > 0;
+        rankTd.appendChild(el('span', 'rank-delta ' + (up ? 'up' : 'down'),
+          (up ? '▲' : '▼') + Math.abs(r.rankDelta)));
+      }
+      tr.appendChild(rankTd);
 
       const nameTd = el('td');
       nameTd.appendChild(el('span', 'pname', r.name));
@@ -399,8 +571,13 @@
       tr.appendChild(el('td', 'num', String(r.tendency)));
       tr.appendChild(el('td', 'num', fmtPts(r.bonusPoints)));
 
-      const totalTd = el('td', 'num total-cell', fmtPts(r.total));
-      if (r.livePoints > 0) totalTd.appendChild(el('span', 'live-delta', '+' + fmtPts(r.livePoints)));
+      // Gesamtstand INKL. Live-/Sim-Punkten als Hauptzahl, darunter der
+      // Live-Anteil als vorläufiger Zuwachs.
+      const totalTd = el('td', 'num total-cell');
+      totalTd.appendChild(el('span', 'total-main', fmtPts(r.totalLive)));
+      if (r.livePoints > 0) {
+        totalTd.appendChild(el('span', 'live-delta', '+' + fmtPts(r.livePoints) + ' live'));
+      }
       tr.appendChild(totalTd);
 
       const barTd = el('td', 'bar-cell');
@@ -494,7 +671,7 @@
 
     const teamFor = (name) => teamByCanon.get(name) || canon(name).team;
 
-    function scorerRow(rank, name, goals, team, picks, showPts) {
+    function scorerRow(rank, name, goals, team, picks, showPts, simulatable) {
       const row = el('div', 'scorer-row');
       row.appendChild(el('span', 'rank', rank));
       if (team) row.appendChild(flagImg(team));
@@ -516,6 +693,21 @@
       const g = el('span', 'goals', String(goals) + ' ');
       g.appendChild(window.Icons.node('ball'));
       row.appendChild(g);
+
+      // Tor-Simulation: getipptem Torjäger ein Tor geben/nehmen und sofort
+      // Torschützenliste + Torjäger-Bonus + Rangliste neu rechnen.
+      if (simulatable) {
+        const sim = el('span', 'scorer-sim');
+        const minus = el('button', 'sim-step', '−');
+        minus.setAttribute('aria-label', 'Tor abziehen');
+        minus.addEventListener('click', () => bumpSimGoal(name, -1));
+        const plus = el('button', 'sim-step', '+');
+        plus.setAttribute('aria-label', 'Tor hinzufügen');
+        plus.addEventListener('click', () => bumpSimGoal(name, +1));
+        sim.appendChild(minus);
+        sim.appendChild(plus);
+        row.appendChild(sim);
+      }
       return row;
     }
 
@@ -537,7 +729,7 @@
     tipped.forEach((t) => {
       if (t.goals !== tPrev) { tRank += 1; tPrev = t.goals; }
       tippCard.appendChild(
-        scorerRow(String(tRank), t.name, t.goals, teamFor(t.name), t.names, true));
+        scorerRow(String(tRank), t.name, t.goals, teamFor(t.name), t.names, true, true));
     });
     view.appendChild(tippCard);
 
@@ -581,8 +773,10 @@
     head.appendChild(close);
     sheet.appendChild(head);
 
+    const move = r.rankDelta > 0 ? ' (▲' + r.rankDelta + ' durch Live)'
+      : r.rankDelta < 0 ? ' (▼' + Math.abs(r.rankDelta) + ' durch Live)' : '';
     sheet.appendChild(el('p', 'sheet-sub',
-      'Platz ' + r.rank + ' · ' + fmtPts(r.totalLive) + ' Punkte' +
+      'Platz ' + r.rank + move + ' · ' + fmtPts(r.totalLive) + ' Punkte' +
       (r.livePoints > 0 ? ' (davon ' + fmtPts(r.livePoints) + ' live)' : '') +
       ' · ' + r.exact + '× exakt, ' + r.tendency + '× Tendenz'));
 
@@ -595,8 +789,11 @@
     ts.innerHTML = 'Torjäger: <b></b>';
     ts.querySelector('b').textContent = p.bonus.topscorer
       ? window.Scoring.canonicalScorer(p.bonus.topscorer).name : '–';
-    if (r.bonusDetail.topscorer) {
-      ts.appendChild(document.createTextNode(' (+' + fmtPts(r.bonusDetail.topscorer) + ' P.)'));
+    const tsLive = r.bonusDetail.topscorerLive || 0;
+    const tsTotal = (r.bonusDetail.topscorer || 0) + tsLive;
+    if (tsTotal) {
+      ts.appendChild(document.createTextNode(' (+' + fmtPts(tsTotal) + ' P.' +
+        (tsLive ? ', davon ' + fmtPts(tsLive) + ' live' : '') + ')'));
     }
     pills.appendChild(ts);
     const em = el('span', 'bonus-pill');

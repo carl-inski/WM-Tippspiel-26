@@ -114,11 +114,26 @@ function computeStandings(data, results, extras = {}) {
     }
     const scorers = (extras.scorers && extras.scorers.length)
       ? extras.scorers : data.manualScorers;
+    // realScorers = Stand ohne Simulation; Differenz zählt als (vorläufige) Live-Punkte,
+    // damit simulierte Tore wie ein laufendes Spiel als Live-Zuwachs erscheinen.
+    const realScorers = (extras.realScorers && extras.realScorers.length)
+      ? extras.realScorers : scorers;
     if (p.bonus.topscorer && scorers && scorers.length) {
-      const hit = scorers.find((s) => samePerson(s.name, p.bonus.topscorer));
-      bonusDetail.topscorerGoals = hit ? hit.goals : 0;
-      bonusDetail.topscorer = round2((hit ? hit.goals : 0) * data.bonus.topscorer.pointsPerGoal);
-      bonusPts += bonusDetail.topscorer;
+      const ppg = data.bonus.topscorer.pointsPerGoal;
+      const goalsOf = (list) => {
+        const h = list.find((s) => samePerson(s.name, p.bonus.topscorer));
+        return h ? h.goals : 0;
+      };
+      const simGoals = goalsOf(scorers);
+      bonusDetail.topscorerGoals = simGoals;
+      const realBonus = round2(goalsOf(realScorers) * ppg);
+      bonusDetail.topscorer = realBonus;
+      bonusPts += realBonus;
+      const liveBonus = round2(simGoals * ppg - realBonus);
+      if (liveBonus) {
+        livePts += liveBonus;
+        bonusDetail.topscorerLive = liveBonus;
+      }
     }
     const shootouts = extras.shootoutCount != null
       ? extras.shootoutCount : data.bonus.shootouts.answer;
@@ -148,6 +163,19 @@ function computeStandings(data, results, extras = {}) {
     if (prev === null || r.totalLive < prev) { rank = i + 1; prev = r.totalLive; }
     r.rank = rank;
   });
+
+  // Basis-Rang OHNE Live-/Simulationspunkte (Stand "als wäre kein Spiel live").
+  // Differenz daraus = wie viele Plätze ein laufendes/simuliertes Spiel bewegt.
+  const byBase = rows.slice()
+    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'de'));
+  let brank = 0, bprev = null;
+  byBase.forEach((r, i) => {
+    if (bprev === null || r.total < bprev) { brank = i + 1; bprev = r.total; }
+    r.baseRank = brank;
+  });
+  // Positiv = nach oben geklettert (kleinere Platzzahl), negativ = abgerutscht.
+  rows.forEach((r) => { r.rankDelta = r.baseRank - r.rank; });
+
   return rows;
 }
 
