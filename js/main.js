@@ -557,12 +557,14 @@
 
       // Platz + Veränderung durch laufende/simulierte Spiele (▲ rauf / ▼ runter)
       const rankTd = el('td', 'rank');
-      rankTd.appendChild(el('span', 'rank-num', String(r.rank)));
+      const rankWrap = el('span', 'rank-wrap');
+      rankWrap.appendChild(el('span', 'rank-num', String(r.rank)));
       if (r.rankDelta) {
         const up = r.rankDelta > 0;
-        rankTd.appendChild(el('span', 'rank-delta ' + (up ? 'up' : 'down'),
+        rankWrap.appendChild(el('span', 'rank-delta ' + (up ? 'up' : 'down'),
           (up ? '▲' : '▼') + Math.abs(r.rankDelta)));
       }
+      rankTd.appendChild(rankWrap);
       tr.appendChild(rankTd);
 
       const nameTd = el('td');
