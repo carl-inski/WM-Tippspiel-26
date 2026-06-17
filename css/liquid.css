@@ -547,6 +547,7 @@ main { max-width: 1060px; margin: 0 auto; }
   border-bottom: 1px solid rgba(255,255,255,0.06);
   font-size: 0.93rem;
   font-variant-numeric: tabular-nums;
+  vertical-align: middle;
 }
 
 .table tbody tr { cursor: pointer; transition: background 0.18s var(--ease); }
@@ -576,8 +577,12 @@ main { max-width: 1060px; margin: 0 auto; }
   animation: blink 1.6s ease-in-out infinite;
 }
 
-/* Platzveränderung durch laufende/simulierte Spiele */
-.table .rank { display: flex; align-items: baseline; gap: 6px; }
+/* Platzveränderung durch laufende/simulierte Spiele.
+   Wichtig: das <td> bleibt eine echte Tabellenzelle (kein display:flex),
+   damit die Platzzahl auf gleicher Höhe wie der Name sitzt. Zahl + Delta
+   sitzen in einem inneren Inline-Flex-Wrapper auf gemeinsamer Grundlinie. */
+.table .rank { vertical-align: middle; }
+.rank-wrap { display: inline-flex; align-items: baseline; gap: 5px; white-space: nowrap; }
 .rank-num { font-weight: 800; }
 .rank-delta {
   font-size: 0.72rem;
