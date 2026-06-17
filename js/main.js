@@ -407,8 +407,8 @@
     card.appendChild(row);
 
     if (state.openMatch === m.id) {
-      card.appendChild(matchTips(m));
       card.appendChild(simControls(m));
+      card.appendChild(matchTips(m));
     }
     return card;
   }

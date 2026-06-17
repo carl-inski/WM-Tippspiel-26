@@ -574,7 +574,6 @@ main { max-width: 1060px; margin: 0 auto; }
   font-size: 0.72rem;
   font-weight: 800;
   color: var(--live);
-  animation: blink 1.6s ease-in-out infinite;
 }
 
 /* Platzveränderung durch laufende/simulierte Spiele.
@@ -920,6 +919,8 @@ footer {
   opacity: 0.75;
 }
 #footer-version { font-variant-numeric: tabular-nums; }
+#footer-meta a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+#footer-meta a:hover { color: var(--accent-warm); }
 
 /* ------- Responsive ------- */
 @media (max-width: 620px) {
