@@ -168,16 +168,61 @@
     render();
   }
 
+  // ---- Lokaler Zwischenspeicher (Fallback bei API-Störung) -----------------
+  // Jeder erfolgreiche API-Abruf wird im Browser gespeichert. Ist die API
+  // gestört, greift die Seite auf diesen letzten Stand zurück (statt nur auf
+  // die statische Excel, die sich nicht aktualisiert). Die API bleibt immer
+  // Primärquelle; gespeichert werden die rohen Antworten, die beim Laden gegen
+  // die aktuelle Excel neu zugeordnet werden.
+  const SNAP_KEY = 'wm26-live-snapshot-v1';
+
+  function saveSnapshot(apiMatches, apiScorers) {
+    try {
+      localStorage.setItem(SNAP_KEY, JSON.stringify({
+        ts: Date.now(),
+        apiMatches: apiMatches || [],
+        apiScorers: apiScorers || []
+      }));
+    } catch (e) { /* localStorage nicht verfügbar oder voll – ignorieren */ }
+  }
+
+  function loadSnapshot() {
+    try {
+      const snap = JSON.parse(localStorage.getItem(SNAP_KEY) || 'null');
+      return (snap && Array.isArray(snap.apiMatches)) ? snap : null;
+    } catch (e) { return null; }
+  }
+
+  /* Übernimmt den gespeicherten Stand, solange keine frischen API-Daten da
+     sind – z. B. direkt beim Laden während einer API-Störung. */
+  function hydrateSnapshot() {
+    if (state.apiState) return false;
+    const snap = loadSnapshot();
+    if (!snap) return false;
+    try {
+      state.apiState = window.LiveApi.mapLiveData(state.data, snap.apiMatches, snap.apiScorers || []);
+      state.stale = true;
+      state.lastUpdate = new Date(snap.ts);
+      return true;
+    } catch (e) { return false; }
+  }
+
   async function refreshLive() {
     if (!CFG.proxyUrl) return;
     try {
       const { apiMatches, apiScorers } = await window.LiveApi.fetchLive(CFG.proxyUrl);
       state.apiState = window.LiveApi.mapLiveData(state.data, apiMatches, apiScorers);
       state.apiError = null;
+      state.stale = false;
       state.lastUpdate = new Date();
+      saveSnapshot(apiMatches, apiScorers);
     } catch (err) {
       console.error('Live-Update fehlgeschlagen:', err);
       state.apiError = err.message;
+      // Fallback: letzten erfolgreichen Stand aus dem lokalen Cache halten/laden,
+      // statt auf die (veraltete) Excel zurückzufallen. API bleibt Primärquelle.
+      if (!state.apiState) hydrateSnapshot();
+      else state.stale = true;
     }
     recompute();
     render();
@@ -249,9 +294,16 @@
       txt.textContent = 'Offline-Modus';
       return;
     }
+    const timeStr = (d) => d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
     if (state.apiError) {
-      dot.className = 'status-dot offline';
-      txt.textContent = 'Live-Daten gestört';
+      // Bei Störung den gespeicherten Zwischenstand ausweisen, sonst „gestört“.
+      if (state.apiState && state.lastUpdate) {
+        dot.className = 'status-dot stale';
+        txt.textContent = 'Stand ' + timeStr(state.lastUpdate) + ' · gespeichert';
+      } else {
+        dot.className = 'status-dot offline';
+        txt.textContent = 'Live-Daten gestört';
+      }
       return;
     }
     if (anyLive()) {
@@ -259,9 +311,7 @@
       txt.textContent = 'LIVE';
     } else {
       dot.className = 'status-dot online';
-      txt.textContent = state.lastUpdate
-        ? 'Stand ' + state.lastUpdate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-        : 'verbunden';
+      txt.textContent = state.lastUpdate ? 'Stand ' + timeStr(state.lastUpdate) : 'verbunden';
     }
   }
 
@@ -978,6 +1028,7 @@
     initTabs();
     try {
       await loadStatic();
+      hydrateSnapshot(); // letzten gespeicherten Live-Stand sofort zeigen
       recompute();
       render();
       // Beim Laden direkt am aktuellen Spieltag landen

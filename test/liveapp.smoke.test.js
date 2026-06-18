@@ -184,3 +184,35 @@ test('Live-Modus: API-Daten fließen in Anzeige und Wertung', async () => {
 
   dom.window.close(); // Timer freigeben, sonst hängt der Testprozess
 });
+
+test('Cache-Fallback: gespeicherter Stand bleibt bei API-Störung erhalten', async () => {
+  const data = JSON.parse(fs.readFileSync(path.join(root, 'data', 'tippspiel.json'), 'utf-8'));
+  const live = data.matches.find((m) => m.home === 'Kanada');
+  const apiPayloads = {
+    matches: { matches: [{
+      status: 'IN_PLAY', stage: 'GROUP_STAGE',
+      utcDate: new Date(Date.parse(live.kickoff)).toISOString(),
+      homeTeam: { name: 'Canada' }, awayTeam: { name: 'Bosnia and Herzegovina' },
+      score: { duration: 'REGULAR', fullTime: { home: 2, away: 0 } }
+    }] },
+    scorers: { scorers: [{ player: { name: 'Harry Kane' }, team: { name: 'England' }, goals: 2 }] }
+  };
+  const dom = makeApp({ proxyUrl: 'https://proxy.example', apiPayloads });
+  const doc = dom.window.document;
+
+  await waitFor(() => doc.getElementById('status-text').textContent === 'LIVE');
+  assert.ok(doc.querySelectorAll('.live-delta').length > 0, 'Live-Punkte zunächst da');
+  assert.ok(dom.window.localStorage.getItem('wm26-live-snapshot-v1'), 'Snapshot gespeichert');
+
+  // API fällt aus -> erneuter Abruf (Klick auf Status) schlägt fehl
+  dom.window.fetch = async () => { throw new Error('API down'); };
+  doc.querySelector('.topbar-status').click();
+
+  await waitFor(() => doc.getElementById('status-text').textContent.includes('gespeichert'));
+  assert.ok(doc.querySelector('.status-dot.stale'), 'Status-Punkt zeigt gespeicherten Stand');
+  // Daten bleiben erhalten statt auf die Excel zurückzufallen
+  assert.ok(doc.querySelectorAll('.live-delta').length > 0, 'Live-Punkte bleiben nach Störung');
+  assert.ok(doc.querySelector('.mscore.live'), 'Live-Spielstand bleibt sichtbar');
+
+  dom.window.close();
+});
