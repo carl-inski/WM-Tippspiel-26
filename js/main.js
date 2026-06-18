@@ -1028,7 +1028,9 @@
     initTabs();
     try {
       await loadStatic();
-      hydrateSnapshot(); // letzten gespeicherten Live-Stand sofort zeigen
+      // Bewusst KEIN vorzeitiges Laden des Caches: Live-Daten sind Primärquelle
+      // und werden zuerst abgerufen (siehe refreshLive). Der lokale Schnappschuss
+      // greift ausschließlich, wenn der Live-Abruf fehlschlägt.
       recompute();
       render();
       // Beim Laden direkt am aktuellen Spieltag landen
