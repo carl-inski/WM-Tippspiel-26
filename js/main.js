@@ -49,12 +49,15 @@
   // ------------------------------------------------------------------ Daten --
 
   async function loadStatic() {
+    // Cache-Buster an die Daten-Fetches, damit aktualisierte Excel-Importe
+    // (neue Ergebnisse/Tipps) zuverlässig beim Nutzer ankommen.
+    const cb = '?v=' + (CFG.version || Date.now());
     const [data, manual] = await Promise.all([
-      fetch('data/tippspiel.json').then((r) => {
+      fetch('data/tippspiel.json' + cb).then((r) => {
         if (!r.ok) throw new Error('data/tippspiel.json nicht erreichbar (HTTP ' + r.status + ')');
         return r.json();
       }),
-      fetch('data/manual-results.json').then((r) => r.json()).catch(() => ({ results: {} }))
+      fetch('data/manual-results.json' + cb).then((r) => r.json()).catch(() => ({ results: {} }))
     ]);
     state.data = data;
     state.manual = manual.results || {};
