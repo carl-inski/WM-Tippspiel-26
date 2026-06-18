@@ -10,7 +10,7 @@ const { JSDOM } = require('jsdom');
 
 const root = path.join(__dirname, '..');
 
-function makeApp({ proxyUrl = '', apiPayloads = null } = {}) {
+function makeApp({ proxyUrl = '', apiPayloads = null, seedSnapshot = null } = {}) {
   // <script src>-Tags entfernen – die Dateien werden unten als echte
   // Inline-Skripte eingefügt (geteilter globaler Scope wie im Browser,
   // deckt z. B. doppelte Top-Level-const-Deklarationen auf)
@@ -47,6 +47,11 @@ function makeApp({ proxyUrl = '', apiPayloads = null } = {}) {
   }
   window.APP_CONFIG.proxyUrl = proxyUrl;
   window.APP_CONFIG.pollSeconds = 3600;
+  // ggf. einen (alten) lokalen Schnappschuss vorab ablegen
+  if (seedSnapshot) {
+    try { window.localStorage.setItem('wm26-live-snapshot-v1', JSON.stringify(seedSnapshot)); }
+    catch (e) { /* egal */ }
+  }
   addScript('js/main.js');
   return dom;
 }
@@ -183,6 +188,40 @@ test('Live-Modus: API-Daten fließen in Anzeige und Wertung', async () => {
   assert.ok(scorerText.includes('+6'), 'Torjäger-Punkte angezeigt: ' + scorerText.slice(0, 200));
 
   dom.window.close(); // Timer freigeben, sonst hängt der Testprozess
+});
+
+test('Live-first: frische API-Daten gewinnen über einen alten Cache', async () => {
+  const data = JSON.parse(fs.readFileSync(path.join(root, 'data', 'tippspiel.json'), 'utf-8'));
+  const live = data.matches.find((m) => m.home === 'Kanada');
+  const utc = new Date(Date.parse(live.kickoff)).toISOString();
+  // alter Snapshot: gleiches Spiel mit veraltetem Stand 5:5
+  const seedSnapshot = {
+    ts: Date.now() - 3600 * 1000,
+    apiMatches: [{
+      status: 'IN_PLAY', stage: 'GROUP_STAGE', utcDate: utc,
+      homeTeam: { name: 'Canada' }, awayTeam: { name: 'Bosnia and Herzegovina' },
+      score: { duration: 'REGULAR', fullTime: { home: 5, away: 5 } }
+    }],
+    apiScorers: []
+  };
+  // frische API liefert 2:0
+  const apiPayloads = {
+    matches: { matches: [{
+      status: 'IN_PLAY', stage: 'GROUP_STAGE', utcDate: utc,
+      homeTeam: { name: 'Canada' }, awayTeam: { name: 'Bosnia and Herzegovina' },
+      score: { duration: 'REGULAR', fullTime: { home: 2, away: 0 } }
+    }] },
+    scorers: { scorers: [] }
+  };
+  const dom = makeApp({ proxyUrl: 'https://proxy.example', apiPayloads, seedSnapshot });
+  const doc = dom.window.document;
+
+  await waitFor(() => doc.getElementById('status-text').textContent === 'LIVE');
+  const liveScore = doc.querySelector('.mscore.live').textContent;
+  assert.ok(liveScore.includes('2 : 0'), 'frischer Live-Stand 2:0 statt Cache 5:5: ' + liveScore);
+  assert.ok(!liveScore.includes('5 : 5'), 'alter Cache-Stand darf nicht erscheinen');
+
+  dom.window.close();
 });
 
 test('Cache-Fallback: gespeicherter Stand bleibt bei API-Störung erhalten', async () => {
