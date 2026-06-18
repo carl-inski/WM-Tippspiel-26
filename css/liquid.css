@@ -217,6 +217,7 @@ body {
 }
 
 .status-dot.offline { background: #8a93a6; }
+.status-dot.stale { background: var(--accent-warm); }
 
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(110, 231, 160, 0.45); }
