@@ -11,8 +11,6 @@ name = "wm-tippspiel-proxy"
 main = "cloudflare-worker.js"
 compatibility_date = "2026-01-01"
 
-# Fallback-Zwischenspeicher: letzter guter API-Stand, wird bei Upstream-
-# Störung ausgeliefert. Namespace-ID via `npx wrangler kv namespace list`.
-[[kv_namespaces]]
-binding = "LIVE_CACHE"
-id = "74a02606992445459b2c5451b272f6cb"
+# Kein Workers-KV mehr: der Fallback-Zwischenspeicher läuft client-seitig
+# (localStorage in der Web-App). Das KV-Free-Limit (1.000 Schreibvorgänge/Tag)
+# wurde durch das Polling sonst sofort gesprengt.
