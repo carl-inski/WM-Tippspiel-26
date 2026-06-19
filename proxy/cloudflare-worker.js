@@ -11,19 +11,18 @@
  *   2) Nur wenn gerade ein Spiel im Anstoß-Fenster ist (spart Highlightly-
  *      Kontingent von 100/Tag), Highlightly für heute laden (Edge-Cache 120s).
  *   3) Laufende/eben beendete Spiele per Anstoßzeit + Teamname zuordnen und den
- *      Live-Stand in die football-data-Antwort einblenden (status IN_PLAY/
- *      FINISHED, score.fullTime). Schlägt Highlightly fehl/ist das Kontingent
- *      erschöpft -> unverändert football-data ausliefern (nie schlechter).
+ *      Live-Stand einblenden (status IN_PLAY/FINISHED, score.fullTime). Schlägt
+ *      Highlightly fehl/ist das Kontingent erschöpft -> unverändert
+ *      football-data ausliefern (nie schlechter).
  * /scorers: football-data (wie bisher).
  *
- * Robustheit: jede erfolgreiche /matches- und /scorers-Antwort wird in KV
- * (LIVE_CACHE) gesichert; ist football-data gestört, liefert der Worker den
- * letzten guten Stand (x-data-source: stale).
+ * Fallback bei football-data-Störung läuft CLIENT-seitig (localStorage-
+ * Schnappschuss in der Web-App) – bewusst KEIN Workers-KV, da dessen Free-
+ * Limit (1.000 Schreibvorgänge/Tag) bei Polling sofort gesprengt würde.
  *
  * Secrets (Settings -> Variables and Secrets):
  *   FOOTBALL_DATA_API_KEY   football-data.org API-Key
  *   HIGHLIGHTLY_API_KEY     Highlightly API-Key (für Live-Stände)
- * Binding: KV Namespace LIVE_CACHE (siehe wrangler.toml).
  */
 
 const FD = 'https://api.football-data.org';
@@ -148,9 +147,8 @@ export default {
       return jsonResponse(
         JSON.stringify({ error: 'Unbekannter Pfad. Erlaubt: /matches, /scorers' }), 404);
     }
-    const cacheKey = 'snap:' + route;
 
-    // 1) football-data (Primärquelle)
+    // football-data (Primärquelle)
     let upstream = null, body = null, ok = false;
     try {
       upstream = await fetch(FD + target, {
@@ -161,45 +159,28 @@ export default {
       ok = upstream.ok;
     } catch (e) { ok = false; }
 
-    if (ok) {
-      let liveCount = 0;
-      // 2+3) Live-Overlay nur für /matches, best effort
-      if (route === '/matches') {
-        try {
-          const fd = JSON.parse(body);
-          liveCount = await overlayLive(fd, env);
-          if (liveCount) body = JSON.stringify(fd);
-        } catch (e) { /* Overlay-Fehler ignorieren -> football-data pur */ }
-      }
-      if (env.LIVE_CACHE) {
-        try { await env.LIVE_CACHE.put(cacheKey, body, { metadata: { ts: Date.now() } }); }
-        catch (e) { /* ignore */ }
-      }
-      return jsonResponse(body, 200, {
-        'cache-control': 'public, max-age=' + (route === '/matches' ? 15 : 20),
-        'x-data-source': 'live',
-        'x-live-overlay': String(liveCount)
-      });
+    if (!ok) {
+      // Kein Server-Cache mehr: die Web-App fällt client-seitig auf ihren
+      // letzten lokalen Schnappschuss bzw. die Excel zurück.
+      return jsonResponse(
+        body || JSON.stringify({ error: 'Upstream nicht erreichbar' }),
+        upstream ? upstream.status : 502,
+        { 'x-data-source': 'error' });
     }
 
-    // 4) football-data gestört -> letzter guter Stand aus KV
-    if (env.LIVE_CACHE) {
+    let liveCount = 0;
+    if (route === '/matches') {
       try {
-        const cached = await env.LIVE_CACHE.getWithMetadata(cacheKey);
-        if (cached && cached.value) {
-          const ts = (cached.metadata && cached.metadata.ts) || 0;
-          return jsonResponse(cached.value, 200, {
-            'cache-control': 'public, max-age=10',
-            'x-data-source': 'stale',
-            'x-snapshot-age': String(Date.now() - ts)
-          });
-        }
-      } catch (e) { /* fällt unten durch */ }
+        const fd = JSON.parse(body);
+        liveCount = await overlayLive(fd, env);
+        if (liveCount) body = JSON.stringify(fd);
+      } catch (e) { /* Overlay-Fehler ignorieren -> football-data pur */ }
     }
 
-    return jsonResponse(
-      body || JSON.stringify({ error: 'Upstream nicht erreichbar' }),
-      upstream ? upstream.status : 502,
-      { 'x-data-source': 'error' });
+    return jsonResponse(body, 200, {
+      'cache-control': 'public, max-age=' + (route === '/matches' ? 15 : 20),
+      'x-data-source': 'live',
+      'x-live-overlay': String(liveCount)
+    });
   }
 };
