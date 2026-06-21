@@ -52,21 +52,26 @@
     // Cache-Buster an die Daten-Fetches, damit aktualisierte Excel-Importe
     // (neue Ergebnisse/Tipps) zuverlässig beim Nutzer ankommen.
     const cb = '?v=' + (CFG.version || Date.now());
-    const [data, manual, scorerOv, resultOv] = await Promise.all([
+    const [data, manual, scorerOv, resultOv, scorersFile] = await Promise.all([
       fetch('data/tippspiel.json' + cb).then((r) => {
         if (!r.ok) throw new Error('data/tippspiel.json nicht erreichbar (HTTP ' + r.status + ')');
         return r.json();
       }),
       fetch('data/manual-results.json' + cb).then((r) => r.json()).catch(() => ({ results: {} })),
       fetch('data/scorer-overrides.json' + cb).then((r) => r.json()).catch(() => ({ overrides: {} })),
-      fetch('data/result-overrides.json' + cb).then((r) => r.json()).catch(() => ({ results: {} }))
+      fetch('data/result-overrides.json' + cb).then((r) => r.json()).catch(() => ({ results: {} })),
+      // zeitbasierter Cache-Buster (5-Min-Granularität): wird per GitHub Action
+      // laufend aktualisiert und soll ohne App-Versionssprung ankommen
+      fetch('data/scorers.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ scorers: [] }))
     ]);
     state.data = data;
     state.manual = manual.results || {};
-    // Korrekturen für Torschützen, falls die Quelle (football-data) hängt.
-    // Wirken als Untergrenze (Floor) – echte höhere Stände bleiben unangetastet.
+    // Akkurate Torschützenliste aus Highlightly-Events (football-datas Aggregat
+    // ist lückenhaft). Wird – wenn vorhanden – als Primärquelle genutzt.
+    state.hlScorers = (scorersFile && scorersFile.scorers) || [];
+    // Korrekturen für Torschützen (Floor) – nie unter den echten Stand.
     state.scorerOverrides = (scorerOv && scorerOv.overrides) || {};
-    state.data.manualScorers = applyScorerOverrides(state.data.manualScorers);
+    state.data.manualScorers = bestScorers(null, state.data.manualScorers);
     // Ergebnis-Korrekturen: gewinnen über BEIDE APIs (football-data + Highlightly),
     // falls eine Quelle ein falsches Endergebnis liefert.
     state.resultOverrides = {};
@@ -75,6 +80,15 @@
         state.resultOverrides[id] = { home: sc.home, away: sc.away, finished: true };
       }
     }
+  }
+
+  /* Wählt die beste Torschützenquelle: Highlightly-Events (akkurat) vor der
+     football-data-Liste vor der Excel – und legt die Korrekturen (Floor) drauf. */
+  function bestScorers(apiScorers, fallbackManual) {
+    const src = (state.hlScorers && state.hlScorers.length) ? state.hlScorers
+      : (apiScorers && apiScorers.length) ? apiScorers
+        : (fallbackManual || state.data.manualScorers || []);
+    return applyScorerOverrides(src);
   }
 
   /* Hebt einzelne Torschützen auf einen Mindest-Torstand an (Quelle hängt
@@ -240,7 +254,7 @@
     try {
       state.apiState = window.LiveApi.mapLiveData(state.data, snap.apiMatches, snap.apiScorers || []);
       if (state.apiState.extras) {
-        state.apiState.extras.scorers = applyScorerOverrides(state.apiState.extras.scorers);
+        state.apiState.extras.scorers = bestScorers(state.apiState.extras.scorers);
       }
       state.stale = true;
       state.lastUpdate = new Date(snap.ts);
@@ -253,9 +267,9 @@
     try {
       const { apiMatches, apiScorers } = await window.LiveApi.fetchLive(CFG.proxyUrl);
       state.apiState = window.LiveApi.mapLiveData(state.data, apiMatches, apiScorers);
-      // Quell-Korrekturen anwenden (z. B. hängender Torschützenstand)
+      // Akkurate Torschützen (Highlightly-Events) bevorzugen + Korrekturen
       if (state.apiState.extras) {
-        state.apiState.extras.scorers = applyScorerOverrides(state.apiState.extras.scorers);
+        state.apiState.extras.scorers = bestScorers(state.apiState.extras.scorers);
       }
       state.apiError = null;
       state.stale = false;
@@ -892,7 +906,7 @@
       allCard.appendChild(el('p', 'empty-hint', 'Noch keine Tore bei der WM.'));
     }
     let aRank = 0, aPrev = NaN;
-    merged.slice(0, 40).forEach((s) => {
+    merged.forEach((s) => {
       if (s.goals !== aPrev) { aRank += 1; aPrev = s.goals; }
       allCard.appendChild(
         scorerRow(String(aRank), s.name, teamFor(s.name), picksByCanon.get(s.name), false, false));

@@ -29,6 +29,7 @@ function makeApp({ proxyUrl = '', apiPayloads = null, seedSnapshot = null } = {}
     if (u.includes('manual-results.json')) return file('data/manual-results.json');
     if (u.includes('scorer-overrides.json')) return { ok: true, json: async () => ({ overrides: {} }) };
     if (u.includes('result-overrides.json')) return { ok: true, json: async () => ({ results: {} }) };
+    if (u.includes('scorers.json')) return { ok: true, json: async () => ({ scorers: [] }) };
     if (apiPayloads && u.endsWith('/matches')) {
       return { ok: true, json: async () => apiPayloads.matches };
     }

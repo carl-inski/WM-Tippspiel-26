@@ -1,0 +1,44 @@
+name: Refresh scorers
+
+# Aktualisiert data/scorers.json aus Highlightly-Match-Events (akkurate
+# Torschützen). Inkrementell: holt nur neu beendete Spiele -> wenige Abrufe.
+# Voraussetzung: Repo-Secret HIGHLIGHTLY_API_KEY (Settings -> Secrets and
+# variables -> Actions).
+
+on:
+  schedule:
+    - cron: '0 5 * * *'    # nach Quota-Reset (00:00 UTC) und Vortags-Spielen
+    - cron: '0 22 * * *'   # abends, nach den meisten Spielen
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-scorers
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Torschützen aus Highlightly-Events bauen
+        env:
+          HIGHLIGHTLY_API_KEY: ${{ secrets.HIGHLIGHTLY_API_KEY }}
+          BUILD_BUDGET: '20'
+        run: node tools/build-scorers.js
+      - name: Bei Änderung committen
+        run: |
+          if ! git diff --quiet -- data/scorers.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/scorers.json
+            git commit -m "data: refresh scorers from Highlightly events"
+            git push
+          else
+            echo "Keine Änderung an data/scorers.json."
+          fi
