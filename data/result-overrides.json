@@ -1,0 +1,6 @@
+{
+  "_comment": "Ergebnis-Korrekturen, falls eine Datenquelle (football-data oder Highlightly) ein falsches Endergebnis liefert. Schlüssel = Spiel-ID aus data/tippspiel.json, Wert = korrektes Ergebnis. Gewinnt über beide APIs. Eintrag entfernen, sobald die Quelle korrekt ist (oder stehen lassen).",
+  "results": {
+    "m037": { "home": 4, "away": 0 }
+  }
+}

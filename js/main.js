@@ -52,13 +52,14 @@
     // Cache-Buster an die Daten-Fetches, damit aktualisierte Excel-Importe
     // (neue Ergebnisse/Tipps) zuverlässig beim Nutzer ankommen.
     const cb = '?v=' + (CFG.version || Date.now());
-    const [data, manual, scorerOv] = await Promise.all([
+    const [data, manual, scorerOv, resultOv] = await Promise.all([
       fetch('data/tippspiel.json' + cb).then((r) => {
         if (!r.ok) throw new Error('data/tippspiel.json nicht erreichbar (HTTP ' + r.status + ')');
         return r.json();
       }),
       fetch('data/manual-results.json' + cb).then((r) => r.json()).catch(() => ({ results: {} })),
-      fetch('data/scorer-overrides.json' + cb).then((r) => r.json()).catch(() => ({ overrides: {} }))
+      fetch('data/scorer-overrides.json' + cb).then((r) => r.json()).catch(() => ({ overrides: {} })),
+      fetch('data/result-overrides.json' + cb).then((r) => r.json()).catch(() => ({ results: {} }))
     ]);
     state.data = data;
     state.manual = manual.results || {};
@@ -66,6 +67,14 @@
     // Wirken als Untergrenze (Floor) – echte höhere Stände bleiben unangetastet.
     state.scorerOverrides = (scorerOv && scorerOv.overrides) || {};
     state.data.manualScorers = applyScorerOverrides(state.data.manualScorers);
+    // Ergebnis-Korrekturen: gewinnen über BEIDE APIs (football-data + Highlightly),
+    // falls eine Quelle ein falsches Endergebnis liefert.
+    state.resultOverrides = {};
+    for (const [id, sc] of Object.entries((resultOv && resultOv.results) || {})) {
+      if (sc && sc.home != null && sc.away != null) {
+        state.resultOverrides[id] = { home: sc.home, away: sc.away, finished: true };
+      }
+    }
   }
 
   /* Hebt einzelne Torschützen auf einen Mindest-Torstand an (Quelle hängt
@@ -100,9 +109,11 @@
 
   function recompute() {
     const apiResults = state.apiState ? state.apiState.results : null;
-    // Simulierte Stände gewinnen über alles und gelten als "live".
+    // Reihenfolge = Priorität (später gewinnt): Excel < manuell < API <
+    // Ergebnis-Korrektur < Simulation. Die Korrektur überschreibt falsche
+    // API-Endergebnisse; die Simulation bleibt als Vorschau ganz oben.
     state.results = window.Scoring.mergeResults(
-      excelResults(), state.manual, apiResults, simResults());
+      excelResults(), state.manual, apiResults, state.resultOverrides, simResults());
     state.standings = window.Scoring.computeStandings(
       state.data, state.results, simulatedExtras());
     state.families = window.Scoring.computeFamilyStandings(state.data, state.standings);
