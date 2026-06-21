@@ -1,14 +1,14 @@
 name: Refresh scorers
 
-# Aktualisiert data/scorers.json aus Highlightly-Match-Events (akkurate
-# Torschützen). Inkrementell: holt nur neu beendete Spiele -> wenige Abrufe.
-# Voraussetzung: Repo-Secret HIGHLIGHTLY_API_KEY (Settings -> Secrets and
-# variables -> Actions).
+# Aktualisiert data/scorers.json (Torschützenliste der Web-App).
+#  - Führende: fussballdaten.de (server-seitig gerendert) – quotafrei, alle 3h.
+#  - 1-Tor-Tail: Highlightly-Events – 1x/Tag, nur wenn Secret HIGHLIGHTLY_API_KEY
+#    gesetzt ist (optional; ohne Secret bleiben die Führenden trotzdem aktuell).
 
 on:
   schedule:
-    - cron: '0 5 * * *'    # nach Quota-Reset (00:00 UTC) und Vortags-Spielen
-    - cron: '0 22 * * *'   # abends, nach den meisten Spielen
+    - cron: '5 */3 * * *'   # fussballdaten-Führende (oft, kostenlos)
+    - cron: '15 5 * * *'    # Highlightly-Tail (1x/Tag)
   workflow_dispatch: {}
 
 permissions:
@@ -26,19 +26,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Torschützen aus Highlightly-Events bauen
+
+      # 1-Tor-Tail aus Highlightly auffrischen (nur 1x/Tag bzw. manuell)
+      - name: Highlightly-Tail aktualisieren
+        if: github.event.schedule == '15 5 * * *' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         env:
           HIGHLIGHTLY_API_KEY: ${{ secrets.HIGHLIGHTLY_API_KEY }}
-          BUILD_BUDGET: '20'
+          BUILD_BUDGET: '25'
+        run: node tools/build-scorers-events.js
+
+      # Führende von fussballdaten + Tail zusammenführen (immer)
+      - name: Torschützenliste bauen
         run: node tools/build-scorers.js
+
       - name: Bei Änderung committen
         run: |
-          if ! git diff --quiet -- data/scorers.json; then
+          if ! git diff --quiet -- data/scorers.json data/scorers-events.json; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add data/scorers.json
-            git commit -m "data: refresh scorers from Highlightly events"
+            git add data/scorers.json data/scorers-events.json
+            git commit -m "data: refresh scorers (fussballdaten + events)"
             git push
           else
-            echo "Keine Änderung an data/scorers.json."
+            echo "Keine Änderung."
           fi

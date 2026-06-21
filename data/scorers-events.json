@@ -1,0 +1,922 @@
+{
+ "generatedAt": "2026-06-21T19:10:28.801Z",
+ "source": "highlightly-events",
+ "count": 72,
+ "scorers": [
+  {
+   "name": "J. David",
+   "teamDE": "Kanada",
+   "goals": 3
+  },
+  {
+   "name": "L. Messi",
+   "teamDE": "Argentinien",
+   "goals": 3
+  },
+  {
+   "name": "C. Larin",
+   "teamDE": "Kanada",
+   "goals": 2
+  },
+  {
+   "name": "E. Haaland",
+   "teamDE": "Norwegen",
+   "goals": 2
+  },
+  {
+   "name": "E. Just",
+   "teamDE": "Neuseeland",
+   "goals": 2
+  },
+  {
+   "name": "F. Balogun",
+   "teamDE": "USA",
+   "goals": 2
+  },
+  {
+   "name": "H. Kane",
+   "teamDE": "England",
+   "goals": 2
+  },
+  {
+   "name": "I. Saibari",
+   "teamDE": "Marokko",
+   "goals": 2
+  },
+  {
+   "name": "J. Manzambi",
+   "teamDE": "Schweiz",
+   "goals": 2
+  },
+  {
+   "name": "K. Havertz",
+   "teamDE": "Deutschland",
+   "goals": 2
+  },
+  {
+   "name": "K. Mbappe",
+   "teamDE": "Frankreich",
+   "goals": 2
+  },
+  {
+   "name": "Y. Ayari",
+   "teamDE": "Schweden",
+   "goals": 2
+  },
+  {
+   "name": "A. Al Amri",
+   "teamDE": "Saudi-Arabien",
+   "goals": 1
+  },
+  {
+   "name": "A. Diallo",
+   "teamDE": "Elfenbeinküste",
+   "goals": 1
+  },
+  {
+   "name": "A. Fayzullaev",
+   "teamDE": "Usbekistan",
+   "goals": 1
+  },
+  {
+   "name": "A. Freeman",
+   "teamDE": "USA",
+   "goals": 1
+  },
+  {
+   "name": "A. Hussein",
+   "teamDE": "Irak",
+   "goals": 1
+  },
+  {
+   "name": "A. Isak",
+   "teamDE": "Schweden",
+   "goals": 1
+  },
+  {
+   "name": "A. Olwan",
+   "teamDE": "Jordanien",
+   "goals": 1
+  },
+  {
+   "name": "B. Barcola",
+   "teamDE": "Frankreich",
+   "goals": 1
+  },
+  {
+   "name": "B. Embolo",
+   "teamDE": "Schweiz",
+   "goals": 1
+  },
+  {
+   "name": "B. Khoukhi",
+   "teamDE": "Katar",
+   "goals": 1
+  },
+  {
+   "name": "C. Metcalfe",
+   "teamDE": "Australien",
+   "goals": 1
+  },
+  {
+   "name": "C. Summerville",
+   "teamDE": "Niederlande",
+   "goals": 1
+  },
+  {
+   "name": "C. Yirenkyi",
+   "teamDE": "Ghana",
+   "goals": 1
+  },
+  {
+   "name": "D. Kamada",
+   "teamDE": "Japan",
+   "goals": 1
+  },
+  {
+   "name": "D. Munoz",
+   "teamDE": "Kolumbien",
+   "goals": 1
+  },
+  {
+   "name": "D. Undav",
+   "teamDE": "Deutschland",
+   "goals": 1
+  },
+  {
+   "name": "E. Ashour",
+   "teamDE": "Ägypten",
+   "goals": 1
+  },
+  {
+   "name": "E. Mahmic",
+   "teamDE": "Bosnien-Herzeg.",
+   "goals": 1
+  },
+  {
+   "name": "F. Nmecha",
+   "teamDE": "Deutschland",
+   "goals": 1
+  },
+  {
+   "name": "G. Reyna",
+   "teamDE": "USA",
+   "goals": 1
+  },
+  {
+   "name": "G. Xhaka",
+   "teamDE": "Schweiz",
+   "goals": 1
+  },
+  {
+   "name": "Hwang In-Beom",
+   "teamDE": "Südkorea",
+   "goals": 1
+  },
+  {
+   "name": "I. Mbaye",
+   "teamDE": "Senegal",
+   "goals": 1
+  },
+  {
+   "name": "J. Bellingham",
+   "teamDE": "England",
+   "goals": 1
+  },
+  {
+   "name": "J. Campaz",
+   "teamDE": "Kolumbien",
+   "goals": 1
+  },
+  {
+   "name": "J. Lukic",
+   "teamDE": "Bosnien-Herzeg.",
+   "goals": 1
+  },
+  {
+   "name": "J. McGinn",
+   "teamDE": "Schottland",
+   "goals": 1
+  },
+  {
+   "name": "J. Musiala",
+   "teamDE": "Deutschland",
+   "goals": 1
+  },
+  {
+   "name": "J. Neves",
+   "teamDE": "Portugal",
+   "goals": 1
+  },
+  {
+   "name": "J. Quinones",
+   "teamDE": "Mexiko",
+   "goals": 1
+  },
+  {
+   "name": "K. Nakamura",
+   "teamDE": "Japan",
+   "goals": 1
+  },
+  {
+   "name": "L. Comenencia",
+   "teamDE": "Curacao",
+   "goals": 1
+  },
+  {
+   "name": "L. Diaz",
+   "teamDE": "Kolumbien",
+   "goals": 1
+  },
+  {
+   "name": "L. Krejci",
+   "teamDE": "Tschechien",
+   "goals": 1
+  },
+  {
+   "name": "L. Ostigard",
+   "teamDE": "Norwegen",
+   "goals": 1
+  },
+  {
+   "name": "L. Romo",
+   "teamDE": "Mexiko",
+   "goals": 1
+  },
+  {
+   "name": "M. Araujo",
+   "teamDE": "Uruguay",
+   "goals": 1
+  },
+  {
+   "name": "M. Arnautovic",
+   "teamDE": "Österreich",
+   "goals": 1
+  },
+  {
+   "name": "M. Baturina",
+   "teamDE": "Kroatien",
+   "goals": 1
+  },
+  {
+   "name": "M. Mohebi",
+   "teamDE": "IR Iran",
+   "goals": 1
+  },
+  {
+   "name": "M. Rashford",
+   "teamDE": "England",
+   "goals": 1
+  },
+  {
+   "name": "M. Sadilek",
+   "teamDE": "Tschechien",
+   "goals": 1
+  },
+  {
+   "name": "M. Svanberg",
+   "teamDE": "Schweden",
+   "goals": 1
+  },
+  {
+   "name": "Mauricio",
+   "teamDE": "Paraguay",
+   "goals": 1
+  },
+  {
+   "name": "N. Brown",
+   "teamDE": "Deutschland",
+   "goals": 1
+  },
+  {
+   "name": "N. Irankunda",
+   "teamDE": "Australien",
+   "goals": 1
+  },
+  {
+   "name": "N. Saliba",
+   "teamDE": "Kanada",
+   "goals": 1
+  },
+  {
+   "name": "N. Schlotterbeck",
+   "teamDE": "Deutschland",
+   "goals": 1
+  },
+  {
+   "name": "O. Rekik",
+   "teamDE": "Tunesien",
+   "goals": 1
+  },
+  {
+   "name": "Oh Hyeon-Gyu",
+   "teamDE": "Südkorea",
+   "goals": 1
+  },
+  {
+   "name": "P. Musa",
+   "teamDE": "Kroatien",
+   "goals": 1
+  },
+  {
+   "name": "R. Jimenez",
+   "teamDE": "Mexiko",
+   "goals": 1
+  },
+  {
+   "name": "R. Rezaeian",
+   "teamDE": "IR Iran",
+   "goals": 1
+  },
+  {
+   "name": "R. Schmid",
+   "teamDE": "Österreich",
+   "goals": 1
+  },
+  {
+   "name": "R. Vargas",
+   "teamDE": "Schweiz",
+   "goals": 1
+  },
+  {
+   "name": "T. Mokoena",
+   "teamDE": "Südafrika",
+   "goals": 1
+  },
+  {
+   "name": "V. Gyokeres",
+   "teamDE": "Schweden",
+   "goals": 1
+  },
+  {
+   "name": "V. van Dijk",
+   "teamDE": "Niederlande",
+   "goals": 1
+  },
+  {
+   "name": "Vinicius Junior",
+   "teamDE": "Brasilien",
+   "goals": 1
+  },
+  {
+   "name": "Y. Wissa",
+   "teamDE": "Kongo",
+   "goals": 1
+  }
+ ],
+ "_matches": {
+  "1267453803": {
+   "date": "2026-06-11T19:00:00.000Z",
+   "home": "Mexico",
+   "away": "South Africa",
+   "goals": [
+    {
+     "player": "J. Quinones",
+     "teamDE": "Mexiko"
+    },
+    {
+     "player": "R. Jimenez",
+     "teamDE": "Mexiko"
+    }
+   ]
+  },
+  "1267454654": {
+   "date": "2026-06-13T01:00:00.000Z",
+   "home": "USA",
+   "away": "Paraguay",
+   "goals": [
+    {
+     "player": "F. Balogun",
+     "teamDE": "USA"
+    },
+    {
+     "player": "F. Balogun",
+     "teamDE": "USA"
+    },
+    {
+     "player": "Mauricio",
+     "teamDE": "Paraguay"
+    },
+    {
+     "player": "G. Reyna",
+     "teamDE": "USA"
+    }
+   ]
+  },
+  "1267455505": {
+   "date": "2026-06-13T22:00:00.000Z",
+   "home": "Brazil",
+   "away": "Morocco",
+   "goals": [
+    {
+     "player": "I. Saibari",
+     "teamDE": "Marokko"
+    },
+    {
+     "player": "Vinicius Junior",
+     "teamDE": "Brasilien"
+    }
+   ]
+  },
+  "1267456356": {
+   "date": "2026-06-14T01:00:00.000Z",
+   "home": "Haiti",
+   "away": "Scotland",
+   "goals": [
+    {
+     "player": "J. McGinn",
+     "teamDE": "Schottland"
+    }
+   ]
+  },
+  "1267457207": {
+   "date": "2026-06-13T19:00:00.000Z",
+   "home": "Qatar",
+   "away": "Switzerland",
+   "goals": [
+    {
+     "player": "B. Embolo",
+     "teamDE": "Schweiz"
+    },
+    {
+     "player": "B. Khoukhi",
+     "teamDE": "Katar"
+    }
+   ]
+  },
+  "1267458058": {
+   "date": "2026-06-14T17:00:00.000Z",
+   "home": "Germany",
+   "away": "Curaçao",
+   "goals": [
+    {
+     "player": "F. Nmecha",
+     "teamDE": "Deutschland"
+    },
+    {
+     "player": "L. Comenencia",
+     "teamDE": "Curacao"
+    },
+    {
+     "player": "N. Schlotterbeck",
+     "teamDE": "Deutschland"
+    },
+    {
+     "player": "K. Havertz",
+     "teamDE": "Deutschland"
+    },
+    {
+     "player": "J. Musiala",
+     "teamDE": "Deutschland"
+    },
+    {
+     "player": "N. Brown",
+     "teamDE": "Deutschland"
+    },
+    {
+     "player": "D. Undav",
+     "teamDE": "Deutschland"
+    },
+    {
+     "player": "K. Havertz",
+     "teamDE": "Deutschland"
+    }
+   ]
+  },
+  "1267458909": {
+   "date": "2026-06-14T23:00:00.000Z",
+   "home": "Ivory Coast",
+   "away": "Ecuador",
+   "goals": [
+    {
+     "player": "A. Diallo",
+     "teamDE": "Elfenbeinküste"
+    }
+   ]
+  },
+  "1267459760": {
+   "date": "2026-06-14T20:00:00.000Z",
+   "home": "Netherlands",
+   "away": "Japan",
+   "goals": [
+    {
+     "player": "V. van Dijk",
+     "teamDE": "Niederlande"
+    },
+    {
+     "player": "K. Nakamura",
+     "teamDE": "Japan"
+    },
+    {
+     "player": "C. Summerville",
+     "teamDE": "Niederlande"
+    },
+    {
+     "player": "D. Kamada",
+     "teamDE": "Japan"
+    }
+   ]
+  },
+  "1267460611": {
+   "date": "2026-06-15T19:00:00.000Z",
+   "home": "Belgium",
+   "away": "Egypt",
+   "goals": [
+    {
+     "player": "E. Ashour",
+     "teamDE": "Ägypten"
+    }
+   ]
+  },
+  "1267461462": {
+   "date": "2026-06-16T01:00:00.000Z",
+   "home": "Iran",
+   "away": "New Zealand",
+   "goals": [
+    {
+     "player": "E. Just",
+     "teamDE": "Neuseeland"
+    },
+    {
+     "player": "R. Rezaeian",
+     "teamDE": "IR Iran"
+    },
+    {
+     "player": "E. Just",
+     "teamDE": "Neuseeland"
+    },
+    {
+     "player": "M. Mohebi",
+     "teamDE": "IR Iran"
+    }
+   ]
+  },
+  "1267462313": {
+   "date": "2026-06-15T22:00:00.000Z",
+   "home": "Saudi Arabia",
+   "away": "Uruguay",
+   "goals": [
+    {
+     "player": "A. Al Amri",
+     "teamDE": "Saudi-Arabien"
+    },
+    {
+     "player": "M. Araujo",
+     "teamDE": "Uruguay"
+    }
+   ]
+  },
+  "1267463164": {
+   "date": "2026-06-15T16:00:00.000Z",
+   "home": "Spain",
+   "away": "Cape Verde",
+   "goals": []
+  },
+  "1267464015": {
+   "date": "2026-06-17T01:00:00.000Z",
+   "home": "Argentina",
+   "away": "Algeria",
+   "goals": [
+    {
+     "player": "L. Messi",
+     "teamDE": "Argentinien"
+    },
+    {
+     "player": "L. Messi",
+     "teamDE": "Argentinien"
+    },
+    {
+     "player": "L. Messi",
+     "teamDE": "Argentinien"
+    }
+   ]
+  },
+  "1267464866": {
+   "date": "2026-06-17T04:00:00.000Z",
+   "home": "Austria",
+   "away": "Jordan",
+   "goals": [
+    {
+     "player": "R. Schmid",
+     "teamDE": "Österreich"
+    },
+    {
+     "player": "A. Olwan",
+     "teamDE": "Jordanien"
+    },
+    {
+     "player": "M. Arnautovic",
+     "teamDE": "Österreich"
+    }
+   ]
+  },
+  "1267465717": {
+   "date": "2026-06-16T19:00:00.000Z",
+   "home": "France",
+   "away": "Senegal",
+   "goals": [
+    {
+     "player": "K. Mbappe",
+     "teamDE": "Frankreich"
+    },
+    {
+     "player": "B. Barcola",
+     "teamDE": "Frankreich"
+    },
+    {
+     "player": "I. Mbaye",
+     "teamDE": "Senegal"
+    },
+    {
+     "player": "K. Mbappe",
+     "teamDE": "Frankreich"
+    }
+   ]
+  },
+  "1267466568": {
+   "date": "2026-06-17T20:00:00.000Z",
+   "home": "England",
+   "away": "Croatia",
+   "goals": [
+    {
+     "player": "H. Kane",
+     "teamDE": "England"
+    },
+    {
+     "player": "M. Baturina",
+     "teamDE": "Kroatien"
+    },
+    {
+     "player": "H. Kane",
+     "teamDE": "England"
+    },
+    {
+     "player": "P. Musa",
+     "teamDE": "Kroatien"
+    },
+    {
+     "player": "J. Bellingham",
+     "teamDE": "England"
+    },
+    {
+     "player": "M. Rashford",
+     "teamDE": "England"
+    }
+   ]
+  },
+  "1267467419": {
+   "date": "2026-06-17T23:00:00.000Z",
+   "home": "Ghana",
+   "away": "Panama",
+   "goals": [
+    {
+     "player": "C. Yirenkyi",
+     "teamDE": "Ghana"
+    }
+   ]
+  },
+  "1267468270": {
+   "date": "2026-06-18T02:00:00.000Z",
+   "home": "Uzbekistan",
+   "away": "Colombia",
+   "goals": [
+    {
+     "player": "D. Munoz",
+     "teamDE": "Kolumbien"
+    },
+    {
+     "player": "A. Fayzullaev",
+     "teamDE": "Usbekistan"
+    },
+    {
+     "player": "L. Diaz",
+     "teamDE": "Kolumbien"
+    },
+    {
+     "player": "J. Campaz",
+     "teamDE": "Kolumbien"
+    }
+   ]
+  },
+  "1267469121": {
+   "date": "2026-06-18T22:00:00.000Z",
+   "home": "Canada",
+   "away": "Qatar",
+   "goals": [
+    {
+     "player": "C. Larin",
+     "teamDE": "Kanada"
+    },
+    {
+     "player": "J. David",
+     "teamDE": "Kanada"
+    },
+    {
+     "player": "J. David",
+     "teamDE": "Kanada"
+    },
+    {
+     "player": "N. Saliba",
+     "teamDE": "Kanada"
+    },
+    {
+     "player": "J. David",
+     "teamDE": "Kanada"
+    }
+   ]
+  },
+  "1267469972": {
+   "date": "2026-06-19T01:00:00.000Z",
+   "home": "Mexico",
+   "away": "South Korea",
+   "goals": [
+    {
+     "player": "L. Romo",
+     "teamDE": "Mexiko"
+    }
+   ]
+  },
+  "1267471674": {
+   "date": "2026-06-19T22:00:00.000Z",
+   "home": "Scotland",
+   "away": "Morocco",
+   "goals": [
+    {
+     "player": "I. Saibari",
+     "teamDE": "Marokko"
+    }
+   ]
+  },
+  "1267472525": {
+   "date": "2026-06-19T19:00:00.000Z",
+   "home": "USA",
+   "away": "Australia",
+   "goals": [
+    {
+     "player": "A. Freeman",
+     "teamDE": "USA"
+    }
+   ]
+  },
+  "1309688933": {
+   "date": "2026-06-12T02:00:00.000Z",
+   "home": "South Korea",
+   "away": "Czech Republic",
+   "goals": [
+    {
+     "player": "L. Krejci",
+     "teamDE": "Tschechien"
+    },
+    {
+     "player": "Hwang In-Beom",
+     "teamDE": "Südkorea"
+    },
+    {
+     "player": "Oh Hyeon-Gyu",
+     "teamDE": "Südkorea"
+    }
+   ]
+  },
+  "1309689784": {
+   "date": "2026-06-12T19:00:00.000Z",
+   "home": "Canada",
+   "away": "Bosnia & Herzegovina",
+   "goals": [
+    {
+     "player": "J. Lukic",
+     "teamDE": "Bosnien-Herzeg."
+    },
+    {
+     "player": "C. Larin",
+     "teamDE": "Kanada"
+    }
+   ]
+  },
+  "1309690635": {
+   "date": "2026-06-14T04:00:00.000Z",
+   "home": "Australia",
+   "away": "Turkey",
+   "goals": [
+    {
+     "player": "N. Irankunda",
+     "teamDE": "Australien"
+    },
+    {
+     "player": "C. Metcalfe",
+     "teamDE": "Australien"
+    }
+   ]
+  },
+  "1309691486": {
+   "date": "2026-06-15T02:00:00.000Z",
+   "home": "Sweden",
+   "away": "Tunisia",
+   "goals": [
+    {
+     "player": "Y. Ayari",
+     "teamDE": "Schweden"
+    },
+    {
+     "player": "A. Isak",
+     "teamDE": "Schweden"
+    },
+    {
+     "player": "O. Rekik",
+     "teamDE": "Tunesien"
+    },
+    {
+     "player": "V. Gyokeres",
+     "teamDE": "Schweden"
+    },
+    {
+     "player": "M. Svanberg",
+     "teamDE": "Schweden"
+    },
+    {
+     "player": "Y. Ayari",
+     "teamDE": "Schweden"
+    }
+   ]
+  },
+  "1309692337": {
+   "date": "2026-06-17T17:00:00.000Z",
+   "home": "Portugal",
+   "away": "Congo DR",
+   "goals": [
+    {
+     "player": "J. Neves",
+     "teamDE": "Portugal"
+    },
+    {
+     "player": "Y. Wissa",
+     "teamDE": "Kongo"
+    }
+   ]
+  },
+  "1309693188": {
+   "date": "2026-06-18T16:00:00.000Z",
+   "home": "Czech Republic",
+   "away": "South Africa",
+   "goals": [
+    {
+     "player": "M. Sadilek",
+     "teamDE": "Tschechien"
+    },
+    {
+     "player": "T. Mokoena",
+     "teamDE": "Südafrika"
+    }
+   ]
+  },
+  "1309694039": {
+   "date": "2026-06-18T19:00:00.000Z",
+   "home": "Switzerland",
+   "away": "Bosnia & Herzegovina",
+   "goals": [
+    {
+     "player": "J. Manzambi",
+     "teamDE": "Schweiz"
+    },
+    {
+     "player": "R. Vargas",
+     "teamDE": "Schweiz"
+    },
+    {
+     "player": "J. Manzambi",
+     "teamDE": "Schweiz"
+    },
+    {
+     "player": "E. Mahmic",
+     "teamDE": "Bosnien-Herzeg."
+    },
+    {
+     "player": "G. Xhaka",
+     "teamDE": "Schweiz"
+    }
+   ]
+  },
+  "1309703400": {
+   "date": "2026-06-16T22:00:00.000Z",
+   "home": "Iraq",
+   "away": "Norway",
+   "goals": [
+    {
+     "player": "E. Haaland",
+     "teamDE": "Norwegen"
+    },
+    {
+     "player": "A. Hussein",
+     "teamDE": "Irak"
+    },
+    {
+     "player": "E. Haaland",
+     "teamDE": "Norwegen"
+    },
+    {
+     "player": "L. Ostigard",
+     "teamDE": "Norwegen"
+    }
+   ]
+  }
+ }
+}
