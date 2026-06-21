@@ -1,0 +1,6 @@
+{
+  "_comment": "Korrekturen für die WM-Torschützenliste, falls die Quelle (football-data) nachhängt. Schlüssel = Spielername (wird kanonisch zugeordnet), Wert = Mindest-Toranzahl (Floor). Wirkt nie nach unten und nie über einen höheren echten Stand. Eintrag entfernen, sobald die Quelle korrekt ist (oder einfach stehen lassen).",
+  "overrides": {
+    "Crysencio Summerville": 2
+  }
+}

@@ -52,15 +52,42 @@
     // Cache-Buster an die Daten-Fetches, damit aktualisierte Excel-Importe
     // (neue Ergebnisse/Tipps) zuverlässig beim Nutzer ankommen.
     const cb = '?v=' + (CFG.version || Date.now());
-    const [data, manual] = await Promise.all([
+    const [data, manual, scorerOv] = await Promise.all([
       fetch('data/tippspiel.json' + cb).then((r) => {
         if (!r.ok) throw new Error('data/tippspiel.json nicht erreichbar (HTTP ' + r.status + ')');
         return r.json();
       }),
-      fetch('data/manual-results.json' + cb).then((r) => r.json()).catch(() => ({ results: {} }))
+      fetch('data/manual-results.json' + cb).then((r) => r.json()).catch(() => ({ results: {} })),
+      fetch('data/scorer-overrides.json' + cb).then((r) => r.json()).catch(() => ({ overrides: {} }))
     ]);
     state.data = data;
     state.manual = manual.results || {};
+    // Korrekturen für Torschützen, falls die Quelle (football-data) hängt.
+    // Wirken als Untergrenze (Floor) – echte höhere Stände bleiben unangetastet.
+    state.scorerOverrides = (scorerOv && scorerOv.overrides) || {};
+    state.data.manualScorers = applyScorerOverrides(state.data.manualScorers);
+  }
+
+  /* Hebt einzelne Torschützen auf einen Mindest-Torstand an (Quelle hängt
+     gelegentlich nach). Floor-Logik: nie unter den echten Stand, nie über
+     einen höheren echten Stand. */
+  function applyScorerOverrides(scorers) {
+    const ov = state.scorerOverrides;
+    if (!ov || !Object.keys(ov).length) return scorers || [];
+    const canon = window.Scoring.canonicalScorer;
+    const out = (scorers || []).map((s) => Object.assign({}, s));
+    const idx = new Map();
+    out.forEach((s, i) => idx.set(canon(s.name).name, i));
+    for (const [name, min] of Object.entries(ov)) {
+      const c = canon(name);
+      if (idx.has(c.name)) {
+        const s = out[idx.get(c.name)];
+        if ((s.goals || 0) < min) s.goals = min;
+      } else {
+        out.push({ name: c.name, goals: min, teamDE: c.team, crest: null });
+      }
+    }
+    return out;
   }
 
   function excelResults() {
@@ -201,6 +228,9 @@
     if (!snap) return false;
     try {
       state.apiState = window.LiveApi.mapLiveData(state.data, snap.apiMatches, snap.apiScorers || []);
+      if (state.apiState.extras) {
+        state.apiState.extras.scorers = applyScorerOverrides(state.apiState.extras.scorers);
+      }
       state.stale = true;
       state.lastUpdate = new Date(snap.ts);
       return true;
@@ -212,6 +242,10 @@
     try {
       const { apiMatches, apiScorers } = await window.LiveApi.fetchLive(CFG.proxyUrl);
       state.apiState = window.LiveApi.mapLiveData(state.data, apiMatches, apiScorers);
+      // Quell-Korrekturen anwenden (z. B. hängender Torschützenstand)
+      if (state.apiState.extras) {
+        state.apiState.extras.scorers = applyScorerOverrides(state.apiState.extras.scorers);
+      }
       state.apiError = null;
       state.stale = false;
       state.lastUpdate = new Date();
