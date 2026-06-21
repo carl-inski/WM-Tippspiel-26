@@ -1,26 +1,27 @@
 /*
  * Baut data/scorers.json – die WM-Torschützenliste, die die Web-App anzeigt.
  *
- * Zwei Quellen, zusammengeführt:
+ * Zwei freie, schlüssellose Quellen, per Personen-Abgleich zusammengeführt:
  *  1) fussballdaten.de/wm/tore/ : aktuelle Führende (2+ Tore), server-seitig
- *     gerendert, vollständige deutsche Namen + Flaggen, ohne API-Key/Kontingent.
- *  2) data/scorers-events.json  : der 1-Tor-"Tail" aus Highlightly-Events
- *     (fussballdaten listet keine 1-Tor-Schützen). Optional – falls vorhanden.
+ *     gerendert, volle deutsche Namen + Flaggen. Sehr aktuell.
+ *  2) football-data.org (über unseren Worker /scorers) : die KOMPLETTE Liste
+ *     inkl. aller 1-Tor-Schützen. Hängt gelegentlich etwas nach.
  *
- * Merge per Personen-Abgleich (Scoring.samePerson): fussballdaten gewinnt
- * (aktueller, voller Name); aus dem Tail werden nur Spieler ergänzt, die dort
- * noch nicht stehen. So ist die Liste aktuell UND vollständig, ohne Dubletten.
+ * Merge: fussballdaten gewinnt (aktueller); aus der football-data-Liste werden
+ * nur Spieler ergänzt, die noch fehlen (i. d. R. die 1-Tor-Schützen). So ist die
+ * Liste aktuell UND vollständig – ohne API-Key, ohne Kontingent, ohne Dubletten.
  *
  * Aufruf:  node tools/build-scorers.js
- * Robust: bei Abruf-/Parse-Fehler bleibt data/scorers.json unverändert.
+ * Robust: schlägt fussballdaten fehl, bleibt data/scorers.json unverändert.
  */
 const fs = require('fs');
 const path = require('path');
+const Teams = require('../js/teams.js');
 const Scoring = require('../js/scoring.js');
 
-const SRC = 'https://www.fussballdaten.de/wm/tore/';
+const FD_SRC = 'https://www.fussballdaten.de/wm/tore/';
+const SCORERS_API = 'https://wm-tippspiel-proxy.f655fr7vs6.workers.dev/scorers';
 const OUT = path.join(__dirname, '..', 'data', 'scorers.json');
-const EVENTS = path.join(__dirname, '..', 'data', 'scorers-events.json');
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
@@ -48,30 +49,43 @@ function parseFussballdaten(html) {
   return out;
 }
 
+async function fetchJson(url) {
+  const r = await fetch(url, { headers: { 'User-Agent': UA, accept: 'application/json' } });
+  if (!r.ok) throw new Error('HTTP ' + r.status + ' für ' + url);
+  return r.json();
+}
+
 (async () => {
-  const resp = await fetch(SRC, { headers: { 'User-Agent': UA, 'accept-language': 'de' } });
-  if (!resp.ok) throw new Error('fussballdaten HTTP ' + resp.status);
-  const fd = parseFussballdaten(await resp.text());
+  const html = await (await fetch(FD_SRC, { headers: { 'User-Agent': UA, 'accept-language': 'de' } })).text();
+  const fd = parseFussballdaten(html);
   if (!fd.length) { console.error('fussballdaten: 0 Treffer – data/scorers.json bleibt unverändert.'); process.exit(1); }
 
-  // 1-Tor-Tail aus Highlightly-Events ergänzen (Personen-Abgleich, fd gewinnt)
+  // Kompletten "Tail" (inkl. 1-Tor-Schützen) aus football-data ergänzen.
   let tail = [];
-  try { tail = (JSON.parse(fs.readFileSync(EVENTS, 'utf8')).scorers) || []; } catch (e) {}
+  try {
+    const api = await fetchJson(SCORERS_API);
+    tail = (api.scorers || []).map((s) => ({
+      name: (s.player && s.player.name) || '?',
+      teamDE: Teams.toGermanName((s.team && s.team.name) || '') || (s.team && s.team.name) || null,
+      goals: s.goals || 0
+    }));
+  } catch (e) { console.error('football-data-Tail nicht erreichbar:', e.message); }
+
   const merged = fd.map((s) => Object.assign({}, s));
-  for (const e of tail) {
-    if (!e || !e.name) continue;
-    if (merged.some((r) => Scoring.samePerson(r.name, e.name))) continue; // schon dabei
-    merged.push({ name: e.name, teamDE: e.teamDE || null, goals: e.goals || 0 });
+  for (const t of tail) {
+    if (!t.name || t.name === '?') continue;
+    if (merged.some((r) => Scoring.samePerson(r.name, t.name))) continue; // fussballdaten gewinnt
+    merged.push(t);
   }
   merged.sort((a, b) => b.goals - a.goals || String(a.name).localeCompare(b.name, 'de'));
 
   fs.writeFileSync(OUT, JSON.stringify({
     generatedAt: new Date().toISOString(),
-    source: 'fussballdaten.de + highlightly-events',
+    source: 'fussballdaten.de + football-data.org',
     count: merged.length,
     scorers: merged
   }, null, 1));
-  console.log('Torschützen: ' + merged.length + ' (fd ' + fd.length + ' + tail ' +
-    (merged.length - fd.length) + ') | Top: ' +
+  console.log('Torschützen: ' + merged.length + ' (fussballdaten ' + fd.length +
+    ' + football-data-Tail ' + (merged.length - fd.length) + ') | Top: ' +
     merged.slice(0, 5).map((s) => s.name + ' ' + s.goals).join(', '));
 })().catch((e) => { console.error(e); process.exit(1); });

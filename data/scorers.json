@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-21T19:27:54.167Z",
- "source": "fussballdaten.de + highlightly-events",
- "count": 77,
+ "generatedAt": "2026-06-21T19:38:33.654Z",
+ "source": "fussballdaten.de + football-data.org",
+ "count": 83,
  "scorers": [
   {
    "name": "Deniz Undav",
@@ -74,7 +74,7 @@
    "goals": 2
   },
   {
-   "name": "J. Manzambi",
+   "name": "Johan Manzambi",
    "teamDE": "Schweiz",
    "goals": 2
   },
@@ -109,202 +109,217 @@
    "goals": 2
   },
   {
-   "name": "A. Al Amri",
-   "teamDE": "Saudi-Arabien",
-   "goals": 1
-  },
-  {
-   "name": "A. Diallo",
-   "teamDE": "Elfenbeinküste",
-   "goals": 1
-  },
-  {
-   "name": "A. Fayzullaev",
+   "name": "Abbosbek Fayzullaev",
    "teamDE": "Usbekistan",
    "goals": 1
   },
   {
-   "name": "A. Freeman",
+   "name": "Abdulelah Al Amri",
+   "teamDE": "Saudi-Arabien",
+   "goals": 1
+  },
+  {
+   "name": "Alex Freeman",
    "teamDE": "USA",
    "goals": 1
   },
   {
-   "name": "A. Hussein",
-   "teamDE": "Irak",
-   "goals": 1
-  },
-  {
-   "name": "A. Isak",
+   "name": "Alexander Isak",
    "teamDE": "Schweden",
    "goals": 1
   },
   {
-   "name": "A. Olwan",
+   "name": "Ali Olwan",
    "teamDE": "Jordanien",
    "goals": 1
   },
   {
-   "name": "B. Barcola",
-   "teamDE": "Frankreich",
+   "name": "Amad Diallo",
+   "teamDE": "Elfenbeinküste",
    "goals": 1
   },
   {
-   "name": "B. Embolo",
-   "teamDE": "Schweiz",
+   "name": "Anthony Elanga",
+   "teamDE": "Schweden",
    "goals": 1
   },
   {
-   "name": "B. Khoukhi",
+   "name": "Aymen Hussein",
+   "teamDE": "Irak",
+   "goals": 1
+  },
+  {
+   "name": "Boualem Khoukhi",
    "teamDE": "Katar",
    "goals": 1
   },
   {
-   "name": "C. Metcalfe",
-   "teamDE": "Australien",
+   "name": "Bradley Barcola",
+   "teamDE": "Frankreich",
    "goals": 1
   },
   {
-   "name": "C. Yirenkyi",
-   "teamDE": "Ghana",
-   "goals": 1
-  },
-  {
-   "name": "D. Munoz",
-   "teamDE": "Kolumbien",
-   "goals": 1
-  },
-  {
-   "name": "E. Ashour",
-   "teamDE": "Ägypten",
-   "goals": 1
-  },
-  {
-   "name": "E. Mahmic",
-   "teamDE": "Bosnien-Herzeg.",
-   "goals": 1
-  },
-  {
-   "name": "F. Nmecha",
-   "teamDE": "Deutschland",
-   "goals": 1
-  },
-  {
-   "name": "G. Reyna",
-   "teamDE": "USA",
-   "goals": 1
-  },
-  {
-   "name": "G. Xhaka",
+   "name": "Breel Embolo",
    "teamDE": "Schweiz",
    "goals": 1
   },
   {
-   "name": "Hwang In-Beom",
-   "teamDE": "Südkorea",
+   "name": "Caleb Yirenkyi",
+   "teamDE": "Ghana",
    "goals": 1
   },
   {
-   "name": "I. Mbaye",
-   "teamDE": "Senegal",
+   "name": "Connor Metcalfe",
+   "teamDE": "Australien",
    "goals": 1
   },
   {
-   "name": "J. Bellingham",
-   "teamDE": "England",
-   "goals": 1
-  },
-  {
-   "name": "J. Campaz",
+   "name": "Daniel Muñoz",
    "teamDE": "Kolumbien",
    "goals": 1
   },
   {
-   "name": "J. Lukic",
+   "name": "Emam Ashour",
+   "teamDE": "Ägypten",
+   "goals": 1
+  },
+  {
+   "name": "Ermin Mahmic",
    "teamDE": "Bosnien-Herzeg.",
    "goals": 1
   },
   {
-   "name": "J. McGinn",
-   "teamDE": "Schottland",
-   "goals": 1
-  },
-  {
-   "name": "J. Musiala",
+   "name": "Felix Kalu Nmecha",
    "teamDE": "Deutschland",
    "goals": 1
   },
   {
-   "name": "J. Neves",
-   "teamDE": "Portugal",
+   "name": "Franck Kessié",
+   "teamDE": "Elfenbeinküste",
    "goals": 1
   },
   {
-   "name": "J. Quinones",
-   "teamDE": "Mexiko",
+   "name": "Gio Reyna",
+   "teamDE": "USA",
    "goals": 1
   },
   {
-   "name": "K. Nakamura",
-   "teamDE": "Japan",
+   "name": "Granit Xhaka",
+   "teamDE": "Schweiz",
    "goals": 1
   },
   {
-   "name": "L. Comenencia",
-   "teamDE": "Curacao",
+   "name": "Hyun-Gyu Oh",
+   "teamDE": "Südkorea",
    "goals": 1
   },
   {
-   "name": "L. Diaz",
+   "name": "Ibrahim M'Baye",
+   "teamDE": "Senegal",
+   "goals": 1
+  },
+  {
+   "name": "In-beom Hwang",
+   "teamDE": "Südkorea",
+   "goals": 1
+  },
+  {
+   "name": "Jamal Musiala",
+   "teamDE": "Deutschland",
+   "goals": 1
+  },
+  {
+   "name": "Jaminton Campaz",
    "teamDE": "Kolumbien",
    "goals": 1
   },
   {
-   "name": "L. Krejci",
-   "teamDE": "Tschechien",
+   "name": "Joao Neves",
+   "teamDE": "Portugal",
    "goals": 1
   },
   {
-   "name": "L. Ostigard",
-   "teamDE": "Norwegen",
+   "name": "John McGinn",
+   "teamDE": "Schottland",
    "goals": 1
   },
   {
-   "name": "L. Romo",
-   "teamDE": "Mexiko",
+   "name": "Jovo Lukić",
+   "teamDE": "Bosnien-Herzeg.",
    "goals": 1
   },
   {
-   "name": "M. Araujo",
-   "teamDE": "Uruguay",
-   "goals": 1
-  },
-  {
-   "name": "M. Arnautovic",
-   "teamDE": "Österreich",
-   "goals": 1
-  },
-  {
-   "name": "M. Baturina",
-   "teamDE": "Kroatien",
-   "goals": 1
-  },
-  {
-   "name": "M. Mohebi",
-   "teamDE": "IR Iran",
-   "goals": 1
-  },
-  {
-   "name": "M. Rashford",
+   "name": "Jude Bellingham",
    "teamDE": "England",
    "goals": 1
   },
   {
-   "name": "M. Sadilek",
+   "name": "Julián Quiñones",
+   "teamDE": "Mexiko",
+   "goals": 1
+  },
+  {
+   "name": "Junya Ito",
+   "teamDE": "Japan",
+   "goals": 1
+  },
+  {
+   "name": "Keito Nakamura",
+   "teamDE": "Japan",
+   "goals": 1
+  },
+  {
+   "name": "Ladislav Krejčí",
    "teamDE": "Tschechien",
    "goals": 1
   },
   {
-   "name": "M. Svanberg",
+   "name": "Lamine Yamal",
+   "teamDE": "Spanien",
+   "goals": 1
+  },
+  {
+   "name": "Leo Østigård",
+   "teamDE": "Norwegen",
+   "goals": 1
+  },
+  {
+   "name": "Livano Comenencia",
+   "teamDE": "Curacao",
+   "goals": 1
+  },
+  {
+   "name": "Luis Díaz",
+   "teamDE": "Kolumbien",
+   "goals": 1
+  },
+  {
+   "name": "Luis Romo",
+   "teamDE": "Mexiko",
+   "goals": 1
+  },
+  {
+   "name": "Marcus Rashford",
+   "teamDE": "England",
+   "goals": 1
+  },
+  {
+   "name": "Marko Arnautovic",
+   "teamDE": "Österreich",
+   "goals": 1
+  },
+  {
+   "name": "Martin Baturina",
+   "teamDE": "Kroatien",
+   "goals": 1
+  },
+  {
+   "name": "Matías Galarza",
+   "teamDE": "Paraguay",
+   "goals": 1
+  },
+  {
+   "name": "Mattias Svanberg",
    "teamDE": "Schweden",
    "goals": 1
   },
@@ -314,77 +329,92 @@
    "goals": 1
   },
   {
-   "name": "N. Brown",
-   "teamDE": "Deutschland",
+   "name": "Maximiliano Araújo",
+   "teamDE": "Uruguay",
    "goals": 1
   },
   {
-   "name": "N. Irankunda",
-   "teamDE": "Australien",
-   "goals": 1
-  },
-  {
-   "name": "N. Saliba",
-   "teamDE": "Kanada",
-   "goals": 1
-  },
-  {
-   "name": "N. Schlotterbeck",
-   "teamDE": "Deutschland",
-   "goals": 1
-  },
-  {
-   "name": "O. Rekik",
-   "teamDE": "Tunesien",
-   "goals": 1
-  },
-  {
-   "name": "Oh Hyeon-Gyu",
-   "teamDE": "Südkorea",
-   "goals": 1
-  },
-  {
-   "name": "P. Musa",
-   "teamDE": "Kroatien",
-   "goals": 1
-  },
-  {
-   "name": "R. Jimenez",
-   "teamDE": "Mexiko",
-   "goals": 1
-  },
-  {
-   "name": "R. Rezaeian",
-   "teamDE": "IR Iran",
-   "goals": 1
-  },
-  {
-   "name": "R. Schmid",
-   "teamDE": "Österreich",
-   "goals": 1
-  },
-  {
-   "name": "R. Vargas",
-   "teamDE": "Schweiz",
-   "goals": 1
-  },
-  {
-   "name": "T. Mokoena",
-   "teamDE": "Südafrika",
-   "goals": 1
-  },
-  {
-   "name": "V. Gyokeres",
-   "teamDE": "Schweden",
-   "goals": 1
-  },
-  {
-   "name": "V. van Dijk",
+   "name": "Memphis Depay",
    "teamDE": "Niederlande",
    "goals": 1
   },
   {
-   "name": "Y. Wissa",
+   "name": "Michal Sadílek",
+   "teamDE": "Tschechien",
+   "goals": 1
+  },
+  {
+   "name": "Mohammad Mohebi",
+   "teamDE": "IR Iran",
+   "goals": 1
+  },
+  {
+   "name": "Nathan-Dylan Saliba",
+   "teamDE": "Kanada",
+   "goals": 1
+  },
+  {
+   "name": "Nathaniel Brown",
+   "teamDE": "Deutschland",
+   "goals": 1
+  },
+  {
+   "name": "Nestor Irankunda",
+   "teamDE": "Australien",
+   "goals": 1
+  },
+  {
+   "name": "Nico Schlotterbeck",
+   "teamDE": "Deutschland",
+   "goals": 1
+  },
+  {
+   "name": "Omar Rekik",
+   "teamDE": "Tunesien",
+   "goals": 1
+  },
+  {
+   "name": "Petar Musa",
+   "teamDE": "Kroatien",
+   "goals": 1
+  },
+  {
+   "name": "Ramin Rezaeian",
+   "teamDE": "IR Iran",
+   "goals": 1
+  },
+  {
+   "name": "Raúl Jiménez",
+   "teamDE": "Mexiko",
+   "goals": 1
+  },
+  {
+   "name": "Romano Schmid",
+   "teamDE": "Österreich",
+   "goals": 1
+  },
+  {
+   "name": "Ruben Vargas",
+   "teamDE": "Schweiz",
+   "goals": 1
+  },
+  {
+   "name": "Teboho Mokoena",
+   "teamDE": "Südafrika",
+   "goals": 1
+  },
+  {
+   "name": "Viktor Gyökeres",
+   "teamDE": "Schweden",
+   "goals": 1
+  },
+  {
+   "name": "Virgil van Dijk",
+   "teamDE": "Niederlande",
+   "goals": 1
+  },
+  {
+   "name": "Yoane Wissa",
    "teamDE": "Kongo",
    "goals": 1
   }

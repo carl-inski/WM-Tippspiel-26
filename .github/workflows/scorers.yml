@@ -1,14 +1,12 @@
 name: Refresh scorers
 
-# Aktualisiert data/scorers.json (Torschützenliste der Web-App).
-#  - Führende: fussballdaten.de (server-seitig gerendert) – quotafrei, alle 3h.
-#  - 1-Tor-Tail: Highlightly-Events – 1x/Tag, nur wenn Secret HIGHLIGHTLY_API_KEY
-#    gesetzt ist (optional; ohne Secret bleiben die Führenden trotzdem aktuell).
+# Aktualisiert data/scorers.json (Torschützenliste der Web-App) alle 3 Stunden.
+# Quellen: fussballdaten.de (Führende) + football-data.org via Worker (kompletter
+# Rest). Beide frei & schlüssellos – KEIN Secret nötig.
 
 on:
   schedule:
-    - cron: '5 */3 * * *'   # fussballdaten-Führende (oft, kostenlos)
-    - cron: '15 5 * * *'    # Highlightly-Tail (1x/Tag)
+    - cron: '5 */3 * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -26,27 +24,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      # 1-Tor-Tail aus Highlightly auffrischen (nur 1x/Tag bzw. manuell)
-      - name: Highlightly-Tail aktualisieren
-        if: github.event.schedule == '15 5 * * *' || github.event_name == 'workflow_dispatch'
-        continue-on-error: true
-        env:
-          HIGHLIGHTLY_API_KEY: ${{ secrets.HIGHLIGHTLY_API_KEY }}
-          BUILD_BUDGET: '25'
-        run: node tools/build-scorers-events.js
-
-      # Führende von fussballdaten + Tail zusammenführen (immer)
       - name: Torschützenliste bauen
         run: node tools/build-scorers.js
-
       - name: Bei Änderung committen
         run: |
-          if ! git diff --quiet -- data/scorers.json data/scorers-events.json; then
+          if ! git diff --quiet -- data/scorers.json; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add data/scorers.json data/scorers-events.json
-            git commit -m "data: refresh scorers (fussballdaten + events)"
+            git add data/scorers.json
+            git commit -m "data: refresh scorers (fussballdaten + football-data)"
             git push
           else
             echo "Keine Änderung."
