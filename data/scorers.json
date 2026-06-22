@@ -1,12 +1,12 @@
 {
- "generatedAt": "2026-06-22T18:52:12.132Z",
+ "generatedAt": "2026-06-22T22:52:59.568Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 90,
  "scorers": [
   {
    "name": "Lionel Messi",
    "teamDE": "Argentinien",
-   "goals": 4
+   "goals": 5
   },
   {
    "name": "Deniz Undav",
@@ -16,6 +16,11 @@
   {
    "name": "Jonathan David",
    "teamDE": "Kanada",
+   "goals": 3
+  },
+  {
+   "name": "Kylian Mbappé",
+   "teamDE": "Frankreich",
    "goals": 3
   },
   {
@@ -81,11 +86,6 @@
   {
    "name": "Kai Havertz",
    "teamDE": "Deutschland",
-   "goals": 2
-  },
-  {
-   "name": "Kylian Mbappé",
-   "teamDE": "Frankreich",
    "goals": 2
   },
   {
