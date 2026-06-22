@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-21T22:21:30.196Z",
+ "generatedAt": "2026-06-22T05:23:59.773Z",
  "source": "fussballdaten.de + football-data.org",
- "count": 83,
+ "count": 90,
  "scorers": [
   {
    "name": "Deniz Undav",
@@ -94,6 +94,11 @@
    "goals": 2
   },
   {
+   "name": "Maxi Araújo",
+   "teamDE": "Uruguay",
+   "goals": 2
+  },
+  {
    "name": "Mikel Oyarzabal",
    "teamDE": "Spanien",
    "goals": 2
@@ -116,6 +121,11 @@
   {
    "name": "Abdulelah Al Amri",
    "teamDE": "Saudi-Arabien",
+   "goals": 1
+  },
+  {
+   "name": "Agustín Canobbio",
+   "teamDE": "Uruguay",
    "goals": 1
   },
   {
@@ -194,6 +204,11 @@
    "goals": 1
   },
   {
+   "name": "Finn Surman",
+   "teamDE": "Neuseeland",
+   "goals": 1
+  },
+  {
    "name": "Franck Kessié",
    "teamDE": "Elfenbeinküste",
    "goals": 1
@@ -206,6 +221,11 @@
   {
    "name": "Granit Xhaka",
    "teamDE": "Schweiz",
+   "goals": 1
+  },
+  {
+   "name": "Hélio Varela",
+   "teamDE": "Kap Verde",
    "goals": 1
   },
   {
@@ -269,6 +289,11 @@
    "goals": 1
   },
   {
+   "name": "Kevin Pina",
+   "teamDE": "Kap Verde",
+   "goals": 1
+  },
+  {
    "name": "Ladislav Krejčí",
    "teamDE": "Tschechien",
    "goals": 1
@@ -329,11 +354,6 @@
    "goals": 1
   },
   {
-   "name": "Maximiliano Araújo",
-   "teamDE": "Uruguay",
-   "goals": 1
-  },
-  {
    "name": "Memphis Depay",
    "teamDE": "Niederlande",
    "goals": 1
@@ -344,8 +364,18 @@
    "goals": 1
   },
   {
+   "name": "Mohamed Salah",
+   "teamDE": "Ägypten",
+   "goals": 1
+  },
+  {
    "name": "Mohammad Mohebi",
    "teamDE": "IR Iran",
+   "goals": 1
+  },
+  {
+   "name": "Mostafa Ziko",
+   "teamDE": "Ägypten",
    "goals": 1
   },
   {
@@ -401,6 +431,11 @@
   {
    "name": "Teboho Mokoena",
    "teamDE": "Südafrika",
+   "goals": 1
+  },
+  {
+   "name": "Trezeguet",
+   "teamDE": "Ägypten",
    "goals": 1
   },
   {
