@@ -1,8 +1,13 @@
 {
- "generatedAt": "2026-06-22T12:22:49.832Z",
+ "generatedAt": "2026-06-22T18:52:12.132Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 90,
  "scorers": [
+  {
+   "name": "Lionel Messi",
+   "teamDE": "Argentinien",
+   "goals": 4
+  },
   {
    "name": "Deniz Undav",
    "teamDE": "Deutschland",
@@ -11,11 +16,6 @@
   {
    "name": "Jonathan David",
    "teamDE": "Kanada",
-   "goals": 3
-  },
-  {
-   "name": "Lionel Messi",
-   "teamDE": "Argentinien",
    "goals": 3
   },
   {
