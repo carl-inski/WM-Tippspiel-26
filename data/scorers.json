@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-23T15:20:54.512Z",
+ "generatedAt": "2026-06-23T20:19:18.365Z",
  "source": "fussballdaten.de + football-data.org",
- "count": 95,
+ "count": 96,
  "scorers": [
   {
    "name": "Lionel Messi",
@@ -41,6 +41,11 @@
   {
    "name": "Cody Gakpo",
    "teamDE": "Niederlande",
+   "goals": 2
+  },
+  {
+   "name": "Cristiano Ronaldo",
+   "teamDE": "Portugal",
    "goals": 2
   },
   {
