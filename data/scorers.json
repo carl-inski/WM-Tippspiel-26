@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-23T04:16:17.633Z",
+ "generatedAt": "2026-06-23T09:59:36.897Z",
  "source": "fussballdaten.de + football-data.org",
- "count": 94,
+ "count": 96,
  "scorers": [
   {
    "name": "Lionel Messi",
@@ -151,6 +151,11 @@
   {
    "name": "Amad Diallo",
    "teamDE": "Elfenbeinküste",
+   "goals": 1
+  },
+  {
+   "name": "Amine Gouiri",
+   "teamDE": "Algerien",
    "goals": 1
   },
   {
@@ -386,6 +391,11 @@
   {
    "name": "Mostafa Ziko",
    "teamDE": "Ägypten",
+   "goals": 1
+  },
+  {
+   "name": "Nadhir Benbouali",
+   "teamDE": "Algerien",
    "goals": 1
   },
   {
