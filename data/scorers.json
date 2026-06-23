@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-23T09:59:36.897Z",
+ "generatedAt": "2026-06-23T15:20:54.512Z",
  "source": "fussballdaten.de + football-data.org",
- "count": 96,
+ "count": 95,
  "scorers": [
   {
    "name": "Lionel Messi",
@@ -366,11 +366,6 @@
   {
    "name": "Mauricio",
    "teamDE": "Paraguay",
-   "goals": 1
-  },
-  {
-   "name": "Memphis Depay",
-   "teamDE": "Niederlande",
    "goals": 1
   },
   {
