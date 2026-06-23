@@ -1,12 +1,22 @@
 {
- "generatedAt": "2026-06-22T22:52:59.568Z",
+ "generatedAt": "2026-06-23T04:16:17.633Z",
  "source": "fussballdaten.de + football-data.org",
- "count": 90,
+ "count": 94,
  "scorers": [
   {
    "name": "Lionel Messi",
    "teamDE": "Argentinien",
    "goals": 5
+  },
+  {
+   "name": "Erling Haaland",
+   "teamDE": null,
+   "goals": 4
+  },
+  {
+   "name": "Kylian Mbappé",
+   "teamDE": "Frankreich",
+   "goals": 4
   },
   {
    "name": "Deniz Undav",
@@ -16,11 +26,6 @@
   {
    "name": "Jonathan David",
    "teamDE": "Kanada",
-   "goals": 3
-  },
-  {
-   "name": "Kylian Mbappé",
-   "teamDE": "Frankreich",
    "goals": 3
   },
   {
@@ -59,23 +64,23 @@
    "goals": 2
   },
   {
-   "name": "Erling Haaland",
-   "teamDE": null,
-   "goals": 2
-  },
-  {
    "name": "Folarin Balogun",
    "teamDE": null,
    "goals": 2
   },
   {
    "name": "Harry Kane",
-   "teamDE": null,
+   "teamDE": "England",
    "goals": 2
   },
   {
    "name": "Ismael Saibari",
    "teamDE": "Spanien",
+   "goals": 2
+  },
+  {
+   "name": "Ismaïla Sarr",
+   "teamDE": "Senegal",
    "goals": 2
   },
   {
@@ -324,6 +329,11 @@
    "goals": 1
   },
   {
+   "name": "Marcus Pedersen",
+   "teamDE": "Norwegen",
+   "goals": 1
+  },
+  {
    "name": "Marcus Rashford",
    "teamDE": "England",
    "goals": 1
@@ -399,8 +409,18 @@
    "goals": 1
   },
   {
+   "name": "Nizar Al Rashdan",
+   "teamDE": "Jordanien",
+   "goals": 1
+  },
+  {
    "name": "Omar Rekik",
    "teamDE": "Tunesien",
+   "goals": 1
+  },
+  {
+   "name": "Ousmane Dembélé",
+   "teamDE": "Frankreich",
    "goals": 1
   },
   {
