@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-23T20:19:18.365Z",
+ "generatedAt": "2026-06-23T22:20:24.712Z",
  "source": "fussballdaten.de + football-data.org",
- "count": 96,
+ "count": 99,
  "scorers": [
   {
    "name": "Lionel Messi",
@@ -75,7 +75,7 @@
   },
   {
    "name": "Harry Kane",
-   "teamDE": "England",
+   "teamDE": null,
    "goals": 2
   },
   {
@@ -131,6 +131,11 @@
   {
    "name": "Abdulelah Al Amri",
    "teamDE": "Saudi-Arabien",
+   "goals": 1
+  },
+  {
+   "name": "Abduvakhid Nematov",
+   "teamDE": "Portugal",
    "goals": 1
   },
   {
@@ -424,6 +429,11 @@
    "goals": 1
   },
   {
+   "name": "Nuno Mendes",
+   "teamDE": "Portugal",
+   "goals": 1
+  },
+  {
    "name": "Omar Rekik",
    "teamDE": "Tunesien",
    "goals": 1
@@ -436,6 +446,11 @@
   {
    "name": "Petar Musa",
    "teamDE": "Kroatien",
+   "goals": 1
+  },
+  {
+   "name": "Rafael Leão",
+   "teamDE": "Portugal",
    "goals": 1
   },
   {
