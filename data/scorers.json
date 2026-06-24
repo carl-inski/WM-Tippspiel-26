@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-23T22:20:24.712Z",
+ "generatedAt": "2026-06-24T04:19:48.263Z",
  "source": "fussballdaten.de + football-data.org",
- "count": 99,
+ "count": 100,
  "scorers": [
   {
    "name": "Lionel Messi",
@@ -64,13 +64,18 @@
    "goals": 2
   },
   {
+   "name": "Daniel Muñoz",
+   "teamDE": "Kolumbien",
+   "goals": 2
+  },
+  {
    "name": "Elijah Just",
    "teamDE": "Neuseeland",
    "goals": 2
   },
   {
    "name": "Folarin Balogun",
-   "teamDE": null,
+   "teamDE": "USA",
    "goals": 2
   },
   {
@@ -169,6 +174,11 @@
    "goals": 1
   },
   {
+   "name": "Ante Budimir",
+   "teamDE": "Kroatien",
+   "goals": 1
+  },
+  {
    "name": "Anthony Elanga",
    "teamDE": "Schweden",
    "goals": 1
@@ -201,11 +211,6 @@
   {
    "name": "Connor Metcalfe",
    "teamDE": "Australien",
-   "goals": 1
-  },
-  {
-   "name": "Daniel Muñoz",
-   "teamDE": "Kolumbien",
    "goals": 1
   },
   {
