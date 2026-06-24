@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-24T04:19:48.263Z",
+ "generatedAt": "2026-06-24T09:48:31.368Z",
  "source": "fussballdaten.de + football-data.org",
- "count": 100,
+ "count": 99,
  "scorers": [
   {
    "name": "Lionel Messi",
@@ -136,11 +136,6 @@
   {
    "name": "Abdulelah Al Amri",
    "teamDE": "Saudi-Arabien",
-   "goals": 1
-  },
-  {
-   "name": "Abduvakhid Nematov",
-   "teamDE": "Portugal",
    "goals": 1
   },
   {
