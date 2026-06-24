@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-24T20:00:52.984Z",
+ "generatedAt": "2026-06-24T22:25:20.414Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -19,8 +19,18 @@
    "goals": 4
   },
   {
+   "name": "Vinicius Junior",
+   "teamDE": "Brasilien",
+   "goals": 4
+  },
+  {
    "name": "Deniz Undav",
    "teamDE": "Deutschland",
+   "goals": 3
+  },
+  {
+   "name": "Johan Manzambi",
+   "teamDE": "Schweiz",
    "goals": 3
   },
   {
@@ -74,6 +84,11 @@
    "goals": 2
   },
   {
+   "name": "Ermin Mahmic",
+   "teamDE": "Bosnien-Herzeg.",
+   "goals": 2
+  },
+  {
    "name": "Folarin Balogun",
    "teamDE": "USA",
    "goals": 2
@@ -91,11 +106,6 @@
   {
    "name": "Ismaïla Sarr",
    "teamDE": "Senegal",
-   "goals": 2
-  },
-  {
-   "name": "Johan Manzambi",
-   "teamDE": "Schweiz",
    "goals": 2
   },
   {
@@ -119,8 +129,8 @@
    "goals": 2
   },
   {
-   "name": "Vinicius Junior",
-   "teamDE": "Brasilien",
+   "name": "Rubén Vargas",
+   "teamDE": "Schweiz",
    "goals": 2
   },
   {
@@ -214,11 +224,6 @@
    "goals": 1
   },
   {
-   "name": "Ermin Mahmic",
-   "teamDE": "Bosnien-Herzeg.",
-   "goals": 1
-  },
-  {
    "name": "Felix Kalu Nmecha",
    "teamDE": "Deutschland",
    "goals": 1
@@ -306,11 +311,6 @@
   {
    "name": "Keito Nakamura",
    "teamDE": "Japan",
-   "goals": 1
-  },
-  {
-   "name": "Kerim Alajbegović",
-   "teamDE": "Bosnien-Herzeg.",
    "goals": 1
   },
   {
@@ -454,6 +454,11 @@
    "goals": 1
   },
   {
+   "name": "Promise Akinpelu",
+   "teamDE": "Kanada",
+   "goals": 1
+  },
+  {
    "name": "Rafael Leão",
    "teamDE": "Portugal",
    "goals": 1
@@ -471,11 +476,6 @@
   {
    "name": "Romano Schmid",
    "teamDE": "Österreich",
-   "goals": 1
-  },
-  {
-   "name": "Ruben Vargas",
-   "teamDE": "Schweiz",
    "goals": 1
   },
   {
