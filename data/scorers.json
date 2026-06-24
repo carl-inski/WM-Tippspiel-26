@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-24T17:13:20.338Z",
+ "generatedAt": "2026-06-24T20:00:52.984Z",
  "source": "fussballdaten.de + football-data.org",
- "count": 99,
+ "count": 100,
  "scorers": [
   {
    "name": "Lionel Messi",
@@ -306,6 +306,11 @@
   {
    "name": "Keito Nakamura",
    "teamDE": "Japan",
+   "goals": 1
+  },
+  {
+   "name": "Kerim Alajbegović",
+   "teamDE": "Bosnien-Herzeg.",
    "goals": 1
   },
   {
