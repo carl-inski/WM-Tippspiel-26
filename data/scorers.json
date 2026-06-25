@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-24T22:25:20.414Z",
+ "generatedAt": "2026-06-25T04:19:19.575Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -29,6 +29,11 @@
    "goals": 3
   },
   {
+   "name": "Ismael Saibari",
+   "teamDE": "Spanien",
+   "goals": 3
+  },
+  {
    "name": "Johan Manzambi",
    "teamDE": "Schweiz",
    "goals": 3
@@ -36,6 +41,11 @@
   {
    "name": "Jonathan David",
    "teamDE": "Kanada",
+   "goals": 3
+  },
+  {
+   "name": "Matheus Cunha",
+   "teamDE": "Brasilien",
    "goals": 3
   },
   {
@@ -99,23 +109,18 @@
    "goals": 2
   },
   {
-   "name": "Ismael Saibari",
-   "teamDE": "Spanien",
-   "goals": 2
-  },
-  {
    "name": "Ismaïla Sarr",
    "teamDE": "Senegal",
    "goals": 2
   },
   {
-   "name": "Kai Havertz",
-   "teamDE": "Deutschland",
+   "name": "Julián Quiñones",
+   "teamDE": "Kolumbien",
    "goals": 2
   },
   {
-   "name": "Matheus Cunha",
-   "teamDE": "Brasilien",
+   "name": "Kai Havertz",
+   "teamDE": "Deutschland",
    "goals": 2
   },
   {
@@ -296,11 +301,6 @@
   {
    "name": "Jude Bellingham",
    "teamDE": "England",
-   "goals": 1
-  },
-  {
-   "name": "Julián Quiñones",
-   "teamDE": "Mexiko",
    "goals": 1
   },
   {
