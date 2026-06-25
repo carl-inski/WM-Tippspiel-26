@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-25T20:18:57.694Z",
+ "generatedAt": "2026-06-25T22:40:53.538Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -131,6 +131,11 @@
   {
    "name": "Mikel Oyarzabal",
    "teamDE": "Spanien",
+   "goals": 2
+  },
+  {
+   "name": "Nicolas Pépé",
+   "teamDE": "Elfenbeinküste",
    "goals": 2
   },
   {
@@ -451,11 +456,6 @@
   {
    "name": "Petar Musa",
    "teamDE": "Kroatien",
-   "goals": 1
-  },
-  {
-   "name": "Promise Akinpelu",
-   "teamDE": "Kanada",
    "goals": 1
   },
   {
