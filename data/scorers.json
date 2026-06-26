@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-26T17:05:22.499Z",
+ "generatedAt": "2026-06-26T20:04:02.117Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -15,6 +15,11 @@
   },
   {
    "name": "Kylian Mbappé",
+   "teamDE": "Frankreich",
+   "goals": 4
+  },
+  {
+   "name": "Ousmane Dembélé",
    "teamDE": "Frankreich",
    "goals": 4
   },
@@ -446,11 +451,6 @@
   {
    "name": "Omar Rekik",
    "teamDE": "Tunesien",
-   "goals": 1
-  },
-  {
-   "name": "Ousmane Dembélé",
-   "teamDE": "Frankreich",
    "goals": 1
   },
   {
