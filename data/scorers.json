@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-27T21:47:43.344Z",
+ "generatedAt": "2026-06-27T22:47:31.100Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -41,6 +41,11 @@
   {
    "name": "Elijah Just",
    "teamDE": "Neuseeland",
+   "goals": 3
+  },
+  {
+   "name": "Harry Kane",
+   "teamDE": null,
    "goals": 3
   },
   {
@@ -119,8 +124,8 @@
    "goals": 2
   },
   {
-   "name": "Harry Kane",
-   "teamDE": "England",
+   "name": "Jude Bellingham",
+   "teamDE": null,
    "goals": 2
   },
   {
@@ -164,7 +169,7 @@
    "goals": 2
   },
   {
-   "name": "Rubén Vargas",
+   "name": "Ruben Vargas",
    "teamDE": "Schweiz",
    "goals": 2
   },
@@ -316,11 +321,6 @@
   {
    "name": "Jovo Lukić",
    "teamDE": "Bosnien-Herzeg.",
-   "goals": 1
-  },
-  {
-   "name": "Jude Bellingham",
-   "teamDE": "England",
    "goals": 1
   },
   {
