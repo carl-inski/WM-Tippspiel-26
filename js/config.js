@@ -7,7 +7,7 @@
  */
 window.APP_CONFIG = {
   // App-Version – wird im Footer angezeigt und mit jeder Änderung erhöht.
-  version: '1.8.0',
+  version: '1.8.1',
   proxyUrl: 'https://wm-tippspiel-proxy.f655fr7vs6.workers.dev',
   // Aktualisierungsintervall in Sekunden: schnell während laufender Spiele,
   // sparsam wenn gerade kein Spiel live ist (schont das API-/Worker-Limit).

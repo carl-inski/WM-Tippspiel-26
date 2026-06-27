@@ -1,0 +1,6 @@
+{
+  "_comment": "Paarungs-Korrekturen für K.o.-Spiele, deren Gegner im Datenfeed (football-data/Highlightly) noch nicht eingetragen ist, obwohl er feststeht. Schlüssel = Spiel-ID aus data/tippspiel.json, Werte = deutsche Teamnamen. Füllt nur Lücken: sobald der Feed die Teams liefert, gewinnen diese automatisch. Eintrag entfernen, sobald der Feed korrekt ist.",
+  "fixtures": {
+    "m075": { "home": "Deutschland", "away": "Paraguay" }
+  }
+}
