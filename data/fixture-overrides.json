@@ -1,6 +1,18 @@
 {
-  "_comment": "Paarungs-Korrekturen für K.o.-Spiele, deren Gegner im Datenfeed (football-data/Highlightly) noch nicht eingetragen ist, obwohl er feststeht. Schlüssel = Spiel-ID aus data/tippspiel.json, Werte = deutsche Teamnamen. Füllt nur Lücken: sobald der Feed die Teams liefert, gewinnen diese automatisch. Eintrag entfernen, sobald der Feed korrekt ist.",
+  "_comment": "Paarungs-Korrekturen für K.o.-Spiele, deren Gegner im Datenfeed (football-data/Highlightly) noch nicht (zuverlässig) eingetragen ist. Schlüssel = Spiel-ID aus data/tippspiel.json, Werte = deutsche Teamnamen (müssen Schlüssel in js/teams.js TEAMS sein). Füllt nur Lücken: sobald der Feed die Teams liefert, gewinnen diese automatisch. Bei noch unbestimmtem Gegner nur 'home' setzen. Stand: Sechzehntelfinale lt. Turnierbaum.",
   "fixtures": {
-    "m075": { "home": "Deutschland", "away": "Paraguay" }
+    "m073": { "home": "Südafrika", "away": "Kanada" },
+    "m074": { "home": "Brasilien", "away": "Japan" },
+    "m075": { "home": "Deutschland", "away": "Paraguay" },
+    "m076": { "home": "Niederlande", "away": "Marokko" },
+    "m077": { "home": "Elfenbeinküste", "away": "Norwegen" },
+    "m078": { "home": "Frankreich", "away": "Schweden" },
+    "m079": { "home": "Mexiko" },
+    "m081": { "home": "Belgien" },
+    "m082": { "home": "USA", "away": "Bosnien-Herzeg." },
+    "m083": { "home": "Spanien" },
+    "m085": { "home": "Schweiz" },
+    "m086": { "home": "Australien", "away": "Ägypten" },
+    "m087": { "home": "Argentinien", "away": "Kap Verde" }
   }
 }
