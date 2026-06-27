@@ -82,13 +82,29 @@
     }
   }
 
-  /* Wählt die beste Torschützenquelle: Highlightly-Events (akkurat) vor der
-     football-data-Liste vor der Excel – und legt die Korrekturen (Floor) drauf. */
+  /* Effektive Torschützenliste: kuratierte Basis (fussballdaten + football-data
+     aus data/scorers.json, volle Namen) PLUS die Live-Torschützen von
+     football-data (über den Worker, alle 20–60 s) – so erscheinen neue Tore in
+     Echtzeit, nicht erst beim nächsten Action-Lauf. Höchster Stand je Person
+     gewinnt; Korrekturen (Floor) zuletzt. */
   function bestScorers(apiScorers, fallbackManual) {
-    const src = (state.hlScorers && state.hlScorers.length) ? state.hlScorers
-      : (apiScorers && apiScorers.length) ? apiScorers
-        : (fallbackManual || state.data.manualScorers || []);
-    return applyScorerOverrides(src);
+    const curated = (state.hlScorers && state.hlScorers.length)
+      ? state.hlScorers
+      : (fallbackManual || state.data.manualScorers || []);
+    return applyScorerOverrides(mergeScorerLists(curated, apiScorers || []));
+  }
+
+  /* Führt zwei Schützenlisten zusammen (Personen-Abgleich, Max je Person). */
+  function mergeScorerLists(base, extra) {
+    const out = (base || []).map((s) => Object.assign({}, s));
+    for (const e of (extra || [])) {
+      if (!e || !e.name) continue;
+      const g = e.goals || 0;
+      const i = out.findIndex((r) => window.Scoring.samePerson(r.name, e.name));
+      if (i >= 0) { if (g > (out[i].goals || 0)) out[i].goals = g; }
+      else out.push({ name: e.name, goals: g, teamDE: e.teamDE || null, crest: e.crest || null });
+    }
+    return out;
   }
 
   /* Hebt einzelne Torschützen auf einen Mindest-Torstand an (Quelle hängt
