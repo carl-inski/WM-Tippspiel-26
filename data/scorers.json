@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-26T22:21:10.595Z",
+ "generatedAt": "2026-06-27T04:12:03.452Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -151,6 +151,11 @@
   {
    "name": "Pape Gueye",
    "teamDE": "Frankreich",
+   "goals": 2
+  },
+  {
+   "name": "Ramin Rezaeian",
+   "teamDE": "Iran",
    "goals": 2
   },
   {
@@ -461,11 +466,6 @@
   {
    "name": "Rafael Leão",
    "teamDE": "Portugal",
-   "goals": 1
-  },
-  {
-   "name": "Ramin Rezaeian",
-   "teamDE": "IR Iran",
    "goals": 1
   },
   {
