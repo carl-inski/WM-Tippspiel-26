@@ -52,7 +52,7 @@
     // Cache-Buster an die Daten-Fetches, damit aktualisierte Excel-Importe
     // (neue Ergebnisse/Tipps) zuverlässig beim Nutzer ankommen.
     const cb = '?v=' + (CFG.version || Date.now());
-    const [data, manual, scorerOv, resultOv, scorersFile] = await Promise.all([
+    const [data, manual, scorerOv, resultOv, scorersFile, fixtureOv] = await Promise.all([
       fetch('data/tippspiel.json' + cb).then((r) => {
         if (!r.ok) throw new Error('data/tippspiel.json nicht erreichbar (HTTP ' + r.status + ')');
         return r.json();
@@ -62,10 +62,13 @@
       fetch('data/result-overrides.json' + cb).then((r) => r.json()).catch(() => ({ results: {} })),
       // zeitbasierter Cache-Buster (5-Min-Granularität): wird per GitHub Action
       // laufend aktualisiert und soll ohne App-Versionssprung ankommen
-      fetch('data/scorers.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ scorers: [] }))
+      fetch('data/scorers.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ scorers: [] })),
+      fetch('data/fixture-overrides.json' + cb).then((r) => r.json()).catch(() => ({ fixtures: {} }))
     ]);
     state.data = data;
     state.manual = manual.results || {};
+    // Paarungs-Override für K.o.-Spiele, deren Gegner im Feed noch fehlt.
+    state.fixtureOverrides = (fixtureOv && fixtureOv.fixtures) || {};
     // Akkurate Torschützenliste aus Highlightly-Events (football-datas Aggregat
     // ist lückenhaft). Wird – wenn vorhanden – als Primärquelle genutzt.
     state.hlScorers = (scorersFile && scorersFile.scorers) || [];
@@ -334,9 +337,12 @@
 
   function teamsOf(m) {
     const info = matchInfo(m.id);
+    // Paarungs-Override füllt nur LÜCKEN (K.o.-Gegner, die der Feed noch nicht
+    // hat). Excel/Live-API gewinnen, sobald sie die Teams liefern.
+    const ov = (state.fixtureOverrides && state.fixtureOverrides[m.id]) || null;
     return {
-      home: m.home || (info && info.homeDE) || null,
-      away: m.away || (info && info.awayDE) || null
+      home: m.home || (info && info.homeDE) || (ov && ov.home) || null,
+      away: m.away || (info && info.awayDE) || (ov && ov.away) || null
     };
   }
 
