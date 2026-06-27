@@ -63,7 +63,9 @@
       // zeitbasierter Cache-Buster (5-Min-Granularität): wird per GitHub Action
       // laufend aktualisiert und soll ohne App-Versionssprung ankommen
       fetch('data/scorers.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ scorers: [] })),
-      fetch('data/fixture-overrides.json' + cb).then((r) => r.json()).catch(() => ({ fixtures: {} }))
+      // zeitbasierter Cache-Buster: Bracket-Updates (R16, VF …) sollen ohne
+      // App-Versionssprung ankommen
+      fetch('data/fixture-overrides.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ fixtures: {} }))
     ]);
     state.data = data;
     state.manual = manual.results || {};
