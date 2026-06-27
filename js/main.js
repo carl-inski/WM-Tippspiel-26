@@ -59,7 +59,7 @@
       }),
       fetch('data/manual-results.json' + cb).then((r) => r.json()).catch(() => ({ results: {} })),
       fetch('data/scorer-overrides.json' + cb).then((r) => r.json()).catch(() => ({ overrides: {} })),
-      fetch('data/result-overrides.json' + cb).then((r) => r.json()).catch(() => ({ results: {} })),
+      fetch('data/result-overrides.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ results: {} })),
       // zeitbasierter Cache-Buster (5-Min-Granularität): wird per GitHub Action
       // laufend aktualisiert und soll ohne App-Versionssprung ankommen
       fetch('data/scorers.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ scorers: [] })),
