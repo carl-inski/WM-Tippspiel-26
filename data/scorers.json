@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-27T23:47:38.432Z",
+ "generatedAt": "2026-06-28T01:58:25.441Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -74,6 +74,11 @@
    "goals": 3
   },
   {
+   "name": "Yoane Wissa",
+   "teamDE": "Frankreich",
+   "goals": 3
+  },
+  {
    "name": "Anthony Elanga",
    "teamDE": "Schweden",
    "goals": 2
@@ -125,7 +130,7 @@
   },
   {
    "name": "Jude Bellingham",
-   "teamDE": null,
+   "teamDE": "England",
    "goals": 2
   },
   {
@@ -496,11 +501,6 @@
   {
    "name": "Virgil van Dijk",
    "teamDE": "Niederlande",
-   "goals": 1
-  },
-  {
-   "name": "Yoane Wissa",
-   "teamDE": "Kongo",
    "goals": 1
   }
  ]
