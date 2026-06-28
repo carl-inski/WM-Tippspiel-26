@@ -47,6 +47,21 @@ function asNumber(cell) {
   return typeof v === 'number' ? v : null;
 }
 
+// Korrigiert abweichende/falsch geschriebene Teamnamen aus der Excel auf die
+// kanonischen deutschen Namen (Schlüssel in js/teams.js). Vor allem K.o.-Spiele
+// werden vom Organisator von Hand eingetippt (Tippfehler/englische Namen).
+const TEAM_ALIASES = {
+  'Mexico': 'Mexiko',
+  'Bosnien-Herzog.': 'Bosnien-Herzeg.',
+  'Bosnien-Herzegowina': 'Bosnien-Herzeg.',
+  'Südkorea': 'Südkorea',
+  'USA': 'USA'
+};
+function normTeam(name) {
+  if (!name) return null;
+  return TEAM_ALIASES[name] || name;
+}
+
 function colLetter(num) {
   let s = '';
   while (num > 0) {
@@ -100,8 +115,8 @@ async function importExcel(file) {
       round,
       // Anstoß in deutscher Zeit (MESZ, UTC+2 während der gesamten WM)
       kickoff: kickoffLocal + '+02:00',
-      home: asText(row.getCell(3)) || null,
-      away: asText(row.getCell(4)) || null,
+      home: normTeam(asText(row.getCell(3))) || null,
+      away: normTeam(asText(row.getCell(4))) || null,
       wert: asNumber(row.getCell(8)),
       result: (asNumber(row.getCell(5)) !== null && asNumber(row.getCell(7)) !== null)
         ? { home: asNumber(row.getCell(5)), away: asNumber(row.getCell(7)) }
