@@ -1,12 +1,12 @@
 {
- "generatedAt": "2026-06-28T01:58:25.441Z",
+ "generatedAt": "2026-06-28T06:35:18.209Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
   {
    "name": "Lionel Messi",
    "teamDE": "Argentinien",
-   "goals": 5
+   "goals": 6
   },
   {
    "name": "Erling Haaland",
@@ -149,6 +149,11 @@
    "goals": 2
   },
   {
+   "name": "Marko Arnautovic",
+   "teamDE": "Österreich",
+   "goals": 2
+  },
+  {
    "name": "Maxi Araújo",
    "teamDE": "Uruguay",
    "goals": 2
@@ -171,6 +176,11 @@
   {
    "name": "Ramin Rezaeian",
    "teamDE": "Iran",
+   "goals": 2
+  },
+  {
+   "name": "Riyad Mahrez",
+   "teamDE": "Frankreich",
    "goals": 2
   },
   {
@@ -384,11 +394,6 @@
    "goals": 1
   },
   {
-   "name": "Marko Arnautovic",
-   "teamDE": "Österreich",
-   "goals": 1
-  },
-  {
    "name": "Martin Baturina",
    "teamDE": "Kroatien",
    "goals": 1
@@ -456,11 +461,6 @@
   {
    "name": "Nizar Al Rashdan",
    "teamDE": "Jordanien",
-   "goals": 1
-  },
-  {
-   "name": "Nuno Mendes",
-   "teamDE": "Portugal",
    "goals": 1
   },
   {
