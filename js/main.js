@@ -68,6 +68,8 @@
       fetch('data/fixture-overrides.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ fixtures: {} }))
     ]);
     state.data = data;
+    // Original-Spielwert sichern (für die USA-0,2-Regel, idempotent).
+    state.data.matches.forEach((m) => { m._wert0 = m.wert; });
     state.manual = manual.results || {};
     // Paarungs-Override für K.o.-Spiele, deren Gegner im Feed noch fehlt.
     state.fixtureOverrides = (fixtureOv && fixtureOv.fixtures) || {};
@@ -142,7 +144,23 @@
     return res;
   }
 
+  /* Sonderregel des Organisators: Spiele mit USA-Beteiligung zählen nur 0,2 –
+     gilt auch für K.o.-Runden (Slot-Wert wird je nach Gegner überschrieben).
+     Greift dynamisch über die effektiven Teams (inkl. Paarungs-Override/API). */
+  function isUSA(name) {
+    const n = String(name || '').toLowerCase();
+    return n === 'usa' || n.includes('vereinigte staaten') || n.includes('united states');
+  }
+  function applyWertRules() {
+    for (const m of state.data.matches) {
+      const base = (m._wert0 != null) ? m._wert0 : m.wert;
+      const t = teamsOf(m);
+      m.wert = (isUSA(t.home) || isUSA(t.away)) ? 0.2 : base;
+    }
+  }
+
   function recompute() {
+    applyWertRules();
     const apiResults = state.apiState ? state.apiState.results : null;
     // Reihenfolge = Priorität (später gewinnt): Excel < manuell < API <
     // Ergebnis-Korrektur < Simulation. Die Korrektur überschreibt falsche
