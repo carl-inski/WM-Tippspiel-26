@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-29T20:59:48.645Z",
+ "generatedAt": "2026-06-29T22:17:22.350Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -66,6 +66,11 @@
   {
    "name": "Jonathan David",
    "teamDE": "Kanada",
+   "goals": 3
+  },
+  {
+   "name": "Kai Havertz",
+   "teamDE": "Deutschland",
    "goals": 3
   },
   {
@@ -136,11 +141,6 @@
   {
    "name": "Julián Quiñones",
    "teamDE": "Mexiko",
-   "goals": 2
-  },
-  {
-   "name": "Kai Havertz",
-   "teamDE": "Deutschland",
    "goals": 2
   },
   {
