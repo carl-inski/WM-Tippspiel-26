@@ -52,7 +52,7 @@
     // Cache-Buster an die Daten-Fetches, damit aktualisierte Excel-Importe
     // (neue Ergebnisse/Tipps) zuverlässig beim Nutzer ankommen.
     const cb = '?v=' + (CFG.version || Date.now());
-    const [data, manual, scorerOv, resultOv, scorersFile, fixtureOv] = await Promise.all([
+    const [data, manual, scorerOv, resultOv, scorersFile, fixtureOv, penaltyRes] = await Promise.all([
       fetch('data/tippspiel.json' + cb).then((r) => {
         if (!r.ok) throw new Error('data/tippspiel.json nicht erreichbar (HTTP ' + r.status + ')');
         return r.json();
@@ -65,7 +65,9 @@
       fetch('data/scorers.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ scorers: [] })),
       // zeitbasierter Cache-Buster: Bracket-Updates (R16, VF …) sollen ohne
       // App-Versionssprung ankommen
-      fetch('data/fixture-overrides.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ fixtures: {} }))
+      fetch('data/fixture-overrides.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ fixtures: {} })),
+      // automatisch gepinnte Elfer-Endstände (fussballdaten), zeitbasiert
+      fetch('data/penalty-results.json?t=' + Math.floor(Date.now() / 300000)).then((r) => r.json()).catch(() => ({ results: {} }))
     ]);
     state.data = data;
     // Original-Spielwert sichern (für die USA-0,2-Regel, idempotent).
@@ -85,6 +87,14 @@
     for (const [id, sc] of Object.entries((resultOv && resultOv.results) || {})) {
       if (sc && sc.home != null && sc.away != null) {
         state.resultOverrides[id] = { home: sc.home, away: sc.away, finished: true };
+      }
+    }
+    // Automatisch gepinnte Elfer-Endstände (fussballdaten) – gewinnen über die
+    // unzuverlässige API, weichen aber manuellen Ergebnis-Korrekturen.
+    state.penaltyResults = {};
+    for (const [id, sc] of Object.entries((penaltyRes && penaltyRes.results) || {})) {
+      if (sc && sc.home != null && sc.away != null) {
+        state.penaltyResults[id] = { home: sc.home, away: sc.away, finished: true };
       }
     }
   }
@@ -163,10 +173,10 @@
     applyWertRules();
     const apiResults = state.apiState ? state.apiState.results : null;
     // Reihenfolge = Priorität (später gewinnt): Excel < manuell < API <
-    // Ergebnis-Korrektur < Simulation. Die Korrektur überschreibt falsche
-    // API-Endergebnisse; die Simulation bleibt als Vorschau ganz oben.
+    // Elfer-Endstände (auto) < Ergebnis-Korrektur (manuell) < Simulation.
     state.results = window.Scoring.mergeResults(
-      excelResults(), state.manual, apiResults, state.resultOverrides, simResults());
+      excelResults(), state.manual, apiResults,
+      state.penaltyResults, state.resultOverrides, simResults());
     state.standings = window.Scoring.computeStandings(
       state.data, state.results, simulatedExtras());
     state.families = window.Scoring.computeFamilyStandings(state.data, state.standings);
