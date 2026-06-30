@@ -110,11 +110,21 @@ async function overlayLive(fd, env) {
 
   let overlaid = 0;
   for (const hm of hl) {
-    const sc = parseScore(hm.state && hm.state.score && hm.state.score.current);
-    if (!sc) continue;
-    const desc = hm.state && hm.state.description;
-    const finished = String(desc || '').toLowerCase() === 'finished';
+    const st = (hm.state) || {};
+    const reg = parseScore(st.score && st.score.current);
+    if (!reg) continue;
+    const desc = st.description;
+    // "Finished", "Finished after penalties", "After extra time", … = beendet
+    const finished = /finish|ended|after (extra|penalt)|full.?time|\baet\b/i.test(String(desc || ''));
     if (!finished && !isLiveDesc(desc)) continue;
+
+    // Bei Elfmeterschießen den Gesamtstand (Reguläres + Elfmeter) bilden,
+    // damit NUR das Endergebnis erscheint (z. B. 1:1 + 2:3 -> 3:4).
+    const pen = parseScore(st.score && st.score.penalties);
+    const sc = (finished && pen)
+      ? { home: reg.home + pen.home, away: reg.away + pen.away }
+      : reg;
+    const penaltyShootout = !!(finished && pen);
 
     const t = Date.parse(hm.date);
     const cand = matches.filter((m) =>
@@ -127,7 +137,7 @@ async function overlayLive(fd, env) {
 
     fdm.score = fdm.score || {};
     fdm.score.fullTime = { home: sc.home, away: sc.away };
-    if (!fdm.score.duration) fdm.score.duration = 'REGULAR';
+    fdm.score.duration = penaltyShootout ? 'PENALTY_SHOOTOUT' : (fdm.score.duration || 'REGULAR');
     fdm.status = finished ? 'FINISHED' : 'IN_PLAY';
     overlaid++;
   }
