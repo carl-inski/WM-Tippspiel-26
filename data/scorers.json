@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-30T16:58:12.812Z",
+ "generatedAt": "2026-06-30T19:02:07.742Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -11,7 +11,7 @@
   {
    "name": "Erling Haaland",
    "teamDE": null,
-   "goals": 4
+   "goals": 5
   },
   {
    "name": "Kylian Mbappé",
@@ -87,6 +87,11 @@
    "name": "Yoane Wissa",
    "teamDE": "Frankreich",
    "goals": 3
+  },
+  {
+   "name": "Amad Diallo",
+   "teamDE": "Elfenbeinküste",
+   "goals": 2
   },
   {
    "name": "Anthony Elanga",
@@ -221,11 +226,6 @@
   {
    "name": "Ali Olwan",
    "teamDE": "Jordanien",
-   "goals": 1
-  },
-  {
-   "name": "Amad Diallo",
-   "teamDE": "Elfenbeinküste",
    "goals": 1
   },
   {
