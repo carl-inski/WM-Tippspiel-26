@@ -526,11 +526,10 @@
 
     const sc = el('div', 'mscore' + (sim ? ' sim' : live ? ' live' : res ? '' : ' upcoming'));
     if (res) {
+      // Nur das Endergebnis. Bei Elfmeterschießen liefert die Quelle in
+      // fullTime bereits den Gesamtstand inkl. Elfmeter (z. B. 3:4) – kein
+      // separater "i. E."-Zusatz, damit nichts hin- und herspringt.
       sc.textContent = res.home + ' : ' + res.away;
-      const info = matchInfo(m.id);
-      if (info && info.penalties && info.penalties.home != null) {
-        sc.textContent += ' (' + info.penalties.home + ':' + info.penalties.away + ' i. E.)';
-      }
     } else {
       sc.textContent = '– : –';
     }
