@@ -31,6 +31,7 @@ function makeApp({ proxyUrl = '', apiPayloads = null, seedSnapshot = null } = {}
     if (u.includes('result-overrides.json')) return { ok: true, json: async () => ({ results: {} }) };
     if (u.includes('scorers.json')) return { ok: true, json: async () => ({ scorers: [] }) };
     if (u.includes('fixture-overrides.json')) return { ok: true, json: async () => ({ fixtures: {} }) };
+    if (u.includes('penalty-results.json')) return { ok: true, json: async () => ({ results: {} }) };
     if (apiPayloads && u.endsWith('/matches')) {
       return { ok: true, json: async () => apiPayloads.matches };
     }

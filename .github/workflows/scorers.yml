@@ -1,11 +1,9 @@
-name: Refresh scorers
+name: Refresh data
 
-# Aktualisiert data/scorers.json (Torschützenliste der Web-App) alle ~10 Min.
-# Quellen: fussballdaten.de (Führende) + football-data.org via Worker (kompletter
-# Rest). Beide frei & schlüssellos – KEIN Secret nötig.
-# Hinweis: GitHubs Cron ist "best effort" und kann sich verzögern. Neue Tore
-# erscheinen aber ohnehin in Echtzeit über die Live-Daten (Worker); diese Action
-# hält nur die kuratierte Voll-Liste (volle Namen) frisch.
+# Aktualisiert alle ~10 Min (frei & schlüssellos, KEIN Secret nötig):
+#  - data/scorers.json         Torschützenliste (fussballdaten + football-data)
+#  - data/penalty-results.json korrekte Elfer-Endstände (fussballdaten "n.E.")
+# Hinweis: GitHubs Cron ist "best effort" und kann sich verzögern.
 
 on:
   schedule:
@@ -29,13 +27,15 @@ jobs:
           node-version: 20
       - name: Torschützenliste bauen
         run: node tools/build-scorers.js
+      - name: Elfer-Endstände bauen
+        run: node tools/build-penalties.js
       - name: Bei Änderung committen
         run: |
-          if ! git diff --quiet -- data/scorers.json; then
+          if ! git diff --quiet -- data/scorers.json data/penalty-results.json; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add data/scorers.json
-            git commit -m "data: refresh scorers (fussballdaten + football-data)"
+            git add data/scorers.json data/penalty-results.json
+            git commit -m "data: refresh scorers + penalty results"
             git push
           else
             echo "Keine Änderung."
