@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-30T01:35:51.417Z",
+ "generatedAt": "2026-06-30T05:55:15.491Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -30,6 +30,11 @@
   },
   {
    "name": "Brian Brobbey",
+   "teamDE": "Niederlande",
+   "goals": 3
+  },
+  {
+   "name": "Cody Gakpo",
    "teamDE": "Niederlande",
    "goals": 3
   },
@@ -91,11 +96,6 @@
   {
    "name": "Ayase Ueda",
    "teamDE": "Japan",
-   "goals": 2
-  },
-  {
-   "name": "Cody Gakpo",
-   "teamDE": "Niederlande",
    "goals": 2
   },
   {
@@ -175,7 +175,7 @@
   },
   {
    "name": "Ramin Rezaeian",
-   "teamDE": "Iran",
+   "teamDE": "IR Iran",
    "goals": 2
   },
   {
