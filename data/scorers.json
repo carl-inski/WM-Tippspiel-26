@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-01T20:19:40.805Z",
+ "generatedAt": "2026-07-01T21:57:06.368Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -22,6 +22,11 @@
    "name": "Harry Kane",
    "teamDE": null,
    "goals": 5
+  },
+  {
+   "name": "Ismaïla Sarr",
+   "teamDE": "Senegal",
+   "goals": 4
   },
   {
    "name": "Ousmane Dembélé",
@@ -56,11 +61,6 @@
   {
    "name": "Ismael Saibari",
    "teamDE": "Spanien",
-   "goals": 3
-  },
-  {
-   "name": "Ismaïla Sarr",
-   "teamDE": "Senegal",
    "goals": 3
   },
   {
@@ -149,6 +149,11 @@
    "goals": 2
   },
   {
+   "name": "Habib Diarra",
+   "teamDE": "Senegal",
+   "goals": 2
+  },
+  {
    "name": "Jude Bellingham",
    "teamDE": "England",
    "goals": 2
@@ -195,7 +200,12 @@
   },
   {
    "name": "Riyad Mahrez",
-   "teamDE": "Frankreich",
+   "teamDE": "Algerien",
+   "goals": 2
+  },
+  {
+   "name": "Romelu Lukaku",
+   "teamDE": "Belgien",
    "goals": 2
   },
   {
@@ -236,11 +246,6 @@
   {
    "name": "Ali Olwan",
    "teamDE": "Jordanien",
-   "goals": 1
-  },
-  {
-   "name": "Amine Gouiri",
-   "teamDE": "Algerien",
    "goals": 1
   },
   {
@@ -436,11 +441,6 @@
   {
    "name": "Mostafa Ziko",
    "teamDE": "Ägypten",
-   "goals": 1
-  },
-  {
-   "name": "Nadhir Benbouali",
-   "teamDE": "Algerien",
    "goals": 1
   },
   {
