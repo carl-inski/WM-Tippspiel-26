@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-01T16:08:50.551Z",
+ "generatedAt": "2026-07-01T18:16:59.636Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -15,6 +15,11 @@
   },
   {
    "name": "Erling Haaland",
+   "teamDE": null,
+   "goals": 5
+  },
+  {
+   "name": "Harry Kane",
    "teamDE": null,
    "goals": 5
   },
@@ -46,11 +51,6 @@
   {
    "name": "Elijah Just",
    "teamDE": "Neuseeland",
-   "goals": 3
-  },
-  {
-   "name": "Harry Kane",
-   "teamDE": null,
    "goals": 3
   },
   {
