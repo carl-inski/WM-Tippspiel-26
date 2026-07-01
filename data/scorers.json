@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-06-30T23:49:48.387Z",
+ "generatedAt": "2026-07-01T02:37:29.172Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -71,6 +71,11 @@
   {
    "name": "Jonathan David",
    "teamDE": "Kanada",
+   "goals": 3
+  },
+  {
+   "name": "Julián Quiñones",
+   "teamDE": "Kolumbien",
    "goals": 3
   },
   {
@@ -149,11 +154,6 @@
    "goals": 2
   },
   {
-   "name": "Julián Quiñones",
-   "teamDE": "Mexiko",
-   "goals": 2
-  },
-  {
    "name": "Leandro Trossard",
    "teamDE": "Belgien",
    "goals": 2
@@ -186,6 +186,11 @@
   {
    "name": "Ramin Rezaeian",
    "teamDE": "IR Iran",
+   "goals": 2
+  },
+  {
+   "name": "Raúl Jiménez",
+   "teamDE": "Mexiko",
    "goals": 2
   },
   {
@@ -471,11 +476,6 @@
   {
    "name": "Petar Musa",
    "teamDE": "Kroatien",
-   "goals": 1
-  },
-  {
-   "name": "Raúl Jiménez",
-   "teamDE": "Mexiko",
    "goals": 1
   },
   {
