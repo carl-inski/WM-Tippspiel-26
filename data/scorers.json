@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-01T21:57:06.368Z",
+ "generatedAt": "2026-07-01T23:23:57.916Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -216,6 +216,11 @@
   {
    "name": "Yasin Ayari",
    "teamDE": "Schweden",
+   "goals": 2
+  },
+  {
+   "name": "Youri Tielemans",
+   "teamDE": "Belgien",
    "goals": 2
   },
   {
@@ -461,11 +466,6 @@
   {
    "name": "Nico Schlotterbeck",
    "teamDE": "Deutschland",
-   "goals": 1
-  },
-  {
-   "name": "Nizar Al Rashdan",
-   "teamDE": "Jordanien",
    "goals": 1
   },
   {
