@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-02T18:54:37.720Z",
+ "generatedAt": "2026-07-02T20:22:31.943Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -94,6 +94,11 @@
    "goals": 3
   },
   {
+   "name": "Mikel Oyarzabal",
+   "teamDE": "Spanien",
+   "goals": 3
+  },
+  {
    "name": "Yoane Wissa",
    "teamDE": "Frankreich",
    "goals": 3
@@ -171,11 +176,6 @@
   {
    "name": "Maximiliano Araújo",
    "teamDE": "Uruguay",
-   "goals": 2
-  },
-  {
-   "name": "Mikel Oyarzabal",
-   "teamDE": "Spanien",
    "goals": 2
   },
   {
