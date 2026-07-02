@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-01T23:23:57.916Z",
+ "generatedAt": "2026-07-02T01:33:32.123Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -56,6 +56,11 @@
   {
    "name": "Elijah Just",
    "teamDE": "Neuseeland",
+   "goals": 3
+  },
+  {
+   "name": "Folarin Balogun",
+   "teamDE": null,
    "goals": 3
   },
   {
@@ -141,11 +146,6 @@
   {
    "name": "Ermin Mahmic",
    "teamDE": "Bosnien-Herzeg.",
-   "goals": 2
-  },
-  {
-   "name": "Folarin Balogun",
-   "teamDE": "USA",
    "goals": 2
   },
   {
