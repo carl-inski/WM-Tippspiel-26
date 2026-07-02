@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-02T20:22:31.943Z",
+ "generatedAt": "2026-07-02T21:45:58.671Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -26,6 +26,11 @@
   {
    "name": "Ismaïla Sarr",
    "teamDE": "Senegal",
+   "goals": 4
+  },
+  {
+   "name": "Mikel Oyarzabal",
+   "teamDE": "Spanien",
    "goals": 4
   },
   {
@@ -91,11 +96,6 @@
   {
    "name": "Matheus Cunha",
    "teamDE": "Brasilien",
-   "goals": 3
-  },
-  {
-   "name": "Mikel Oyarzabal",
-   "teamDE": "Spanien",
    "goals": 3
   },
   {
