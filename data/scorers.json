@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-03T18:02:17.070Z",
+ "generatedAt": "2026-07-03T19:46:58.159Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -154,6 +154,11 @@
    "goals": 2
   },
   {
+   "name": "Emam Ashour",
+   "teamDE": "Ägypten",
+   "goals": 2
+  },
+  {
    "name": "Ermin Mahmic",
    "teamDE": "Bosnien-Herzeg.",
    "goals": 2
@@ -276,11 +281,6 @@
   {
    "name": "Connor Metcalfe",
    "teamDE": "Australien",
-   "goals": 1
-  },
-  {
-   "name": "Emam Ashour",
-   "teamDE": "Ägypten",
    "goals": 1
   },
   {
