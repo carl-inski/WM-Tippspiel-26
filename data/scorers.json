@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-03T00:11:59.195Z",
+ "generatedAt": "2026-07-03T04:13:32.701Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -54,6 +54,11 @@
    "goals": 3
   },
   {
+   "name": "Cristiano Ronaldo",
+   "teamDE": "Portugal",
+   "goals": 3
+  },
+  {
    "name": "Deniz Undav",
    "teamDE": "Deutschland",
    "goals": 3
@@ -65,7 +70,7 @@
   },
   {
    "name": "Folarin Balogun",
-   "teamDE": null,
+   "teamDE": "USA",
    "goals": 3
   },
   {
@@ -124,8 +129,8 @@
    "goals": 2
   },
   {
-   "name": "Cristiano Ronaldo",
-   "teamDE": "Portugal",
+   "name": "Breel Embolo",
+   "teamDE": "Schweiz",
    "goals": 2
   },
   {
@@ -261,11 +266,6 @@
   {
    "name": "Boualem Khoukhi",
    "teamDE": "Katar",
-   "goals": 1
-  },
-  {
-   "name": "Breel Embolo",
-   "teamDE": "Schweiz",
    "goals": 1
   },
   {
