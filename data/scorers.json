@@ -1,16 +1,16 @@
 {
- "generatedAt": "2026-07-03T21:52:54.984Z",
+ "generatedAt": "2026-07-03T23:10:53.340Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
   {
-   "name": "Kylian Mbappé",
-   "teamDE": "Frankreich",
-   "goals": 6
-  },
-  {
    "name": "Lionel Messi",
    "teamDE": "Argentinien",
+   "goals": 7
+  },
+  {
+   "name": "Kylian Mbappé",
+   "teamDE": "Frankreich",
    "goals": 6
   },
   {
