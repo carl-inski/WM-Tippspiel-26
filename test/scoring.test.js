@@ -21,6 +21,20 @@ function excelResults() {
   return res;
 }
 
+/* Offenes Spiel (Team bekannt, noch kein Ergebnis) MIT Tipp-Streuung finden –
+   bei einseitigen Favoritenpaarungen tippen ggf. alle dieselbe Tendenz, dann
+   liefert jedes simulierte Ergebnis für alle denselben Live-Effekt (0 oder
+   alle gleich) statt echter Gewinner/Verlierer. */
+function openMatchWithTipSpread() {
+  const signOf = (t) => Math.sign(t[0] - t[1]);
+  for (const m of data.matches) {
+    if (m.result || !m.home) continue;
+    const tips = data.players.map((p) => p.tips[m.id]).filter(Boolean);
+    if (new Set(tips.map(signOf)).size >= 2) return m;
+  }
+  throw new Error('kein offenes Spiel mit gestreuten Tipps gefunden');
+}
+
 test('Import: Struktur vollständig', () => {
   assert.equal(data.players.length, 72);
   assert.equal(data.matches.length, 104);
@@ -61,7 +75,7 @@ test('matchPoints: exakt, Tendenz, daneben', () => {
 
 test('Live-Punkte werden getrennt ausgewiesen', () => {
   const results = excelResults();
-  const firstOpen = data.matches.find((m) => !m.result && m.home);
+  const firstOpen = openMatchWithTipSpread();
   results[firstOpen.id] = { home: 1, away: 0, live: true };
   const standings = Scoring.computeStandings(data, results);
   const someoneLive = standings.some((r) => r.livePoints > 0);
@@ -79,7 +93,7 @@ test('Rangdelta: Basis-Rang ohne Live, Bewegung durch Live-Spiel', () => {
 
   // Ein laufendes Spiel bewegt die Rangliste; rankDelta = baseRank - rank
   const results = excelResults();
-  const open = data.matches.find((m) => !m.result && m.home);
+  const open = openMatchWithTipSpread();
   results[open.id] = { home: 1, away: 0, live: true };
   const live = Scoring.computeStandings(data, results);
   assert.ok(live.every((r) => r.rankDelta === r.baseRank - r.rank), 'Delta-Formel');
