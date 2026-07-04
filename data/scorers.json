@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-04T17:50:23.833Z",
+ "generatedAt": "2026-07-04T19:22:33.902Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -124,6 +124,11 @@
    "goals": 2
   },
   {
+   "name": "Azzedine Ounahi",
+   "teamDE": "Marokko",
+   "goals": 2
+  },
+  {
    "name": "Bradley Barcola",
    "teamDE": "Frankreich",
    "goals": 2
@@ -221,6 +226,11 @@
   {
    "name": "Ruben Vargas",
    "teamDE": "Schweiz",
+   "goals": 2
+  },
+  {
+   "name": "Soufiane Rahimi",
+   "teamDE": "Marokko",
    "goals": 2
   },
   {
@@ -399,11 +409,6 @@
    "goals": 1
   },
   {
-   "name": "Marcus Pedersen",
-   "teamDE": "Norwegen",
-   "goals": 1
-  },
-  {
    "name": "Marcus Rashford",
    "teamDE": "England",
    "goals": 1
@@ -486,11 +491,6 @@
   {
    "name": "Teboho Mokoena",
    "teamDE": "Südafrika",
-   "goals": 1
-  },
-  {
-   "name": "Trezeguet",
-   "teamDE": "Ägypten",
    "goals": 1
   },
   {
