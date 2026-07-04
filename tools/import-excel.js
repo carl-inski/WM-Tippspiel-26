@@ -54,6 +54,7 @@ const TEAM_ALIASES = {
   'Mexico': 'Mexiko',
   'Bosnien-Herzog.': 'Bosnien-Herzeg.',
   'Bosnien-Herzegowina': 'Bosnien-Herzeg.',
+  'Argentinen': 'Argentinien',
   'Südkorea': 'Südkorea',
   'USA': 'USA'
 };
