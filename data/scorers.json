@@ -1,8 +1,13 @@
 {
- "generatedAt": "2026-07-05T21:41:13.265Z",
+ "generatedAt": "2026-07-05T22:43:49.214Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
+  {
+   "name": "Erling Haaland",
+   "teamDE": null,
+   "goals": 7
+  },
   {
    "name": "Kylian Mbappé",
    "teamDE": "Frankreich",
@@ -12,11 +17,6 @@
    "name": "Lionel Messi",
    "teamDE": "Argentinien",
    "goals": 7
-  },
-  {
-   "name": "Erling Haaland",
-   "teamDE": null,
-   "goals": 5
   },
   {
    "name": "Harry Kane",
