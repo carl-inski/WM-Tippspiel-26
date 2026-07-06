@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-05T23:49:28.145Z",
+ "generatedAt": "2026-07-06T02:08:08.866Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -26,6 +26,16 @@
   {
    "name": "Ismaïla Sarr",
    "teamDE": "Senegal",
+   "goals": 4
+  },
+  {
+   "name": "Jude Bellingham",
+   "teamDE": null,
+   "goals": 4
+  },
+  {
+   "name": "Julián Quiñones",
+   "teamDE": "Kolumbien",
    "goals": 4
   },
   {
@@ -86,11 +96,6 @@
   {
    "name": "Jonathan David",
    "teamDE": "Kanada",
-   "goals": 3
-  },
-  {
-   "name": "Julián Quiñones",
-   "teamDE": "Kolumbien",
    "goals": 3
   },
   {
@@ -171,11 +176,6 @@
   {
    "name": "Habib Diarra",
    "teamDE": "Senegal",
-   "goals": 2
-  },
-  {
-   "name": "Jude Bellingham",
-   "teamDE": "England",
    "goals": 2
   },
   {
