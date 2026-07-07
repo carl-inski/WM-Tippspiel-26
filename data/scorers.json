@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-06T23:51:34.299Z",
+ "generatedAt": "2026-07-07T03:56:26.137Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -114,6 +114,11 @@
    "goals": 3
   },
   {
+   "name": "Romelu Lukaku",
+   "teamDE": "Belgien",
+   "goals": 3
+  },
+  {
    "name": "Yoane Wissa",
    "teamDE": "Frankreich",
    "goals": 3
@@ -146,6 +151,11 @@
   {
    "name": "Breel Embolo",
    "teamDE": "Schweiz",
+   "goals": 2
+  },
+  {
+   "name": "Charles De Ketelaere",
+   "teamDE": "Belgien",
    "goals": 2
   },
   {
@@ -189,6 +199,11 @@
    "goals": 2
   },
   {
+   "name": "Malik Tillman",
+   "teamDE": "USA",
+   "goals": 2
+  },
+  {
    "name": "Marko Arnautovic",
    "teamDE": "Österreich",
    "goals": 2
@@ -216,11 +231,6 @@
   {
    "name": "Riyad Mahrez",
    "teamDE": "Algerien",
-   "goals": 2
-  },
-  {
-   "name": "Romelu Lukaku",
-   "teamDE": "Belgien",
    "goals": 2
   },
   {
@@ -439,18 +449,8 @@
    "goals": 1
   },
   {
-   "name": "Mohamed Salah",
-   "teamDE": "Ägypten",
-   "goals": 1
-  },
-  {
    "name": "Mohammad Mohebi",
    "teamDE": "IR Iran",
-   "goals": 1
-  },
-  {
-   "name": "Mostafa Ziko",
-   "teamDE": "Ägypten",
    "goals": 1
   },
   {
