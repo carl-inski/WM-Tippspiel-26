@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-07T22:47:25.668Z",
+ "generatedAt": "2026-07-07T23:41:34.683Z",
  "source": "fussballdaten.de (n.E.)",
  "count": 4,
  "results": {
@@ -16,8 +16,8 @@
    "away": 5
   },
   "m096": {
-   "home": 0,
-   "away": 0
+   "home": 4,
+   "away": 3
   }
  }
 }
