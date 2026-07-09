@@ -1,8 +1,13 @@
 {
- "generatedAt": "2026-07-09T20:11:39.825Z",
+ "generatedAt": "2026-07-09T21:51:40.900Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
+  {
+   "name": "Kylian Mbappé",
+   "teamDE": "Frankreich",
+   "goals": 8
+  },
   {
    "name": "Lionel Messi",
    "teamDE": "Argentinien",
@@ -14,14 +19,14 @@
    "goals": 7
   },
   {
-   "name": "Kylian Mbappé",
-   "teamDE": "Frankreich",
-   "goals": 7
-  },
-  {
    "name": "Harry Kane",
    "teamDE": null,
    "goals": 6
+  },
+  {
+   "name": "Ousmane Dembélé",
+   "teamDE": "Frankreich",
+   "goals": 5
   },
   {
    "name": "Ismaïla Sarr",
@@ -41,11 +46,6 @@
   {
    "name": "Mikel Oyarzabal",
    "teamDE": "Spanien",
-   "goals": 4
-  },
-  {
-   "name": "Ousmane Dembélé",
-   "teamDE": "Frankreich",
    "goals": 4
   },
   {
