@@ -975,11 +975,80 @@ footer {
 .bonus-row:last-child { border-bottom: none; }
 .bonus-row.win { background: rgba(110, 231, 160, 0.08); }
 .bonus-row.out { opacity: 0.5; }
-.bonus-row .bonus-count { color: var(--text-dim); font-weight: 600; }
+.bonus-team { font-weight: 700; }
+
+/* Rechte Spalte: Tipp-Anzahl (Pille) + Punkte, mit klaren Abständen */
+.bonus-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.bonus-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
 .bonus-pts { white-space: nowrap; font-weight: 800; font-variant-numeric: tabular-nums; }
 .bonus-plus { color: var(--accent); }
 .bonus-minus { color: var(--live); }
 .bonus-out { color: var(--text-dim); font-size: 0.78rem; font-weight: 600; }
+
+/* Ausklapp-Knopf (Torschützenliste) */
+.expand-btn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s var(--ease);
+}
+.expand-btn:hover { background: rgba(255, 255, 255, 0.09); }
+
+/* Aktionsleiste (Elferschießen anwenden / zurücksetzen) */
+.bonus-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.bonus-apply {
+  flex: 1;
+  padding: 11px 16px;
+  border-radius: var(--radius-s);
+  border: 1px solid rgba(110, 231, 160, 0.5);
+  background: rgba(110, 231, 160, 0.16);
+  color: #d6f7e5;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s var(--ease), transform 0.1s;
+}
+.bonus-apply:hover { background: rgba(110, 231, 160, 0.24); }
+.bonus-apply:active { transform: scale(0.98); }
+.bonus-apply.done {
+  border-color: var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  cursor: default;
+}
+.bonus-apply.done:hover { background: rgba(255, 255, 255, 0.05); }
 
 .so-num {
   display: inline-flex;

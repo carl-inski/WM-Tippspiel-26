@@ -18,7 +18,9 @@
     simGoals: {},        // { kanonischerName: +n } – simulierte WM-Tore (Torjäger)
     // Manuell gesetzte Zusatzfragen-Ergebnisse (Bonus-Tab): Weltmeister-Team
     // und Anzahl Elfmeterschießen. Fließen sofort in die Wertung ein.
-    bonusSet: { champion: null, shootouts: null }
+    bonusSet: { champion: null, shootouts: null },
+    bonusDraft: null,        // Stepper-Wert (Elfer), noch nicht angewendet
+    scorersExpanded: false   // volle WM-Torschützenliste ausgeklappt?
   };
   const BONUS_KEY = 'wm26-bonus-set';
 
@@ -312,7 +314,14 @@
   }
   function setBonusShootouts(n) {
     state.bonusSet.shootouts = (n == null) ? null : Math.max(0, n | 0);
+    if (n == null) state.bonusDraft = null;      // Reset -> Stepper wieder Default
+    else state.bonusDraft = state.bonusSet.shootouts;
     saveBonusSet(); recompute(); render();
+  }
+  // Stepper nur den Entwurf ändern (noch NICHT auf die Wertung anwenden)
+  function setShootoutDraft(n) {
+    state.bonusDraft = Math.max(0, n | 0);
+    render();
   }
   function bonusIsSet() {
     return !!(state.bonusSet.champion || state.bonusSet.shootouts != null);
@@ -1024,12 +1033,24 @@
     if (!merged.length) {
       allCard.appendChild(el('p', 'empty-hint', 'Noch keine Tore bei der WM.'));
     }
+    // Dichte Platzierung + Einklappen: standardmäßig nur bis Platz 5 zeigen.
     let aRank = 0, aPrev = NaN;
-    merged.forEach((s) => {
+    const ranked = merged.map((s) => {
       if (s.goals !== aPrev) { aRank += 1; aPrev = s.goals; }
-      allCard.appendChild(
-        scorerRow(String(aRank), s.name, teamFor(s.name), picksByCanon.get(s.name), false, false));
+      return { name: s.name, rank: aRank };
     });
+    const collapsedCount = ranked.filter((r) => r.rank <= 5).length;
+    const hasMore = ranked.length > collapsedCount;
+    const visible = state.scorersExpanded ? ranked : ranked.slice(0, collapsedCount);
+    visible.forEach((s) => allCard.appendChild(
+      scorerRow(String(s.rank), s.name, teamFor(s.name), picksByCanon.get(s.name), false, false)));
+    if (hasMore) {
+      const btn = el('button', 'expand-btn', state.scorersExpanded
+        ? 'Weniger anzeigen'
+        : 'Alle ' + ranked.length + ' Torschützen anzeigen');
+      btn.addEventListener('click', () => { state.scorersExpanded = !state.scorersExpanded; render(); });
+      allCard.appendChild(btn);
+    }
     view.appendChild(allCard);
 
     // ---- 3) Weltmeister-Bonus  ---- 4) Elfmeterschießen-Bonus ----
@@ -1086,16 +1107,14 @@
       if (window.Teams.TEAMS[r.team]) row.appendChild(flagImg(r.team));
       else row.appendChild(ballPlaceholder());
       const nameWrap = el('span', 'scorer-name');
-      const head = el('span', '');
-      head.appendChild(el('b', '', r.team));
-      head.appendChild(el('span', 'bonus-count', ' · ' + r.names.length));
-      nameWrap.appendChild(head);
+      nameWrap.appendChild(el('b', 'bonus-team', r.team));
       nameWrap.appendChild(el('span', 'picks',
         r.names.slice(0, 8).join(', ') + (r.names.length > 8 ? ' +' + (r.names.length - 8) : '')));
       row.appendChild(nameWrap);
-      const right = el('span', 'bonus-pts');
-      if (won) right.appendChild(el('span', 'bonus-plus', '+' + fmtPts(champPts) + ' P.'));
-      else if (!r.alive) right.appendChild(el('span', 'bonus-out', 'ausgeschieden'));
+      const right = el('span', 'bonus-right');
+      right.appendChild(el('span', 'bonus-count', String(r.names.length)));
+      if (won) right.appendChild(el('span', 'bonus-pts bonus-plus', '+' + fmtPts(champPts)));
+      else if (!r.alive) right.appendChild(el('span', 'bonus-out', 'raus'));
       row.appendChild(right);
       card.appendChild(row);
     }
@@ -1114,36 +1133,39 @@
 
     const detected = state.apiState && state.apiState.extras
       ? state.apiState.extras.shootoutCount : null;
-    const set = state.bonusSet.shootouts;
-    const cur = (set != null) ? set : (detected != null ? detected : 0);
-    const applied = set != null;
+    const applied = state.bonusSet.shootouts; // angewendeter Stand (oder null)
+    // Stepper-Wert (Entwurf): eigener Draft, sonst angewendet, sonst erkannt, sonst 0
+    const draft = state.bonusDraft != null ? state.bonusDraft
+      : (applied != null ? applied : (detected != null ? detected : 0));
 
     const ctl = el('div', 'shootout-control');
-    ctl.appendChild(el('span', 'sc-label', 'Elferschießen gesamt'));
+    ctl.appendChild(el('span', 'sc-label', 'Anzahl Elferschießen'));
     const stepper = el('div', 'sim-stepper');
     const minus = el('button', 'sim-step', '−');
     minus.setAttribute('aria-label', 'weniger');
-    minus.addEventListener('click', () => setBonusShootouts(cur - 1));
-    const val = el('span', 'sim-val', String(cur));
+    minus.addEventListener('click', () => setShootoutDraft(draft - 1));
+    stepper.appendChild(minus);
+    stepper.appendChild(el('span', 'sim-val', String(draft)));
     const plus = el('button', 'sim-step', '+');
     plus.setAttribute('aria-label', 'mehr');
-    plus.addEventListener('click', () => setBonusShootouts(cur + 1));
-    stepper.appendChild(minus); stepper.appendChild(val); stepper.appendChild(plus);
+    plus.addEventListener('click', () => setShootoutDraft(draft + 1));
+    stepper.appendChild(plus);
     ctl.appendChild(stepper);
     card.appendChild(ctl);
 
-    const hint = el('div', 'bonus-hint');
-    if (applied) {
-      hint.appendChild(document.createTextNode('Gesetzt – Punkte werden angewendet. '));
+    // Anwenden / Zurücksetzen
+    const actions = el('div', 'bonus-actions');
+    const isApplied = applied != null && applied === draft;
+    const applyBtn = el('button', 'bonus-apply' + (isApplied ? ' done' : ''),
+      isApplied ? '✓ angewendet' : 'Bonus jetzt anwenden');
+    applyBtn.addEventListener('click', () => setBonusShootouts(draft));
+    actions.appendChild(applyBtn);
+    if (applied != null) {
       const reset = el('button', 'sim-reset', 'zurücksetzen');
       reset.addEventListener('click', () => setBonusShootouts(null));
-      hint.appendChild(reset);
-    } else {
-      hint.textContent = detected != null
-        ? 'Automatisch erkannt: ' + detected + '. Endstand setzen, um den Bonus anzuwenden.'
-        : 'Anzahl setzen, um den Bonus anzuwenden.';
+      actions.appendChild(reset);
     }
-    card.appendChild(hint);
+    card.appendChild(actions);
 
     const byNum = new Map();
     for (const p of state.data.players) {
@@ -1152,25 +1174,17 @@
       byNum.get(p.bonus.shootouts).push(p.name);
     }
     for (const [num, names] of [...byNum.entries()].sort((a, b) => a[0] - b[0])) {
-      const isExact = applied && num === cur;
-      const pts = applied ? (num === cur ? exact : -malus * Math.abs(num - cur)) : null;
-      const row = el('div', 'bonus-row' + (isExact ? ' win' : ''));
+      const pts = num === draft ? exact : -malus * Math.abs(num - draft);
+      const row = el('div', 'bonus-row' + (num === draft ? ' win' : ''));
       row.appendChild(el('span', 'so-num', String(num)));
       const nameWrap = el('span', 'scorer-name');
-      const head = el('span', '');
-      head.appendChild(el('b', '', num + '×'));
-      head.appendChild(el('span', 'bonus-count', ' · ' + names.length));
-      nameWrap.appendChild(head);
       nameWrap.appendChild(el('span', 'picks',
         names.slice(0, 8).join(', ') + (names.length > 8 ? ' +' + (names.length - 8) : '')));
       row.appendChild(nameWrap);
-      const right = el('span', 'bonus-pts');
-      if (applied) {
-        right.appendChild(el('span', pts > 0 ? 'bonus-plus' : (pts < 0 ? 'bonus-minus' : ''),
-          (pts > 0 ? '+' : '') + fmtPts(pts) + ' P.'));
-      } else {
-        right.appendChild(el('span', 'picks', names.length + '×'));
-      }
+      const right = el('span', 'bonus-right');
+      right.appendChild(el('span', 'bonus-count', String(names.length)));
+      right.appendChild(el('span', 'bonus-pts ' + (pts > 0 ? 'bonus-plus' : (pts < 0 ? 'bonus-minus' : '')),
+        (pts > 0 ? '+' : '') + fmtPts(pts)));
       row.appendChild(right);
       card.appendChild(row);
     }
