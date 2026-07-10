@@ -15,8 +15,12 @@
     lastUpdate: null,
     apiError: null,
     sim: {},             // { matchId: {home, away} } – manuell simulierte Live-Stände
-    simGoals: {}         // { kanonischerName: +n } – simulierte WM-Tore (Torjäger)
+    simGoals: {},        // { kanonischerName: +n } – simulierte WM-Tore (Torjäger)
+    // Manuell gesetzte Zusatzfragen-Ergebnisse (Bonus-Tab): Weltmeister-Team
+    // und Anzahl Elfmeterschießen. Fließen sofort in die Wertung ein.
+    bonusSet: { champion: null, shootouts: null }
   };
+  const BONUS_KEY = 'wm26-bonus-set';
 
   const $ = (sel) => document.querySelector(sel);
   const el = (tag, cls, text) => {
@@ -97,6 +101,8 @@
         state.penaltyResults[id] = { home: sc.home, away: sc.away, finished: true };
       }
     }
+    // Lokal gesetzte Bonus-Antworten (Weltmeister/Elfer) wiederherstellen
+    loadBonusSet();
   }
 
   /* Effektive Torschützenliste: kuratierte Basis (fussballdaten + football-data
@@ -201,27 +207,41 @@
   function simulatedExtras() {
     const base = state.apiState ? state.apiState.extras : {};
     const sim = state.simGoals || {};
-    if (!Object.keys(sim).length) return base;
-    const canon = window.Scoring.canonicalScorer;
-    const map = new Map();
-    // realer Stand: API-Torschützen, offline ersatzweise die manuelle Liste
-    const seed = (base.scorers && base.scorers.length)
-      ? base.scorers : (state.data.manualScorers || []);
-    for (const s of seed) {
-      const key = canon(s.name).name;
-      const prev = map.get(key);
-      if (prev) prev.goals += (s.goals || 0);
-      else map.set(key, { name: key, goals: s.goals || 0, teamDE: s.teamDE || null, crest: s.crest || null });
+    let out = base;
+    if (Object.keys(sim).length) {
+      const canon = window.Scoring.canonicalScorer;
+      const map = new Map();
+      // realer Stand: API-Torschützen, offline ersatzweise die manuelle Liste
+      const seed = (base.scorers && base.scorers.length)
+        ? base.scorers : (state.data.manualScorers || []);
+      for (const s of seed) {
+        const key = canon(s.name).name;
+        const prev = map.get(key);
+        if (prev) prev.goals += (s.goals || 0);
+        else map.set(key, { name: key, goals: s.goals || 0, teamDE: s.teamDE || null, crest: s.crest || null });
+      }
+      const realScorers = [...map.values()].map((s) => Object.assign({}, s));
+      for (const [name, extra] of Object.entries(sim)) {
+        if (!extra) continue;
+        const c = canon(name);
+        const prev = map.get(c.name);
+        if (prev) prev.goals = Math.max(0, prev.goals + extra);
+        else if (extra > 0) map.set(c.name, { name: c.name, goals: extra, teamDE: c.team, crest: null });
+      }
+      out = Object.assign({}, base, { scorers: [...map.values()], realScorers });
     }
-    const realScorers = [...map.values()].map((s) => Object.assign({}, s));
-    for (const [name, extra] of Object.entries(sim)) {
-      if (!extra) continue;
-      const c = canon(name);
-      const prev = map.get(c.name);
-      if (prev) prev.goals = Math.max(0, prev.goals + extra);
-      else if (extra > 0) map.set(c.name, { name: c.name, goals: extra, teamDE: c.team, crest: null });
+    // Manuell gesetzte Zusatzfragen (Bonus-Tab) überschreiben die
+    // API-/Excel-Antworten und lassen den Bonus sofort einfließen.
+    const b = state.bonusSet || {};
+    if (b.champion || b.shootouts != null) {
+      out = Object.assign({}, out);
+      if (b.champion) out.championTeam = b.champion;
+      if (b.shootouts != null) {
+        out.shootoutCount = b.shootouts;
+        out.tournamentFinished = true; // manuell gesetzt -> Elfer-Bonus anwenden
+      }
     }
-    return Object.assign({}, base, { scorers: [...map.values()], realScorers });
+    return out;
   }
 
   function hasSim() {
@@ -267,6 +287,35 @@
     state.simGoals = {};
     recompute();
     render();
+  }
+
+  // ---- Bonus-Zusatzfragen (Weltmeister / Elfmeterschießen) ----------------
+
+  function saveBonusSet() {
+    try { localStorage.setItem(BONUS_KEY, JSON.stringify(state.bonusSet)); } catch (e) { /* egal */ }
+  }
+  function loadBonusSet() {
+    try {
+      const b = JSON.parse(localStorage.getItem(BONUS_KEY) || 'null');
+      if (b && typeof b === 'object') {
+        state.bonusSet = {
+          champion: b.champion || null,
+          shootouts: (typeof b.shootouts === 'number') ? b.shootouts : null
+        };
+      }
+    } catch (e) { /* egal */ }
+  }
+
+  function setBonusChampion(team) {
+    state.bonusSet.champion = (state.bonusSet.champion === team) ? null : (team || null);
+    saveBonusSet(); recompute(); render();
+  }
+  function setBonusShootouts(n) {
+    state.bonusSet.shootouts = (n == null) ? null : Math.max(0, n | 0);
+    saveBonusSet(); recompute(); render();
+  }
+  function bonusIsSet() {
+    return !!(state.bonusSet.champion || state.bonusSet.shootouts != null);
   }
 
   // ---- Lokaler Zwischenspeicher (Fallback bei API-Störung) -----------------
@@ -378,6 +427,24 @@
 
   function anyLive() {
     return Object.values(state.results).some((r) => r.live && !r.sim);
+  }
+
+  /* Noch im Turnier verbliebene Mannschaften: alle Teams aus K.o.-Spielen,
+     minus die Verlierer bereits entschiedener K.o.-Partien. */
+  function aliveTeams() {
+    const ko = state.data.matches.filter((m) => !/grupp/i.test(m.round || ''));
+    const all = new Set();
+    const eliminated = new Set();
+    for (const m of ko) {
+      const { home, away } = teamsOf(m);
+      if (home) all.add(home);
+      if (away) all.add(away);
+      const res = state.results[m.id];
+      if (res && res.home != null && res.away != null && res.home !== res.away && home && away) {
+        eliminated.add(res.home > res.away ? away : home);
+      }
+    }
+    return [...all].filter((t) => !eliminated.has(t)).sort((a, b) => a.localeCompare(b, 'de'));
   }
 
   // ---------------------------------------------------------------- Render --
@@ -777,6 +844,7 @@
     const view = $('#view-familien');
     view.innerHTML = '';
     if (hasSim()) view.appendChild(simBanner());
+    if (bonusIsSet()) view.appendChild(bonusBanner());
     const byName = new Map(state.standings.map((r) => [r.name, r]));
 
     const grid = el('div', 'family-grid');
@@ -963,6 +1031,171 @@
         scorerRow(String(aRank), s.name, teamFor(s.name), picksByCanon.get(s.name), false, false));
     });
     view.appendChild(allCard);
+
+    // ---- 3) Weltmeister-Bonus  ---- 4) Elfmeterschießen-Bonus ----
+    renderChampionCard(view);
+    renderShootoutCard(view);
+  }
+
+  // ------- Bonus: Weltmeister -------
+
+  function renderChampionCard(view) {
+    const champPts = state.data.bonus.champion.points || 15;
+    const card = el('div', 'glass card');
+    card.appendChild(el('h2', '', 'Weltmeister'));
+    card.appendChild(el('p', 'bonus-hint',
+      'Wähle den Weltmeister – Tipper mit diesem Team bekommen +' + fmtPts(champPts) + ' Punkte.'));
+
+    const alive = aliveTeams();
+    const aliveSet = new Set(alive);
+    const picked = state.bonusSet.champion;
+    const pickerTeams = (picked && !aliveSet.has(picked)) ? [picked, ...alive] : alive;
+
+    const picker = el('div', 'bonus-picker');
+    for (const team of pickerTeams) {
+      const chip = el('button', 'pick-chip' + (picked === team ? ' active' : ''));
+      if (window.Teams.TEAMS[team]) chip.appendChild(flagImg(team));
+      chip.appendChild(el('span', '', team));
+      chip.addEventListener('click', () => setBonusChampion(team));
+      picker.appendChild(chip);
+    }
+    card.appendChild(picker);
+    if (picked) {
+      const reset = el('button', 'sim-reset', 'Auswahl zurücksetzen');
+      reset.addEventListener('click', () => setBonusChampion(picked));
+      card.appendChild(reset);
+    }
+
+    const byTeam = new Map();
+    for (const p of state.data.players) {
+      if (!p.bonus.champion) continue;
+      if (!byTeam.has(p.bonus.champion)) byTeam.set(p.bonus.champion, []);
+      byTeam.get(p.bonus.champion).push(p.name);
+    }
+    const rows = [...byTeam.entries()]
+      .map(([team, names]) => ({ team, names, alive: aliveSet.has(team) }))
+      .sort((a, b) =>
+        (b.team === picked) - (a.team === picked) ||
+        (b.alive - a.alive) ||
+        b.names.length - a.names.length ||
+        a.team.localeCompare(b.team, 'de'));
+
+    for (const r of rows) {
+      const won = r.team === picked;
+      const row = el('div', 'bonus-row' + (won ? ' win' : (r.alive ? '' : ' out')));
+      if (window.Teams.TEAMS[r.team]) row.appendChild(flagImg(r.team));
+      else row.appendChild(ballPlaceholder());
+      const nameWrap = el('span', 'scorer-name');
+      const head = el('span', '');
+      head.appendChild(el('b', '', r.team));
+      head.appendChild(el('span', 'bonus-count', ' · ' + r.names.length));
+      nameWrap.appendChild(head);
+      nameWrap.appendChild(el('span', 'picks',
+        r.names.slice(0, 8).join(', ') + (r.names.length > 8 ? ' +' + (r.names.length - 8) : '')));
+      row.appendChild(nameWrap);
+      const right = el('span', 'bonus-pts');
+      if (won) right.appendChild(el('span', 'bonus-plus', '+' + fmtPts(champPts) + ' P.'));
+      else if (!r.alive) right.appendChild(el('span', 'bonus-out', 'ausgeschieden'));
+      row.appendChild(right);
+      card.appendChild(row);
+    }
+    view.appendChild(card);
+  }
+
+  // ------- Bonus: Elfmeterschießen -------
+
+  function renderShootoutCard(view) {
+    const so = state.data.bonus.shootouts;
+    const exact = so.exactPoints || 10, malus = so.malusPerDelta || 2;
+    const card = el('div', 'glass card');
+    card.appendChild(el('h2', '', 'Elfmeterschießen'));
+    card.appendChild(el('p', 'bonus-hint',
+      'Exakt getippt = +' + fmtPts(exact) + ' P., sonst −' + fmtPts(malus) + ' P. je Abweichung.'));
+
+    const detected = state.apiState && state.apiState.extras
+      ? state.apiState.extras.shootoutCount : null;
+    const set = state.bonusSet.shootouts;
+    const cur = (set != null) ? set : (detected != null ? detected : 0);
+    const applied = set != null;
+
+    const ctl = el('div', 'shootout-control');
+    ctl.appendChild(el('span', 'sc-label', 'Elferschießen gesamt'));
+    const stepper = el('div', 'sim-stepper');
+    const minus = el('button', 'sim-step', '−');
+    minus.setAttribute('aria-label', 'weniger');
+    minus.addEventListener('click', () => setBonusShootouts(cur - 1));
+    const val = el('span', 'sim-val', String(cur));
+    const plus = el('button', 'sim-step', '+');
+    plus.setAttribute('aria-label', 'mehr');
+    plus.addEventListener('click', () => setBonusShootouts(cur + 1));
+    stepper.appendChild(minus); stepper.appendChild(val); stepper.appendChild(plus);
+    ctl.appendChild(stepper);
+    card.appendChild(ctl);
+
+    const hint = el('div', 'bonus-hint');
+    if (applied) {
+      hint.appendChild(document.createTextNode('Gesetzt – Punkte werden angewendet. '));
+      const reset = el('button', 'sim-reset', 'zurücksetzen');
+      reset.addEventListener('click', () => setBonusShootouts(null));
+      hint.appendChild(reset);
+    } else {
+      hint.textContent = detected != null
+        ? 'Automatisch erkannt: ' + detected + '. Endstand setzen, um den Bonus anzuwenden.'
+        : 'Anzahl setzen, um den Bonus anzuwenden.';
+    }
+    card.appendChild(hint);
+
+    const byNum = new Map();
+    for (const p of state.data.players) {
+      if (p.bonus.shootouts == null) continue;
+      if (!byNum.has(p.bonus.shootouts)) byNum.set(p.bonus.shootouts, []);
+      byNum.get(p.bonus.shootouts).push(p.name);
+    }
+    for (const [num, names] of [...byNum.entries()].sort((a, b) => a[0] - b[0])) {
+      const isExact = applied && num === cur;
+      const pts = applied ? (num === cur ? exact : -malus * Math.abs(num - cur)) : null;
+      const row = el('div', 'bonus-row' + (isExact ? ' win' : ''));
+      row.appendChild(el('span', 'so-num', String(num)));
+      const nameWrap = el('span', 'scorer-name');
+      const head = el('span', '');
+      head.appendChild(el('b', '', num + '×'));
+      head.appendChild(el('span', 'bonus-count', ' · ' + names.length));
+      nameWrap.appendChild(head);
+      nameWrap.appendChild(el('span', 'picks',
+        names.slice(0, 8).join(', ') + (names.length > 8 ? ' +' + (names.length - 8) : '')));
+      row.appendChild(nameWrap);
+      const right = el('span', 'bonus-pts');
+      if (applied) {
+        right.appendChild(el('span', pts > 0 ? 'bonus-plus' : (pts < 0 ? 'bonus-minus' : ''),
+          (pts > 0 ? '+' : '') + fmtPts(pts) + ' P.'));
+      } else {
+        right.appendChild(el('span', 'picks', names.length + '×'));
+      }
+      row.appendChild(right);
+      card.appendChild(row);
+    }
+    view.appendChild(card);
+  }
+
+  /* Banner auf Einzel-/Familienwertung, wenn Bonus-Antworten manuell gesetzt
+     sind (nur lokal), damit die veränderten Punkte nachvollziehbar sind. */
+  function bonusBanner() {
+    const b = el('div', 'banner sim-banner');
+    const parts = [];
+    if (state.bonusSet.champion) parts.push('Weltmeister ' + state.bonusSet.champion);
+    if (state.bonusSet.shootouts != null) parts.push(state.bonusSet.shootouts + ' Elferschießen');
+    const txt = el('span', '');
+    txt.innerHTML = window.Icons.svg('trophy') +
+      ' <strong>Bonus gesetzt</strong> · ' + parts.join(' · ') + ' (nur auf diesem Gerät)';
+    b.appendChild(txt);
+    const reset = el('button', 'sim-reset', 'Zurücksetzen');
+    reset.addEventListener('click', resetBonus);
+    b.appendChild(reset);
+    return b;
+  }
+  function resetBonus() {
+    state.bonusSet = { champion: null, shootouts: null };
+    saveBonusSet(); recompute(); render();
   }
 
   // ------- Tipper-Detail-Sheet -------
