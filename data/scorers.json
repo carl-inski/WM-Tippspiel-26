@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-10T19:47:28.311Z",
+ "generatedAt": "2026-07-10T20:56:45.798Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -214,6 +214,11 @@
    "goals": 2
   },
   {
+   "name": "Mikel Merino",
+   "teamDE": "Spanien",
+   "goals": 2
+  },
+  {
    "name": "Mostafa Ziko",
    "teamDE": "Ägypten",
    "goals": 2
@@ -326,11 +331,6 @@
   {
    "name": "Granit Xhaka",
    "teamDE": "Schweiz",
-   "goals": 1
-  },
-  {
-   "name": "Hélio Varela",
-   "teamDE": "Kap Verde",
    "goals": 1
   },
   {
