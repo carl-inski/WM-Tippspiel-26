@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-10T18:00:03.254Z",
+ "generatedAt": "2026-07-10T19:47:28.311Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -56,6 +56,11 @@
   {
    "name": "Brian Brobbey",
    "teamDE": "Niederlande",
+   "goals": 3
+  },
+  {
+   "name": "Charles De Ketelaere",
+   "teamDE": "Belgien",
    "goals": 3
   },
   {
@@ -151,11 +156,6 @@
   {
    "name": "Breel Embolo",
    "teamDE": "Schweiz",
-   "goals": 2
-  },
-  {
-   "name": "Charles De Ketelaere",
-   "teamDE": "Belgien",
    "goals": 2
   },
   {
