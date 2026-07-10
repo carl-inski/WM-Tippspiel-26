@@ -55,6 +55,7 @@ const TEAM_ALIASES = {
   'Bosnien-Herzog.': 'Bosnien-Herzeg.',
   'Bosnien-Herzegowina': 'Bosnien-Herzeg.',
   'Argentinen': 'Argentinien',
+  'Spanian': 'Spanien',
   'Südkorea': 'Südkorea',
   'USA': 'USA'
 };
@@ -135,7 +136,9 @@ async function importExcel(file) {
       if (h !== null && a2 !== null) p.tips[m.id] = [h, a2];
     }
     p.bonus = {
-      champion: asText(ws.getRow(BONUS_ROWS.champion).getCell(p.startCol)) || null,
+      // Weltmeister-Tipp ebenfalls normalisieren (Champion-Bonus vergleicht
+      // exakt, daher würden Tippfehler wie "Spanian" sonst leer ausgehen).
+      champion: normTeam(asText(ws.getRow(BONUS_ROWS.champion).getCell(p.startCol))) || null,
       topscorer: asText(ws.getRow(BONUS_ROWS.topscorer).getCell(p.startCol)) || null,
       shootouts: asNumber(ws.getRow(BONUS_ROWS.shootouts).getCell(p.startCol))
     };

@@ -1,7 +1,7 @@
 {
  "meta": {
   "title": "WM 2026 – Offizielles Tippspiel",
-  "importedAt": "2026-07-10T06:58:55.463Z",
+  "importedAt": "2026-07-10T07:22:57.024Z",
   "sourceFile": "WM_Tippspiel_2026.xlsx",
   "scoring": {
    "exactFactor": 1.5,
@@ -29097,7 +29097,7 @@
     ]
    },
    "bonus": {
-    "champion": "Spanian",
+    "champion": "Spanien",
     "topscorer": "Mbappé",
     "shootouts": 5
    },

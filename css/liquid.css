@@ -923,6 +923,90 @@ footer {
 #footer-meta a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 #footer-meta a:hover { color: var(--accent-warm); }
 
+/* ------- Bonus (Weltmeister / Elfmeterschießen) ------- */
+.bonus-hint {
+  margin: -4px 0 14px;
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* Team-Auswahl (verbleibende Mannschaften) */
+.bonus-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.pick-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s var(--ease), border-color 0.18s var(--ease), transform 0.1s;
+}
+.pick-chip:hover { background: rgba(255, 255, 255, 0.1); }
+.pick-chip:active { transform: scale(0.96); }
+.pick-chip .flag { width: 22px; height: 16px; }
+.pick-chip.active {
+  background: rgba(110, 231, 160, 0.16);
+  border-color: rgba(110, 231, 160, 0.5);
+  color: #d6f7e5;
+}
+
+/* Zeilen (Weltmeister-/Elfer-Tipps) – analog zu .scorer-row */
+.bonus-row {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.94rem;
+}
+.bonus-row:last-child { border-bottom: none; }
+.bonus-row.win { background: rgba(110, 231, 160, 0.08); }
+.bonus-row.out { opacity: 0.5; }
+.bonus-row .bonus-count { color: var(--text-dim); font-weight: 600; }
+.bonus-pts { white-space: nowrap; font-weight: 800; font-variant-numeric: tabular-nums; }
+.bonus-plus { color: var(--accent); }
+.bonus-minus { color: var(--live); }
+.bonus-out { color: var(--text-dim); font-size: 0.78rem; font-weight: 600; }
+
+.so-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-warm);
+}
+
+/* Stepper zum Einstellen der Elferschießen-Anzahl */
+.shootout-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-s);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+}
+.sc-label { font-weight: 700; font-size: 0.9rem; }
+
 /* ------- Responsive ------- */
 @media (max-width: 620px) {
   /* Tabs wie eine iOS-Tab-Bar: Icon über dem Label */
