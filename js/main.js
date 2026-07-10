@@ -946,11 +946,13 @@
       else row.appendChild(ballPlaceholder());
 
       const nameWrap = el('span', 'scorer-name');
-      nameWrap.appendChild(el('span', '', name + ' '));
+      nameWrap.appendChild(el('b', '', name));
       if (picks && picks.length) {
-        nameWrap.appendChild(el('span', 'picks',
-          '· getippt von ' + picks.slice(0, 6).join(', ') +
-          (picks.length > 6 ? ' +' + (picks.length - 6) : '')));
+        const picksEl = el('span', 'picks',
+          picks.slice(0, 6).join(', ') + (picks.length > 6 ? ' +' + (picks.length - 6) : ''));
+        picksEl.style.cursor = 'pointer';
+        picksEl.addEventListener('click', () => openNamesSheet(name, picks));
+        nameWrap.appendChild(picksEl);
       }
       row.appendChild(nameWrap);
 
@@ -1108,8 +1110,11 @@
       else row.appendChild(ballPlaceholder());
       const nameWrap = el('span', 'scorer-name');
       nameWrap.appendChild(el('b', 'bonus-team', r.team));
-      nameWrap.appendChild(el('span', 'picks',
-        r.names.slice(0, 8).join(', ') + (r.names.length > 8 ? ' +' + (r.names.length - 8) : '')));
+      const picksEl = el('span', 'picks',
+        r.names.slice(0, 8).join(', ') + (r.names.length > 8 ? ' +' + (r.names.length - 8) : ''));
+      picksEl.style.cursor = 'pointer';
+      picksEl.addEventListener('click', () => openNamesSheet(r.team, r.names));
+      nameWrap.appendChild(picksEl);
       row.appendChild(nameWrap);
       const right = el('span', 'bonus-right');
       right.appendChild(el('span', 'bonus-count', String(r.names.length)));
@@ -1174,17 +1179,22 @@
       byNum.get(p.bonus.shootouts).push(p.name);
     }
     for (const [num, names] of [...byNum.entries()].sort((a, b) => a[0] - b[0])) {
-      const pts = num === draft ? exact : -malus * Math.abs(num - draft);
-      const row = el('div', 'bonus-row' + (num === draft ? ' win' : ''));
+      const row = el('div', 'bonus-row' + (applied != null && num === applied ? ' win' : ''));
       row.appendChild(el('span', 'so-num', String(num)));
       const nameWrap = el('span', 'scorer-name');
-      nameWrap.appendChild(el('span', 'picks',
-        names.slice(0, 8).join(', ') + (names.length > 8 ? ' +' + (names.length - 8) : '')));
+      const picksEl = el('span', 'picks',
+        names.slice(0, 8).join(', ') + (names.length > 8 ? ' +' + (names.length - 8) : ''));
+      picksEl.style.cursor = 'pointer';
+      picksEl.addEventListener('click', () => openNamesSheet(num + ' Elfmeter getippt', names));
+      nameWrap.appendChild(picksEl);
       row.appendChild(nameWrap);
       const right = el('span', 'bonus-right');
       right.appendChild(el('span', 'bonus-count', String(names.length)));
-      right.appendChild(el('span', 'bonus-pts ' + (pts > 0 ? 'bonus-plus' : (pts < 0 ? 'bonus-minus' : '')),
-        (pts > 0 ? '+' : '') + fmtPts(pts)));
+      if (applied != null) {
+        const pts = num === applied ? exact : -malus * Math.abs(num - applied);
+        right.appendChild(el('span', 'bonus-pts ' + (pts > 0 ? 'bonus-plus' : (pts < 0 ? 'bonus-minus' : '')),
+          (pts > 0 ? '+' : '') + fmtPts(pts)));
+      }
       row.appendChild(right);
       card.appendChild(row);
     }
@@ -1304,6 +1314,33 @@
   function closeSheet() {
     $('#sheet-backdrop').hidden = true;
     document.documentElement.style.overflow = '';
+  }
+
+  /* Kompaktes Sheet mit der vollständigen Tipper-Liste (Torschützen/Weltmeister/
+     Elfmeterschießen) – von der oft abgeschnittenen "+N"-Vorschau aus geöffnet. */
+  function openNamesSheet(title, names) {
+    const sheet = $('#sheet');
+    sheet.innerHTML = '';
+    const head = el('div', 'sheet-head');
+    head.appendChild(el('h2', '', title));
+    const close = el('button', 'sheet-close');
+    close.appendChild(window.Icons.node('x'));
+    close.setAttribute('aria-label', 'Schließen');
+    close.addEventListener('click', closeSheet);
+    head.appendChild(close);
+    sheet.appendChild(head);
+    sheet.appendChild(el('p', 'sheet-sub',
+      names.length + (names.length === 1 ? ' Tipper' : ' Tipper:innen')));
+    const chips = el('div', 'member-chips');
+    names.forEach((n) => {
+      const chip = el('span', 'member-chip', n);
+      chip.style.cursor = 'pointer';
+      chip.addEventListener('click', () => openPlayerSheet(n));
+      chips.appendChild(chip);
+    });
+    sheet.appendChild(chips);
+    $('#sheet-backdrop').hidden = false;
+    document.documentElement.style.overflow = 'hidden';
   }
 
   // ------------------------------------------------------------------ Tabs --

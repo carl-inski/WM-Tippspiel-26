@@ -769,8 +769,15 @@ main { max-width: 1060px; margin: 0 auto; }
 
 .scorer-row:last-child { border-bottom: none; }
 .scorer-row .rank { color: var(--text-dim); font-weight: 700; }
-.scorer-name { min-width: 0; }
-.scorer-row .picks { color: var(--text-dim); font-size: 0.8rem; }
+/* Name/Team in Zeile 1, Tipper-Liste in Zeile 2 – einheitlich für Torschützen,
+   Weltmeister- und Elfmeterschießen-Bonus. */
+.scorer-name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.picks { color: var(--text-dim); font-size: 0.8rem; }
 
 /* Rechter Block: Punkte + Tore oben, darunter rechts die +/- Knöpfe */
 .scorer-meta {
