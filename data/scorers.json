@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-11T22:26:35.144Z",
+ "generatedAt": "2026-07-11T23:31:21.085Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -26,7 +26,7 @@
   {
    "name": "Jude Bellingham",
    "teamDE": null,
-   "goals": 5
+   "goals": 6
   },
   {
    "name": "Ousmane Dembélé",
