@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-11T21:27:04.721Z",
+ "generatedAt": "2026-07-11T22:26:35.144Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -24,6 +24,11 @@
    "goals": 6
   },
   {
+   "name": "Jude Bellingham",
+   "teamDE": null,
+   "goals": 5
+  },
+  {
    "name": "Ousmane Dembélé",
    "teamDE": "Frankreich",
    "goals": 5
@@ -31,11 +36,6 @@
   {
    "name": "Ismaïla Sarr",
    "teamDE": "Senegal",
-   "goals": 4
-  },
-  {
-   "name": "Jude Bellingham",
-   "teamDE": null,
    "goals": 4
   },
   {
