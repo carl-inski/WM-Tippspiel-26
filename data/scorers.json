@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-12T01:12:15.694Z",
+ "generatedAt": "2026-07-12T04:43:29.243Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -174,6 +174,11 @@
    "goals": 2
   },
   {
+   "name": "Dan Ndoye",
+   "teamDE": "Schweiz",
+   "goals": 2
+  },
+  {
    "name": "Daniel Muñoz",
    "teamDE": "Kolumbien",
    "goals": 2
@@ -191,6 +196,11 @@
   {
    "name": "Habib Diarra",
    "teamDE": "Senegal",
+   "goals": 2
+  },
+  {
+   "name": "Lautaro Martínez",
+   "teamDE": "Argentinien",
    "goals": 2
   },
   {
@@ -271,11 +281,6 @@
   {
    "name": "Abdulelah Al Amri",
    "teamDE": "Saudi-Arabien",
-   "goals": 1
-  },
-  {
-   "name": "Agustín Canobbio",
-   "teamDE": "Uruguay",
    "goals": 1
   },
   {
@@ -381,11 +386,6 @@
   {
    "name": "Keito Nakamura",
    "teamDE": "Japan",
-   "goals": 1
-  },
-  {
-   "name": "Kevin Pina",
-   "teamDE": "Kap Verde",
    "goals": 1
   },
   {
