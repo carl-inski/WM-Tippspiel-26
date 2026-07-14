@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-14T19:42:38.378Z",
+ "generatedAt": "2026-07-14T20:45:48.242Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -244,6 +244,11 @@
    "goals": 2
   },
   {
+   "name": "Pedro Porro",
+   "teamDE": "Spanien",
+   "goals": 2
+  },
+  {
    "name": "Ramin Rezaeian",
    "teamDE": "IR Iran",
    "goals": 2
@@ -391,11 +396,6 @@
   {
    "name": "Ladislav Krejčí",
    "teamDE": "Tschechien",
-   "goals": 1
-  },
-  {
-   "name": "Lamine Yamal",
-   "teamDE": "Spanien",
    "goals": 1
   },
   {
