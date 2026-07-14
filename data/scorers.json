@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-14T18:08:20.388Z",
+ "generatedAt": "2026-07-14T19:42:38.378Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -29,6 +29,11 @@
    "goals": 6
   },
   {
+   "name": "Mikel Oyarzabal",
+   "teamDE": "Spanien",
+   "goals": 5
+  },
+  {
    "name": "Ousmane Dembélé",
    "teamDE": "Frankreich",
    "goals": 5
@@ -41,11 +46,6 @@
   {
    "name": "Julián Quiñones",
    "teamDE": "Kolumbien",
-   "goals": 4
-  },
-  {
-   "name": "Mikel Oyarzabal",
-   "teamDE": "Spanien",
    "goals": 4
   },
   {
