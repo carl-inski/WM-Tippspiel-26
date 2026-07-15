@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-15T19:57:24.301Z",
+ "generatedAt": "2026-07-15T21:10:24.820Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -109,6 +109,11 @@
    "goals": 3
   },
   {
+   "name": "Lautaro Martínez",
+   "teamDE": "Argentinien",
+   "goals": 3
+  },
+  {
    "name": "Matheus Cunha",
    "teamDE": "Brasilien",
    "goals": 3
@@ -189,6 +194,11 @@
    "goals": 2
   },
   {
+   "name": "Enzo Fernández",
+   "teamDE": "Argentinien",
+   "goals": 2
+  },
+  {
    "name": "Ermin Mahmic",
    "teamDE": "Bosnien-Herzeg.",
    "goals": 2
@@ -196,11 +206,6 @@
   {
    "name": "Habib Diarra",
    "teamDE": "Senegal",
-   "goals": 2
-  },
-  {
-   "name": "Lautaro Martínez",
-   "teamDE": "Argentinien",
    "goals": 2
   },
   {
@@ -381,11 +386,6 @@
   {
    "name": "Jovo Lukić",
    "teamDE": "Bosnien-Herzeg.",
-   "goals": 1
-  },
-  {
-   "name": "Junya Ito",
-   "teamDE": "Japan",
    "goals": 1
   },
   {
