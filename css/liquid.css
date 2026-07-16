@@ -1027,6 +1027,20 @@ footer {
 }
 .expand-btn:hover { background: rgba(255, 255, 255, 0.09); }
 
+/* Info-Zeile, wenn die Elfer-Anzahl real feststeht (kein Eingriff mehr nötig) */
+.bonus-locked {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-s);
+  border: 1px solid rgba(110, 231, 160, 0.35);
+  background: rgba(110, 231, 160, 0.1);
+}
+.bonus-locked-badge { color: #d6f7e5; font-weight: 700; font-size: 0.9rem; }
+.bonus-locked-info { color: var(--text-dim); font-size: 0.82rem; }
+
 /* Aktionsleiste (Elferschießen anwenden / zurücksetzen) */
 .bonus-actions {
   display: flex;

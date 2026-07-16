@@ -233,12 +233,16 @@
       out = Object.assign({}, base, { scorers: [...map.values()], realScorers });
     }
     // Manuell gesetzte Zusatzfragen (Bonus-Tab) überschreiben die
-    // API-/Excel-Antworten und lassen den Bonus sofort einfließen.
+    // API-/Excel-Antworten und lassen den Bonus sofort einfließen. Sobald die
+    // Elfer-Anzahl real feststeht (shootoutsDecided), gewinnt immer der echte
+    // Live-Stand – eine alte lokale Test-Einstellung darf das Ergebnis nicht
+    // mehr verfälschen.
     const b = state.bonusSet || {};
-    if (b.champion || b.shootouts != null) {
+    const shootoutsLocked = !!(base && base.shootoutsDecided);
+    if (b.champion || (b.shootouts != null && !shootoutsLocked)) {
       out = Object.assign({}, out);
       if (b.champion) out.championTeam = b.champion;
-      if (b.shootouts != null) {
+      if (b.shootouts != null && !shootoutsLocked) {
         out.shootoutCount = b.shootouts;
         out.tournamentFinished = true; // manuell gesetzt -> Elfer-Bonus anwenden
       }
@@ -323,8 +327,14 @@
     state.bonusDraft = Math.max(0, n | 0);
     render();
   }
+  /* Steht die Elfer-Anzahl schon real (über den Live-Feed) fest? Dann ist die
+     lokale lediglich für die Bonus-Vorschau gedachte Einstellung hinfällig –
+     der Bonus gilt ab da global für alle, unabhängig vom Gerät. */
+  function shootoutsLocked() {
+    return !!(state.apiState && state.apiState.extras && state.apiState.extras.shootoutsDecided);
+  }
   function bonusIsSet() {
-    return !!(state.bonusSet.champion || state.bonusSet.shootouts != null);
+    return !!(state.bonusSet.champion || (state.bonusSet.shootouts != null && !shootoutsLocked()));
   }
 
   // ---- Lokaler Zwischenspeicher (Fallback bei API-Störung) -----------------
@@ -1138,39 +1148,53 @@
 
     const detected = state.apiState && state.apiState.extras
       ? state.apiState.extras.shootoutCount : null;
-    const applied = state.bonusSet.shootouts; // angewendeter Stand (oder null)
-    // Stepper-Wert (Entwurf): eigener Draft, sonst angewendet, sonst erkannt, sonst 0
-    const draft = state.bonusDraft != null ? state.bonusDraft
-      : (applied != null ? applied : (detected != null ? detected : 0));
+    const locked = shootoutsLocked();
+    let applied; // Zahl, gegen die unten die Punkte berechnet werden (oder null)
 
-    const ctl = el('div', 'shootout-control');
-    ctl.appendChild(el('span', 'sc-label', 'Anzahl Elferschießen'));
-    const stepper = el('div', 'sim-stepper');
-    const minus = el('button', 'sim-step', '−');
-    minus.setAttribute('aria-label', 'weniger');
-    minus.addEventListener('click', () => setShootoutDraft(draft - 1));
-    stepper.appendChild(minus);
-    stepper.appendChild(el('span', 'sim-val', String(draft)));
-    const plus = el('button', 'sim-step', '+');
-    plus.setAttribute('aria-label', 'mehr');
-    plus.addEventListener('click', () => setShootoutDraft(draft + 1));
-    stepper.appendChild(plus);
-    ctl.appendChild(stepper);
-    card.appendChild(ctl);
+    if (locked) {
+      // Halbfinale ist komplett gespielt -> die Anzahl steht real fest und gilt
+      // global für alle. Nichts mehr einstellbar, nur noch die Info-Zeile.
+      applied = detected;
+      const badge = el('div', 'bonus-locked');
+      badge.appendChild(el('span', 'bonus-locked-badge', '✓ Bonus bereits angewendet'));
+      badge.appendChild(el('span', 'bonus-locked-info',
+        'Es waren ' + applied + ' Elfmeterschießen bis einschließlich Halbfinale – daran ändert sich nichts mehr.'));
+      card.appendChild(badge);
+    } else {
+      // Noch offen: Stepper + Vorschau, bewusst per Knopf anwenden.
+      applied = state.bonusSet.shootouts;
+      const draft = state.bonusDraft != null ? state.bonusDraft
+        : (applied != null ? applied : (detected != null ? detected : 0));
 
-    // Anwenden / Zurücksetzen
-    const actions = el('div', 'bonus-actions');
-    const isApplied = applied != null && applied === draft;
-    const applyBtn = el('button', 'bonus-apply' + (isApplied ? ' done' : ''),
-      isApplied ? '✓ angewendet' : 'Bonus jetzt anwenden');
-    applyBtn.addEventListener('click', () => setBonusShootouts(draft));
-    actions.appendChild(applyBtn);
-    if (applied != null) {
-      const reset = el('button', 'sim-reset', 'zurücksetzen');
-      reset.addEventListener('click', () => setBonusShootouts(null));
-      actions.appendChild(reset);
+      const ctl = el('div', 'shootout-control');
+      ctl.appendChild(el('span', 'sc-label', 'Anzahl Elferschießen'));
+      const stepper = el('div', 'sim-stepper');
+      const minus = el('button', 'sim-step', '−');
+      minus.setAttribute('aria-label', 'weniger');
+      minus.addEventListener('click', () => setShootoutDraft(draft - 1));
+      stepper.appendChild(minus);
+      stepper.appendChild(el('span', 'sim-val', String(draft)));
+      const plus = el('button', 'sim-step', '+');
+      plus.setAttribute('aria-label', 'mehr');
+      plus.addEventListener('click', () => setShootoutDraft(draft + 1));
+      stepper.appendChild(plus);
+      ctl.appendChild(stepper);
+      card.appendChild(ctl);
+
+      // Anwenden / Zurücksetzen
+      const actions = el('div', 'bonus-actions');
+      const isApplied = applied != null && applied === draft;
+      const applyBtn = el('button', 'bonus-apply' + (isApplied ? ' done' : ''),
+        isApplied ? '✓ angewendet' : 'Bonus jetzt anwenden');
+      applyBtn.addEventListener('click', () => setBonusShootouts(draft));
+      actions.appendChild(applyBtn);
+      if (applied != null) {
+        const reset = el('button', 'sim-reset', 'zurücksetzen');
+        reset.addEventListener('click', () => setBonusShootouts(null));
+        actions.appendChild(reset);
+      }
+      card.appendChild(actions);
     }
-    card.appendChild(actions);
 
     const byNum = new Map();
     for (const p of state.data.players) {
@@ -1207,7 +1231,9 @@
     const b = el('div', 'banner sim-banner');
     const parts = [];
     if (state.bonusSet.champion) parts.push('Weltmeister ' + state.bonusSet.champion);
-    if (state.bonusSet.shootouts != null) parts.push(state.bonusSet.shootouts + ' Elferschießen');
+    if (state.bonusSet.shootouts != null && !shootoutsLocked()) {
+      parts.push(state.bonusSet.shootouts + ' Elferschießen');
+    }
     const txt = el('span', '');
     txt.innerHTML = window.Icons.svg('trophy') +
       ' <strong>Bonus gesetzt</strong> · ' + parts.join(' · ') + ' (nur auf diesem Gerät)';
