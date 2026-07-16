@@ -78,6 +78,17 @@
     let championTeam = null;
     let shootoutCount = 0;
     let tournamentFinished = false;
+    // Die Elfmeterschießen-Frage gilt laut Excel "bis einschl. Halbfinale" –
+    // die Anzahl steht also schon fest, sobald diese Runden komplett gespielt
+    // sind, nicht erst wenn das ganze Turnier (inkl. Finale) vorbei ist.
+    let sawKoBisHf = false;
+    let shootoutsDecided = true;
+    for (const am of apiMatches) {
+      if (!KO_STAGES_BIS_HF.includes(am.stage)) continue;
+      sawKoBisHf = true;
+      if (am.status !== 'FINISHED') shootoutsDecided = false;
+    }
+    shootoutsDecided = shootoutsDecided && sawKoBisHf;
 
     for (const am of apiMatches) {
       const m = findExcelMatch(data, am, used);
@@ -124,7 +135,7 @@
       crest: s.team && s.team.crest
     }));
 
-    return { results, matchInfo, extras: { championTeam, scorers, shootoutCount, tournamentFinished } };
+    return { results, matchInfo, extras: { championTeam, scorers, shootoutCount, tournamentFinished, shootoutsDecided } };
   }
 
   const api = { fetchLive, mapLiveData, findExcelMatch, parseKickoff };

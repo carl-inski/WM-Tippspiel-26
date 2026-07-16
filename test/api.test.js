@@ -85,6 +85,35 @@ test('Elfmeterschießen bis HF werden gezählt, Finale liefert Weltmeister', () 
   assert.equal(results[af.id].away, 1);
 });
 
+test('Elfmeterschießen-Bonus gilt schon nach dem Halbfinale, nicht erst nach dem Finale', () => {
+  const sf1 = data.matches.find((m) => m.round === 'Halbfinale');
+  const sf2 = data.matches.filter((m) => m.round === 'Halbfinale')[1];
+  const amsHalbfinaleFertig = [
+    apiMatch({
+      stage: 'SEMI_FINALS',
+      utcDate: new Date(Date.parse(sf1.kickoff)).toISOString().replace('.000', ''),
+      homeTeam: { name: 'France' }, awayTeam: { name: 'Spain' },
+      score: { duration: 'REGULAR', fullTime: { home: 0, away: 2 }, winner: 'AWAY_TEAM' }
+    }),
+    apiMatch({
+      stage: 'SEMI_FINALS',
+      utcDate: new Date(Date.parse(sf2.kickoff)).toISOString().replace('.000', ''),
+      homeTeam: { name: 'England' }, awayTeam: { name: 'Argentina' },
+      score: { duration: 'REGULAR', fullTime: { home: 1, away: 2 }, winner: 'AWAY_TEAM' }
+    })
+  ];
+  const { extras } = LiveApi.mapLiveData(data, amsHalbfinaleFertig, []);
+  assert.equal(extras.tournamentFinished, false, 'Finale noch nicht gespielt');
+  assert.equal(extras.shootoutsDecided, true, 'Halbfinale komplett -> Elfer-Anzahl steht fest');
+
+  const amsHalbfinaleOffen = [
+    amsHalbfinaleFertig[0],
+    apiMatch(Object.assign({}, amsHalbfinaleFertig[1], { status: 'TIMED', score: { duration: 'REGULAR', fullTime: { home: null, away: null } } }))
+  ];
+  const { extras: extrasOffen } = LiveApi.mapLiveData(data, amsHalbfinaleOffen, []);
+  assert.equal(extrasOffen.shootoutsDecided, false, 'zweites Halbfinale noch offen -> Anzahl steht noch nicht fest');
+});
+
 test('parseKickoff parst ISO-Zeiten ohne Sekunden (Safari-Fall)', () => {
   assert.equal(LiveApi.parseKickoff('2026-06-11T21:00+02:00').getTime(),
     Date.UTC(2026, 5, 11, 19, 0, 0));

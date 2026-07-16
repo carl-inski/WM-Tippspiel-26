@@ -137,7 +137,8 @@ function computeStandings(data, results, extras = {}) {
     }
     const shootouts = extras.shootoutCount != null
       ? extras.shootoutCount : data.bonus.shootouts.answer;
-    if (shootouts != null && p.bonus.shootouts != null && extras.tournamentFinished) {
+    if (shootouts != null && p.bonus.shootouts != null &&
+        (extras.shootoutsDecided || extras.tournamentFinished)) {
       bonusDetail.shootouts = p.bonus.shootouts === shootouts
         ? data.bonus.shootouts.exactPoints
         : -data.bonus.shootouts.malusPerDelta * Math.abs(p.bonus.shootouts - shootouts);
