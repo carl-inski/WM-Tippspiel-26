@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-18T20:56:45.781Z",
+ "generatedAt": "2026-07-18T21:57:27.933Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -161,6 +161,11 @@
   {
    "name": "Breel Embolo",
    "teamDE": "Schweiz",
+   "goals": 2
+  },
+  {
+   "name": "Bukayo Saka",
+   "teamDE": "England",
    "goals": 2
   },
   {
@@ -331,11 +336,6 @@
   {
    "name": "Felix Kalu Nmecha",
    "teamDE": "Deutschland",
-   "goals": 1
-  },
-  {
-   "name": "Franck Kessié",
-   "teamDE": "Elfenbeinküste",
    "goals": 1
   },
   {
