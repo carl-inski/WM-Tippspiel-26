@@ -1,12 +1,12 @@
 {
- "generatedAt": "2026-07-18T21:57:27.933Z",
+ "generatedAt": "2026-07-18T22:58:53.775Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
   {
    "name": "Kylian Mbappé",
    "teamDE": "Frankreich",
-   "goals": 8
+   "goals": 10
   },
   {
    "name": "Lionel Messi",
@@ -54,8 +54,18 @@
    "goals": 4
   },
   {
+   "name": "Bradley Barcola",
+   "teamDE": "Frankreich",
+   "goals": 3
+  },
+  {
    "name": "Brian Brobbey",
    "teamDE": "Niederlande",
+   "goals": 3
+  },
+  {
+   "name": "Bukayo Saka",
+   "teamDE": null,
    "goals": 3
   },
   {
@@ -90,7 +100,7 @@
   },
   {
    "name": "Ismael Saibari",
-   "teamDE": "Spanien",
+   "teamDE": "Marokko",
    "goals": 3
   },
   {
@@ -130,7 +140,7 @@
   },
   {
    "name": "Yoane Wissa",
-   "teamDE": "Frankreich",
+   "teamDE": "Kongo",
    "goals": 3
   },
   {
@@ -154,18 +164,8 @@
    "goals": 2
   },
   {
-   "name": "Bradley Barcola",
-   "teamDE": "Frankreich",
-   "goals": 2
-  },
-  {
    "name": "Breel Embolo",
    "teamDE": "Schweiz",
-   "goals": 2
-  },
-  {
-   "name": "Bukayo Saka",
-   "teamDE": "England",
    "goals": 2
   },
   {
