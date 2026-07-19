@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-18T22:58:53.775Z",
+ "generatedAt": "2026-07-19T00:02:12.899Z",
  "source": "fussballdaten.de + football-data.org",
  "count": 100,
  "scorers": [
@@ -19,23 +19,23 @@
    "goals": 7
   },
   {
+   "name": "Jude Bellingham",
+   "teamDE": null,
+   "goals": 7
+  },
+  {
    "name": "Harry Kane",
    "teamDE": null,
    "goals": 6
   },
   {
-   "name": "Jude Bellingham",
-   "teamDE": null,
+   "name": "Ousmane Dembélé",
+   "teamDE": "Frankreich",
    "goals": 6
   },
   {
    "name": "Mikel Oyarzabal",
    "teamDE": "Spanien",
-   "goals": 5
-  },
-  {
-   "name": "Ousmane Dembélé",
-   "teamDE": "Frankreich",
    "goals": 5
   },
   {
