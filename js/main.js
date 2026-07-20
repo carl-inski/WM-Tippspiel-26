@@ -872,6 +872,7 @@
       barTd.appendChild(bar);
       tr.appendChild(barTd);
 
+      tr.dataset.name = r.name;
       tr.addEventListener('click', () => openPlayerSheet(r.name));
       tbody.appendChild(tr);
     }
@@ -891,6 +892,7 @@
   function renderFamilien() {
     const view = $('#view-familien');
     view.innerHTML = '';
+    if (tournamentFinished()) view.appendChild(celebrationBanner());
     if (hasSim()) view.appendChild(simBanner());
     if (bonusIsSet()) view.appendChild(bonusBanner());
     const byName = new Map(state.standings.map((r) => [r.name, r]));
@@ -898,6 +900,7 @@
     const grid = el('div', 'family-grid');
     for (const f of state.families) {
       const card = el('div', 'glass family-card');
+      card.dataset.family = f.name;
       const head = el('div', 'family-head');
       head.appendChild(el('span', 'fname', f.name));
       head.appendChild(el('span', 'frank', '#' + f.rank));
@@ -928,6 +931,7 @@
   function renderTorjaeger() {
     const view = $('#view-torjaeger');
     view.innerHTML = '';
+    if (tournamentFinished()) view.appendChild(celebrationBanner());
     if (hasSim()) view.appendChild(simBanner());
 
     const canon = window.Scoring.canonicalScorer;
@@ -1105,27 +1109,49 @@
     const champPts = state.data.bonus.champion.points || 15;
     const card = el('div', 'glass card');
     card.appendChild(el('h2', '', 'Weltmeister'));
-    card.appendChild(el('p', 'bonus-hint',
-      'Wähle den Weltmeister – Tipper mit diesem Team bekommen +' + fmtPts(champPts) + ' Punkte.'));
 
+    const locked = tournamentFinished();
+    const answer = state.data.bonus.champion.answer;   // z. B. "Spanien"
     const alive = aliveTeams();
     const aliveSet = new Set(alive);
-    const picked = state.bonusSet.champion;
-    const pickerTeams = (picked && !aliveSet.has(picked)) ? [picked, ...alive] : alive;
+    // Effektiver Weltmeister: nach Turnierende die echte Antwort, sonst die
+    // lokale (Vorschau-)Auswahl.
+    const champion = locked ? answer : state.bonusSet.champion;
 
-    const picker = el('div', 'bonus-picker');
-    for (const team of pickerTeams) {
-      const chip = el('button', 'pick-chip' + (picked === team ? ' active' : ''));
-      if (window.Teams.TEAMS[team]) chip.appendChild(flagImg(team));
-      chip.appendChild(el('span', '', team));
-      chip.addEventListener('click', () => setBonusChampion(team));
-      picker.appendChild(chip);
-    }
-    card.appendChild(picker);
-    if (picked) {
-      const reset = el('button', 'sim-reset', 'Auswahl zurücksetzen');
-      reset.addEventListener('click', () => setBonusChampion(picked));
-      card.appendChild(reset);
+    if (locked) {
+      // Endstand: Weltmeister steht fest, Bonus gilt global – nur noch anzeigen,
+      // Spanien vorausgewählt (analog zur Elfmeterschießen-Karte).
+      const badge = el('div', 'bonus-locked');
+      badge.appendChild(el('span', 'bonus-locked-badge', '✓ Bonus bereits angewendet'));
+      badge.appendChild(el('span', 'bonus-locked-info',
+        'Weltmeister steht fest – Tipper mit diesem Team bekommen +' + fmtPts(champPts) + ' Punkte.'));
+      card.appendChild(badge);
+      const chosen = el('div', 'bonus-picker');
+      const chip = el('span', 'pick-chip active');
+      chip.style.cursor = 'default';
+      if (window.Teams.TEAMS[answer]) chip.appendChild(flagImg(answer));
+      chip.appendChild(el('span', '', answer || '–'));
+      chosen.appendChild(chip);
+      card.appendChild(chosen);
+    } else {
+      card.appendChild(el('p', 'bonus-hint',
+        'Wähle den Weltmeister – Tipper mit diesem Team bekommen +' + fmtPts(champPts) + ' Punkte.'));
+      const picked = state.bonusSet.champion;
+      const pickerTeams = (picked && !aliveSet.has(picked)) ? [picked, ...alive] : alive;
+      const picker = el('div', 'bonus-picker');
+      for (const team of pickerTeams) {
+        const chip = el('button', 'pick-chip' + (picked === team ? ' active' : ''));
+        if (window.Teams.TEAMS[team]) chip.appendChild(flagImg(team));
+        chip.appendChild(el('span', '', team));
+        chip.addEventListener('click', () => setBonusChampion(team));
+        picker.appendChild(chip);
+      }
+      card.appendChild(picker);
+      if (picked) {
+        const reset = el('button', 'sim-reset', 'Auswahl zurücksetzen');
+        reset.addEventListener('click', () => setBonusChampion(picked));
+        card.appendChild(reset);
+      }
     }
 
     const byTeam = new Map();
@@ -1137,13 +1163,13 @@
     const rows = [...byTeam.entries()]
       .map(([team, names]) => ({ team, names, alive: aliveSet.has(team) }))
       .sort((a, b) =>
-        (b.team === picked) - (a.team === picked) ||
+        (b.team === champion) - (a.team === champion) ||
         (b.alive - a.alive) ||
         b.names.length - a.names.length ||
         a.team.localeCompare(b.team, 'de'));
 
     for (const r of rows) {
-      const won = r.team === picked;
+      const won = r.team === champion;
       const row = el('div', 'bonus-row' + (won ? ' win' : (r.alive ? '' : ' out')));
       if (window.Teams.TEAMS[r.team]) row.appendChild(flagImg(r.team));
       else row.appendChild(ballPlaceholder());
@@ -1421,8 +1447,10 @@
     return layer;
   }
 
-  /* Baut ein Sieger-Treppchen (2. – 1. – 3.) aus [{name, sub}, …]. */
-  function buildPodium(title, rows) {
+  /* Baut ein Sieger-Treppchen (2. – 1. – 3.) aus [{name, sub, key}, …].
+     onPick(key) wird beim Antippen eines Namens aufgerufen (Sprung in die
+     jeweilige Tabelle). */
+  function buildPodium(title, rows, onPick) {
     const wrap = el('div', 'podium-block');
     wrap.appendChild(el('h3', 'podium-title', title));
     const pod = el('div', 'podium');
@@ -1432,13 +1460,45 @@
       const place = i + 1;
       const step = el('div', 'podium-step p' + place);
       step.appendChild(el('span', 'podium-medal', place === 1 ? '🥇' : place === 2 ? '🥈' : '🥉'));
-      step.appendChild(el('span', 'podium-name', r.name));
+      const nameEl = el('span', 'podium-name' + (onPick ? ' clickable' : ''), r.name);
+      if (onPick) nameEl.addEventListener('click', () => onPick(r.key));
+      step.appendChild(nameEl);
       step.appendChild(el('span', 'podium-sub', r.sub));
       step.appendChild(el('span', 'podium-bar', String(place)));
       pod.appendChild(step);
     });
     wrap.appendChild(pod);
     return wrap;
+  }
+
+  /* Aus der Siegerehrung heraus in die Einzelwertung springen und die Zeile
+     der Person kurz hervorheben. */
+  function goToStanding(name) {
+    closeCelebration();
+    activateTab('tabelle', false);
+    state.tableFilter = '';
+    render();
+    flashElement(() => [...document.querySelectorAll('#view-tabelle tbody tr')]
+      .find((tr) => tr.dataset.name === name));
+  }
+  function goToFamily(famName) {
+    closeCelebration();
+    activateTab('familien', false);
+    render();
+    flashElement(() => [...document.querySelectorAll('#view-familien .family-card')]
+      .find((c) => c.dataset.family === famName));
+  }
+  /* Scrollt das (per Finder gesuchte) Element in die Mitte und hebt es kurz hervor. */
+  function flashElement(finder) {
+    const raf = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window)
+      : (fn) => setTimeout(fn, 16);
+    raf(() => {
+      const node = finder();
+      if (!node) return;
+      if (node.scrollIntoView) node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      node.classList.add('row-flash');
+      setTimeout(() => node.classList.remove('row-flash'), 2200);
+    });
   }
 
   function openCelebration() {
@@ -1491,11 +1551,11 @@
     box.appendChild(head);
 
     const indiv = state.standings.slice(0, 3).map((r) =>
-      ({ name: r.name, sub: fmtPts(r.totalLive) + ' Pkt.' }));
+      ({ name: r.name, key: r.name, sub: fmtPts(r.totalLive) + ' Pkt.' }));
     const fam = state.families.slice(0, 3).map((f) =>
-      ({ name: f.name.replace(/^Fam\.\s*/, ''), sub: 'Ø ' + fmtPts(f.average) }));
-    box.appendChild(buildPodium('Einzelwertung', indiv));
-    box.appendChild(buildPodium('Familienwertung', fam));
+      ({ name: f.name.replace(/^Fam\.\s*/, ''), key: f.name, sub: 'Ø ' + fmtPts(f.average) }));
+    box.appendChild(buildPodium('Einzelwertung', indiv, goToStanding));
+    box.appendChild(buildPodium('Familienwertung', fam, goToFamily));
 
     const actions = el('div', 'celebrate-actions');
     const statsBtn = el('button', 'celebrate-btn primary');
@@ -1535,12 +1595,14 @@
     const list = el('div', 'stats-namelist');
     box.appendChild(list);
 
-    const names = state.data.players.map((p) => p.name)
+    // Alle Namen (doppelte Vornamen nur einmal), alphabetisch – komplett
+    // scrollbar, damit jeder seinen Namen findet und antippen kann.
+    const names = [...new Set(state.data.players.map((p) => p.name))]
       .sort((a, b) => a.localeCompare(b, 'de'));
     const renderList = (q) => {
       list.innerHTML = '';
       const needle = q.trim().toLowerCase();
-      const hits = names.filter((n) => n.toLowerCase().includes(needle)).slice(0, 24);
+      const hits = names.filter((n) => n.toLowerCase().includes(needle));
       hits.forEach((n) => {
         const chip = el('button', 'stats-namechip', n);
         chip.addEventListener('click', () => renderStats(n));
@@ -1755,31 +1817,37 @@
     ind.style.transform = 'translateX(' + active.offsetLeft + 'px)';
   }
 
+  /* Wechselt programmatisch auf einen Tab (wie ein Klick auf die Tab-Leiste).
+     restoreScroll=false erzwingt Start oben (für gezielte Sprünge aus der
+     Siegerehrung). */
+  function activateTab(tabName, restoreScroll) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (tabName === state.tab) { moveIndicator(); return; }
+    state.scrollPos = state.scrollPos || {};
+    state.scrollPos[state.tab] = scroller.scrollTop;
+    state.tab = tabName;
+    document.querySelectorAll('.seg-btn').forEach((b) => {
+      const on = b.dataset.tab === tabName;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.view').forEach((v) =>
+      v.hidden = v.id !== 'view-' + tabName);
+    moveIndicator();
+    if (restoreScroll && state.scrollPos[tabName] != null) {
+      scroller.scrollTop = state.scrollPos[tabName];
+    } else if (restoreScroll && tabName === 'spiele') {
+      scrollToCurrentMatchday();
+    } else {
+      scroller.scrollTop = 0;
+    }
+  }
+
   function initTabs() {
     $('#tabs').addEventListener('click', (e) => {
       const btn = e.target.closest('.seg-btn');
       if (!btn || btn.dataset.tab === state.tab) return;
-      const scroller = document.scrollingElement || document.documentElement;
-      // Scroll-Position der verlassenen Ansicht merken
-      state.scrollPos = state.scrollPos || {};
-      state.scrollPos[state.tab] = scroller.scrollTop;
-
-      state.tab = btn.dataset.tab;
-      document.querySelectorAll('.seg-btn').forEach((b) => {
-        b.classList.toggle('active', b === btn);
-        b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
-      });
-      document.querySelectorAll('.view').forEach((v) =>
-        v.hidden = v.id !== 'view-' + state.tab);
-      moveIndicator();
-      // Position wiederherstellen; Spiele starten beim aktuellen Spieltag
-      if (state.scrollPos[state.tab] != null) {
-        scroller.scrollTop = state.scrollPos[state.tab];
-      } else if (state.tab === 'spiele') {
-        scrollToCurrentMatchday();
-      } else {
-        scroller.scrollTop = 0;
-      }
+      activateTab(btn.dataset.tab, true);
     });
     window.addEventListener('resize', moveIndicator);
 

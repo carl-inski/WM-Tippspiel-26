@@ -129,10 +129,25 @@ test('Siegerehrung: Podest + persönliche Statistiken', async () => {
   assert.ok(podiumTxt.includes('Caspary'), 'Familien-Sieger im Treppchen');
   assert.ok(podiumTxt.includes('Basti'), 'Dank an den Organisator');
 
-  // Zu den Statistiken wechseln und einen Namen wählen
+  // Banner „WM entschieden" in allen vier Ansichten
+  assert.equal(doc.querySelectorAll('.celebrate-banner').length, 4,
+    'Siegerehrungs-Banner in Spiele, Einzel, Familien und Bonus');
+
+  // Podest-Name verweist in die passende Tabelle
+  const goldName = doc.querySelector('.podium-step.p1 .podium-name.clickable');
+  assert.ok(goldName, 'Podest-Name ist anklickbar');
+  goldName.click();
+  assert.equal(doc.getElementById('celebrate-backdrop').hidden, true, 'Siegerehrung schließt beim Sprung');
+  assert.ok(doc.querySelector('.seg-btn[data-tab="tabelle"]').classList.contains('active'),
+    'Einzelwertung ist aktiv');
+
+  // Erneut öffnen und die Statistiken prüfen
+  doc.querySelector('#view-tabelle .celebrate-banner').click();
+  await waitFor(() => doc.getElementById('celebrate-backdrop').hidden === false);
   doc.querySelector('.celebrate-btn.primary').click();
   await waitFor(() => doc.querySelector('.stats-input'));
   const chips = [...doc.querySelectorAll('.stats-namechip')];
+  assert.ok(chips.length >= 70, 'komplette Namensliste (alle Tipper) scrollbar, nicht gekürzt');
   const emma = chips.find((c) => c.textContent === 'Emma H');
   assert.ok(emma, 'Namensliste enthält Emma H');
   emma.click();
@@ -146,6 +161,14 @@ test('Siegerehrung: Podest + persönliche Statistiken', async () => {
   // Overlay lässt sich schließen
   doc.querySelector('.celebrate-close').click();
   assert.equal(doc.getElementById('celebrate-backdrop').hidden, true);
+
+  // Bonus-Tab: Weltmeister ist auf Spanien vorausgewählt und angewendet
+  const bonusTxt = doc.getElementById('view-torjaeger').textContent;
+  const lockedBadges = doc.querySelectorAll('#view-torjaeger .bonus-locked-badge');
+  assert.ok(lockedBadges.length >= 2, 'Weltmeister- und Elfer-Bonus als angewendet markiert');
+  assert.ok(bonusTxt.includes('Spanien'), 'Spanien als Weltmeister vorausgewählt');
+  assert.ok(!doc.querySelector('#view-torjaeger button.pick-chip'),
+    'kein Auswahl-Button mehr im Weltmeister-Bonus');
 
   dom.window.close();
 });

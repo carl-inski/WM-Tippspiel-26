@@ -1232,6 +1232,13 @@ footer {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.podium-name.clickable {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-underline-offset: 3px;
+}
+.podium-name.clickable:hover { text-decoration-color: var(--accent); }
 .podium-sub { font-size: 0.72rem; color: var(--text-dim); }
 .podium-bar {
   display: flex;
@@ -1415,6 +1422,21 @@ footer {
 .stats-outro { margin-top: 22px; text-align: center; }
 .stats-outro-big { margin: 0; font-size: 1.15rem; font-weight: 800; }
 .stats-outro-small { margin: 6px 0 0; font-size: 0.88rem; color: var(--text-dim); }
+
+/* Kurzes Hervorheben einer Zeile/Karte nach dem Sprung aus der Siegerehrung */
+.row-flash { animation: rowFlash 2.2s var(--ease); }
+.family-card.row-flash { border-radius: var(--radius-m); }
+@keyframes rowFlash {
+  0%, 100% { background-color: transparent; box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
+  15%, 55% {
+    background-color: rgba(255, 209, 102, 0.16);
+    box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.5);
+  }
+}
+tr.row-flash td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+tr.row-flash td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+/* etwas Abstand zur klebenden Kopfleiste beim Zentrieren */
+#view-tabelle tbody tr, .family-card { scroll-margin: 90px 0; }
 
 /* ------- Responsive ------- */
 @media (max-width: 620px) {
