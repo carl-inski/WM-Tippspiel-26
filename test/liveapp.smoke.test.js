@@ -10,7 +10,7 @@ const { JSDOM } = require('jsdom');
 
 const root = path.join(__dirname, '..');
 
-function makeApp({ proxyUrl = '', apiPayloads = null, seedSnapshot = null } = {}) {
+function makeApp({ proxyUrl = '', apiPayloads = null, seedSnapshot = null, tippspiel = null } = {}) {
   // <script src>-Tags entfernen – die Dateien werden unten als echte
   // Inline-Skripte eingefügt (geteilter globaler Scope wie im Browser,
   // deckt z. B. doppelte Top-Level-const-Deklarationen auf)
@@ -25,7 +25,9 @@ function makeApp({ proxyUrl = '', apiPayloads = null, seedSnapshot = null } = {}
       ok: true,
       json: async () => JSON.parse(fs.readFileSync(path.join(root, p), 'utf-8'))
     });
-    if (u.includes('tippspiel.json')) return file('data/tippspiel.json');
+    if (u.includes('tippspiel.json')) {
+      return tippspiel ? { ok: true, json: async () => tippspiel } : file('data/tippspiel.json');
+    }
     if (u.includes('manual-results.json')) return file('data/manual-results.json');
     if (u.includes('scorer-overrides.json')) return { ok: true, json: async () => ({ overrides: {} }) };
     if (u.includes('result-overrides.json')) return { ok: true, json: async () => ({ results: {} }) };
@@ -110,6 +112,44 @@ test('Offline-Modus: alle Ansichten rendern', async () => {
   dom.window.close(); // Timer freigeben, sonst hängt der Testprozess
 });
 
+test('Siegerehrung: Podest + persönliche Statistiken', async () => {
+  const dom = makeApp();
+  const doc = dom.window.document;
+  await waitFor(() => doc.querySelectorAll('#view-spiele .match-card').length > 0);
+
+  // Turnier ist durch -> Siegerehrung öffnet automatisch beim ersten Besuch
+  await waitFor(() => doc.getElementById('celebrate-backdrop').hidden === false);
+  assert.equal(doc.querySelector('.celebrate-winner').textContent, 'Emma H',
+    'Gesamtsiegerin im Kopf der Siegerehrung');
+  // Zwei Treppchen (Einzel- + Familienwertung) mit je 3 Plätzen
+  assert.equal(doc.querySelectorAll('.podium-block').length, 2);
+  assert.equal(doc.querySelectorAll('.podium-step').length, 6);
+  const podiumTxt = doc.querySelector('.celebrate').textContent;
+  assert.ok(podiumTxt.includes('Tanja') && podiumTxt.includes('Jochen'), 'Plätze 2 und 3 einzeln');
+  assert.ok(podiumTxt.includes('Caspary'), 'Familien-Sieger im Treppchen');
+  assert.ok(podiumTxt.includes('Basti'), 'Dank an den Organisator');
+
+  // Zu den Statistiken wechseln und einen Namen wählen
+  doc.querySelector('.celebrate-btn.primary').click();
+  await waitFor(() => doc.querySelector('.stats-input'));
+  const chips = [...doc.querySelectorAll('.stats-namechip')];
+  const emma = chips.find((c) => c.textContent === 'Emma H');
+  assert.ok(emma, 'Namensliste enthält Emma H');
+  emma.click();
+  await waitFor(() => doc.querySelector('.stats-name'));
+  assert.equal(doc.querySelector('.stats-name').textContent, 'Emma H');
+  assert.ok(doc.querySelector('.stats-rank').textContent.includes('#1'), 'Platz 1 in den Stats');
+  assert.ok(doc.querySelectorAll('.stat-tile').length >= 6, 'Kennzahlen-Kacheln vorhanden');
+  assert.ok(doc.querySelector('.stats-outro').textContent.includes('Basti'),
+    'Abschluss dankt Basti');
+
+  // Overlay lässt sich schließen
+  doc.querySelector('.celebrate-close').click();
+  assert.equal(doc.getElementById('celebrate-backdrop').hidden, true);
+
+  dom.window.close();
+});
+
 test('Simulation: manueller Live-Stand bewegt Wertung und Rangliste', async () => {
   const dom = makeApp();
   const doc = dom.window.document;
@@ -139,7 +179,14 @@ test('Simulation: manueller Live-Stand bewegt Wertung und Rangliste', async () =
 });
 
 test('Simulation: auch ein zukünftiges Spiel lässt sich simulieren', async () => {
-  const dom = makeApp();
+  // Das reale Turnier ist abgeschlossen (kein offenes Spiel mehr). Für diesen
+  // Test das Ergebnis des letzten Spiels entfernen, damit es wieder ein
+  // kommendes Spiel gibt, das sich simulieren lässt.
+  const data = JSON.parse(fs.readFileSync(path.join(root, 'data', 'tippspiel.json'), 'utf-8'));
+  for (let i = data.matches.length - 1; i >= 0; i--) {
+    if (data.matches[i].result) { data.matches[i].result = null; break; }
+  }
+  const dom = makeApp({ tippspiel: data });
   const doc = dom.window.document;
   await waitFor(() => doc.querySelectorAll('#view-spiele .match-card').length > 0);
 

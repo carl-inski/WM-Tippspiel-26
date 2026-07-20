@@ -27,12 +27,23 @@ function excelResults() {
    alle gleich) statt echter Gewinner/Verlierer. */
 function openMatchWithTipSpread() {
   const signOf = (t) => Math.sign(t[0] - t[1]);
+  const spread = (m) => {
+    const tips = data.players.map((p) => p.tips[m.id]).filter(Boolean);
+    return new Set(tips.map(signOf)).size >= 2;
+  };
+  // Bevorzugt ein echtes offenes Spiel …
   for (const m of data.matches) {
     if (m.result || !m.home) continue;
-    const tips = data.players.map((p) => p.tips[m.id]).filter(Boolean);
-    if (new Set(tips.map(signOf)).size >= 2) return m;
+    if (spread(m)) return m;
   }
-  throw new Error('kein offenes Spiel mit gestreuten Tipps gefunden');
+  // … nach Turnierende ist keins mehr offen: irgendein Spiel mit Teams und
+  // gestreuten Tipps genügt (der Test überschreibt das Ergebnis ohnehin mit
+  // einem simulierten Live-Stand).
+  for (const m of data.matches) {
+    if (!m.home) continue;
+    if (spread(m)) return m;
+  }
+  throw new Error('kein Spiel mit gestreuten Tipps gefunden');
 }
 
 test('Import: Struktur vollständig', () => {
@@ -54,14 +65,30 @@ test('Import: Struktur vollständig', () => {
 // nicht unsere Berechnung (die korrekt an den echten Tipp anknüpft).
 const KNOWN_EXCEL_FORMULA_BUGS = new Set(['Martina']);
 
+// Doppelt vergebene Vornamen lassen sich nicht eindeutig über den Namen
+// vergleichen (der Endstand ist je Name eindeutig, die Excel-Zwischenstände
+// nicht). Solche Namen aus der namensbasierten Prüfung ausnehmen.
+function duplicateNames(players) {
+  const seen = new Map();
+  players.forEach((p) => seen.set(p.name, (seen.get(p.name) || 0) + 1));
+  return new Set([...seen].filter(([, n]) => n > 1).map(([name]) => name));
+}
+
 test('Punktstände stimmen mit den Excel-Formelwerten überein', () => {
-  const standings = Scoring.computeStandings(data, excelResults());
+  // Das Turnier ist abgeschlossen: die gecachten Excel-Stände enthalten die
+  // Zusatzfragen (Weltmeister, Torjäger, Elfmeterschießen). Für den Vergleich
+  // dieselben Endstände in die Wertung geben (tournamentFinished öffnet das
+  // Elfer-Tor; Torschützen aus der manuell gepflegten Excel-Liste).
+  const extras = { tournamentFinished: true, scorers: data.manualScorers };
+  const standings = Scoring.computeStandings(data, excelResults(), extras);
   const byName = new Map(standings.map((r) => [r.name, r]));
+  const dupes = duplicateNames(data.players);
 
   let checked = 0;
   for (const p of data.players) {
     if (typeof p.excelScore !== 'number') continue; // kein gecachter Wert
     if (KNOWN_EXCEL_FORMULA_BUGS.has(p.name)) continue;
+    if (dupes.has(p.name)) continue;                // doppelter Vorname
     const ours = byName.get(p.name).total;
     assert.ok(Math.abs(ours - p.excelScore) < 1e-6,
       `${p.name}: Excel=${p.excelScore} App=${ours}`);

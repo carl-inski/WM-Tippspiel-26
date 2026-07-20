@@ -84,6 +84,11 @@
     // Akkurate Torschützenliste aus Highlightly-Events (football-datas Aggregat
     // ist lückenhaft). Wird – wenn vorhanden – als Primärquelle genutzt.
     state.hlScorers = (scorersFile && scorersFile.scorers) || [];
+    // Die vom Organisator in der Excel gepflegte Torschützenliste ist die
+    // offizielle (End-)Quelle. Roh sichern, bevor sie unten mit den kuratierten
+    // Live-Daten zusammengeführt wird – so bleibt der Excel-Stand als Untergrenze
+    // erhalten (z. B. Mbappé 10 laut Excel schlägt ein nachhängendes Aggregat 8).
+    state.excelScorers = (state.data.manualScorers || []).map((s) => Object.assign({}, s));
     // Korrekturen für Torschützen (Floor) – nie unter den echten Stand.
     state.scorerOverrides = (scorerOv && scorerOv.overrides) || {};
     state.data.manualScorers = bestScorers(null, state.data.manualScorers);
@@ -116,7 +121,14 @@
     const curated = (state.hlScorers && state.hlScorers.length)
       ? state.hlScorers
       : (fallbackManual || state.data.manualScorers || []);
-    return applyScorerOverrides(mergeScorerLists(curated, apiScorers || []));
+    let merged = mergeScorerLists(curated, apiScorers || []);
+    // Offizielle Excel-Torschützen als Untergrenze einmischen (höchster Stand je
+    // Spieler gewinnt) – damit der finale, vom Organisator gepflegte Stand nicht
+    // von einem nachhängenden Live-Aggregat unterboten wird.
+    if (state.excelScorers && state.excelScorers.length) {
+      merged = mergeScorerLists(merged, state.excelScorers);
+    }
+    return applyScorerOverrides(merged);
   }
 
   /* Führt zwei Schützenlisten zusammen (Personen-Abgleich, Max je Person). */
@@ -232,17 +244,23 @@
       }
       out = Object.assign({}, base, { scorers: [...map.values()], realScorers });
     }
+    // Ist das Turnier durch (Finale gespielt), stehen Weltmeister & Elfer-Anzahl
+    // endgültig fest – auch offline (rein aus der Excel), ohne auf den Live-Feed
+    // zu warten. Dann gilt die echte Excel-Antwort für alle.
+    if (tournamentFinished()) {
+      out = Object.assign({}, out, { tournamentFinished: true, shootoutsDecided: true });
+    }
     // Manuell gesetzte Zusatzfragen (Bonus-Tab) überschreiben die
     // API-/Excel-Antworten und lassen den Bonus sofort einfließen. Sobald die
-    // Elfer-Anzahl real feststeht (shootoutsDecided), gewinnt immer der echte
-    // Live-Stand – eine alte lokale Test-Einstellung darf das Ergebnis nicht
+    // Elfer-Anzahl real feststeht (shootoutsLocked), gewinnt immer der echte
+    // Stand – eine alte lokale Test-Einstellung darf das Ergebnis nicht
     // mehr verfälschen.
     const b = state.bonusSet || {};
-    const shootoutsLocked = !!(base && base.shootoutsDecided);
-    if (b.champion || (b.shootouts != null && !shootoutsLocked)) {
+    const locked = shootoutsLocked();
+    if (b.champion || (b.shootouts != null && !locked)) {
       out = Object.assign({}, out);
       if (b.champion) out.championTeam = b.champion;
-      if (b.shootouts != null && !shootoutsLocked) {
+      if (b.shootouts != null && !locked) {
         out.shootoutCount = b.shootouts;
         out.tournamentFinished = true; // manuell gesetzt -> Elfer-Bonus anwenden
       }
@@ -327,11 +345,20 @@
     state.bonusDraft = Math.max(0, n | 0);
     render();
   }
-  /* Steht die Elfer-Anzahl schon real (über den Live-Feed) fest? Dann ist die
-     lokale lediglich für die Bonus-Vorschau gedachte Einstellung hinfällig –
-     der Bonus gilt ab da global für alle, unabhängig vom Gerät. */
+  /* Ist das Turnier komplett durch? Erkennt das Finale mit Ergebnis (steht auch
+     offline in der Excel), fällt sonst auf den Live-Feed zurück. */
+  function tournamentFinished() {
+    const finale = state.data && state.data.matches
+      && state.data.matches.find((m) => m.round === 'Finale');
+    if (finale && state.results && state.results[finale.id]) return true;
+    return !!(state.apiState && state.apiState.extras && state.apiState.extras.tournamentFinished);
+  }
+  /* Steht die Elfer-Anzahl schon real fest (Halbfinale durch bzw. Turnier
+     beendet)? Dann ist die lokale, nur für die Bonus-Vorschau gedachte
+     Einstellung hinfällig – der Bonus gilt ab da global für alle. */
   function shootoutsLocked() {
-    return !!(state.apiState && state.apiState.extras && state.apiState.extras.shootoutsDecided);
+    return tournamentFinished() ||
+      !!(state.apiState && state.apiState.extras && state.apiState.extras.shootoutsDecided);
   }
   function bonusIsSet() {
     return !!(state.bonusSet.champion || (state.bonusSet.shootouts != null && !shootoutsLocked()));
@@ -546,6 +573,7 @@
     const view = $('#view-spiele');
     view.innerHTML = '';
 
+    if (tournamentFinished()) view.appendChild(celebrationBanner());
     if (hasSim()) view.appendChild(simBanner());
 
     if (!CFG.proxyUrl) {
@@ -775,6 +803,7 @@
   function renderTabelle() {
     const view = $('#view-tabelle');
     view.innerHTML = '';
+    if (tournamentFinished()) view.appendChild(celebrationBanner());
     if (hasSim()) view.appendChild(simBanner());
     const card = el('div', 'glass card');
 
@@ -1369,6 +1398,344 @@
     document.documentElement.style.overflow = 'hidden';
   }
 
+  // ---------------------------------------------- Siegerehrung & Statistik --
+  // Abschluss-Feature: Sobald das Turnier durch ist, öffnet sich einmalig eine
+  // festliche Siegerehrung (Treppchen Einzel- + Familienwertung) und man kann
+  // seinen Namen suchen, um persönliche WM-Statistiken zu sehen.
+
+  const CELEBRATE_KEY = 'wm26-celebrated-2026';
+
+  /* Kleine Konfetti-Schicht (rein dekorativ, per CSS animiert). */
+  function confettiLayer() {
+    const layer = el('div', 'confetti');
+    layer.setAttribute('aria-hidden', 'true');
+    const cols = ['#6ee7a0', '#ffd166', '#ff5d73', '#7db6ff', '#f4f6fb'];
+    for (let i = 0; i < 28; i++) {
+      const c = el('i');
+      c.style.left = (i / 28 * 100) + '%';
+      c.style.background = cols[i % cols.length];
+      c.style.animationDelay = (i % 9) * 0.22 + 's';
+      c.style.animationDuration = (2.6 + (i % 5) * 0.5) + 's';
+      layer.appendChild(c);
+    }
+    return layer;
+  }
+
+  /* Baut ein Sieger-Treppchen (2. – 1. – 3.) aus [{name, sub}, …]. */
+  function buildPodium(title, rows) {
+    const wrap = el('div', 'podium-block');
+    wrap.appendChild(el('h3', 'podium-title', title));
+    const pod = el('div', 'podium');
+    [1, 0, 2].forEach((i) => {           // Anzeige-Reihenfolge: Silber, Gold, Bronze
+      const r = rows[i];
+      if (!r) return;
+      const place = i + 1;
+      const step = el('div', 'podium-step p' + place);
+      step.appendChild(el('span', 'podium-medal', place === 1 ? '🥇' : place === 2 ? '🥈' : '🥉'));
+      step.appendChild(el('span', 'podium-name', r.name));
+      step.appendChild(el('span', 'podium-sub', r.sub));
+      step.appendChild(el('span', 'podium-bar', String(place)));
+      pod.appendChild(step);
+    });
+    wrap.appendChild(pod);
+    return wrap;
+  }
+
+  function openCelebration() {
+    if (!state.standings.length) return;
+    renderCelebrationHome();
+    $('#celebrate-backdrop').hidden = false;
+    document.documentElement.style.overflow = 'hidden';
+  }
+  function closeCelebration() {
+    $('#celebrate-backdrop').hidden = true;
+    document.documentElement.style.overflow = '';
+    try { localStorage.setItem(CELEBRATE_KEY, '1'); } catch (e) { /* egal */ }
+  }
+
+  /* Beim ersten Öffnen nach Turnierende automatisch die Siegerehrung zeigen
+     (danach jederzeit über den Banner erreichbar). */
+  function maybeAutoCelebrate() {
+    if (!tournamentFinished()) return;
+    let seen = false;
+    try { seen = localStorage.getItem(CELEBRATE_KEY) === '1'; } catch (e) { /* egal */ }
+    if (!seen) openCelebration();
+  }
+
+  function celebrateCloseBtn() {
+    const close = el('button', 'sheet-close celebrate-close');
+    close.appendChild(window.Icons.node('x'));
+    close.setAttribute('aria-label', 'Schließen');
+    close.addEventListener('click', closeCelebration);
+    return close;
+  }
+
+  /* Start-Ansicht der Siegerehrung: Gewinner-Held + beide Treppchen. */
+  function renderCelebrationHome() {
+    const box = $('#celebrate');
+    box.innerHTML = '';
+    box.scrollTop = 0;
+    box.appendChild(confettiLayer());
+    box.appendChild(celebrateCloseBtn());
+
+    const champ = state.standings[0];
+    const head = el('div', 'celebrate-head');
+    head.appendChild(el('div', 'celebrate-trophy', '🏆'));
+    head.appendChild(el('p', 'celebrate-kicker', 'WM 2026 · Familien-Tippspiel'));
+    head.appendChild(el('p', 'celebrate-congrats', 'Herzlichen Glückwunsch'));
+    head.appendChild(el('div', 'celebrate-winner', champ ? champ.name : ''));
+    if (champ) {
+      head.appendChild(el('p', 'celebrate-sub',
+        '1. Platz gesamt · ' + fmtPts(champ.totalLive) + ' Punkte · der Eisbecher ist verdient! 🍨'));
+    }
+    box.appendChild(head);
+
+    const indiv = state.standings.slice(0, 3).map((r) =>
+      ({ name: r.name, sub: fmtPts(r.totalLive) + ' Pkt.' }));
+    const fam = state.families.slice(0, 3).map((f) =>
+      ({ name: f.name.replace(/^Fam\.\s*/, ''), sub: 'Ø ' + fmtPts(f.average) }));
+    box.appendChild(buildPodium('Einzelwertung', indiv));
+    box.appendChild(buildPodium('Familienwertung', fam));
+
+    const actions = el('div', 'celebrate-actions');
+    const statsBtn = el('button', 'celebrate-btn primary');
+    statsBtn.innerHTML = window.Icons.svg('chart') + ' Meine Statistiken ansehen';
+    statsBtn.addEventListener('click', renderStatsSearch);
+    actions.appendChild(statsBtn);
+    const closeBtn = el('button', 'celebrate-btn', 'Schließen');
+    closeBtn.addEventListener('click', closeCelebration);
+    actions.appendChild(closeBtn);
+    box.appendChild(actions);
+
+    box.appendChild(el('p', 'celebrate-thanks', 'Vielen Dank an Basti für die Organisation ❤️'));
+  }
+
+  /* Namenssuche für die persönlichen Statistiken. */
+  function renderStatsSearch() {
+    const box = $('#celebrate');
+    box.innerHTML = '';
+    box.scrollTop = 0;
+    box.appendChild(celebrateCloseBtn());
+
+    const head = el('div', 'stats-head');
+    const back = el('button', 'stats-back', '‹ zurück');
+    back.addEventListener('click', renderCelebrationHome);
+    head.appendChild(back);
+    box.appendChild(head);
+
+    box.appendChild(el('h2', 'stats-title', 'Deine WM-Statistiken'));
+    box.appendChild(el('p', 'stats-lead', 'Gib deinen Namen ein und entdecke, wie deine WM gelaufen ist.'));
+
+    const input = el('input', 'stats-input');
+    input.setAttribute('type', 'text');
+    input.setAttribute('placeholder', 'Name eingeben …');
+    input.setAttribute('autocomplete', 'off');
+    box.appendChild(input);
+
+    const list = el('div', 'stats-namelist');
+    box.appendChild(list);
+
+    const names = state.data.players.map((p) => p.name)
+      .sort((a, b) => a.localeCompare(b, 'de'));
+    const renderList = (q) => {
+      list.innerHTML = '';
+      const needle = q.trim().toLowerCase();
+      const hits = names.filter((n) => n.toLowerCase().includes(needle)).slice(0, 24);
+      hits.forEach((n) => {
+        const chip = el('button', 'stats-namechip', n);
+        chip.addEventListener('click', () => renderStats(n));
+        list.appendChild(chip);
+      });
+      if (!hits.length) list.appendChild(el('p', 'empty-hint', 'Kein Name gefunden.'));
+    };
+    renderList('');
+    input.addEventListener('input', () => renderList(input.value));
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const needle = input.value.trim().toLowerCase();
+      const exact = names.find((n) => n.toLowerCase() === needle);
+      const hits = names.filter((n) => n.toLowerCase().includes(needle));
+      if (exact) renderStats(exact);
+      else if (hits.length === 1) renderStats(hits[0]);
+    });
+  }
+
+  /* Sammelt die persönlichen Kennzahlen eines Tippers aus dem Endstand. */
+  function computePlayerStats(name) {
+    const p = state.data.players.find((x) => x.name === name);
+    const r = state.standings.find((x) => x.name === name);
+    if (!p || !r) return null;
+
+    const total = state.standings.length;
+    const allPts = state.standings.map((x) => x.totalLive);
+    const avg = allPts.reduce((a, b) => a + b, 0) / (total || 1);
+
+    // Häufigstes getipptes Ergebnis
+    const tipCount = new Map();
+    for (const id in p.tips) {
+      const t = p.tips[id];
+      const key = t[0] + ':' + t[1];
+      tipCount.set(key, (tipCount.get(key) || 0) + 1);
+    }
+    let favTip = '–', favN = 0;
+    for (const [k, n] of tipCount) if (n > favN) { favN = n; favTip = k; }
+
+    // Bester Einzeltipp (meiste Punkte in einem Spiel)
+    let best = null;
+    for (const m of state.data.matches) {
+      const res = state.results[m.id];
+      const tip = p.tips[m.id];
+      if (!res || !tip) continue;
+      const pts = window.Scoring.matchPoints(tip, res, m.wert);
+      if (pts == null) continue;
+      if (!best || pts > best.pts) {
+        const teams = teamsOf(m);
+        best = { pts, home: teams.home, away: teams.away, tip, res };
+      }
+    }
+
+    const played = r.exact + r.tendency + r.wrong;
+    const hitRate = played ? Math.round(((r.exact + r.tendency) / played) * 100) : 0;
+    const fam = state.families.find((f) => f.members.includes(name));
+    const famRank = fam ? state.families.findIndex((f) => f === fam) + 1 : null;
+    // besser als wie viele Prozent der Mitspieler?
+    const beaten = total - r.rank;
+    const beatPct = total > 1 ? Math.round((beaten / (total - 1)) * 100) : 100;
+    const ai = state.standings.find((x) => /charly|chatgpt/i.test(x.name));
+
+    return { p, r, total, avg, favTip, favN, best, played, hitRate, fam, famRank, beaten, beatPct, ai };
+  }
+
+  function statTile(value, label, cls) {
+    const t = el('div', 'stat-tile' + (cls ? ' ' + cls : ''));
+    t.appendChild(el('span', 'stat-value', value));
+    t.appendChild(el('span', 'stat-label', label));
+    return t;
+  }
+
+  /* Persönliche Statistik-Ansicht für einen Namen. */
+  function renderStats(name) {
+    const s = computePlayerStats(name);
+    const box = $('#celebrate');
+    box.innerHTML = '';
+    box.scrollTop = 0;
+    box.appendChild(celebrateCloseBtn());
+
+    const head = el('div', 'stats-head');
+    const back = el('button', 'stats-back', '‹ andere Person');
+    back.addEventListener('click', renderStatsSearch);
+    head.appendChild(back);
+    box.appendChild(head);
+
+    if (!s) {
+      box.appendChild(el('p', 'empty-hint', 'Keine Daten für „' + name + '“ gefunden.'));
+      return;
+    }
+    const { p, r } = s;
+
+    box.appendChild(el('p', 'stats-kicker', 'WM 2026 · Deine Bilanz'));
+    box.appendChild(el('h2', 'stats-name', name));
+
+    // Held: Platzierung
+    const podiumEmoji = r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : '';
+    const hero = el('div', 'stats-hero');
+    hero.appendChild(el('div', 'stats-rank', '#' + r.rank + (podiumEmoji ? ' ' + podiumEmoji : '')));
+    hero.appendChild(el('div', 'stats-rank-sub',
+      'von ' + s.total + ' Tipper:innen · ' + fmtPts(r.totalLive) + ' Punkte'));
+    box.appendChild(hero);
+
+    // Kennzahlen-Kacheln
+    const grid = el('div', 'stats-grid');
+    grid.appendChild(statTile(r.exact, 'exakte Tipps', 'good'));
+    grid.appendChild(statTile(r.tendency, 'richtige Tendenz'));
+    grid.appendChild(statTile(r.wrong, 'daneben', 'bad'));
+    grid.appendChild(statTile(s.hitRate + '%', 'Trefferquote'));
+    grid.appendChild(statTile('★ ' + s.favTip, 'Lieblingstipp (' + s.favN + '×)'));
+    grid.appendChild(statTile(s.beatPct + '%', 'besser als … der Mitspieler'));
+    box.appendChild(grid);
+
+    // Vergleich zum Durchschnitt
+    const diff = r.totalLive - s.avg;
+    const cmp = el('div', 'stats-compare');
+    const arrow = diff >= 0 ? '▲' : '▼';
+    const cmpCls = diff >= 0 ? 'good' : 'bad';
+    cmp.innerHTML = 'Schnitt aller Tipper: <b>' + fmtPts(s.avg) + '</b> Punkte · ' +
+      'du liegst <span class="' + cmpCls + '">' + arrow + ' ' + fmtPts(Math.abs(diff)) + '</span> ' +
+      (diff >= 0 ? 'darüber' : 'darunter');
+    box.appendChild(cmp);
+
+    // Highlight-Zeilen
+    const lines = el('div', 'stats-lines');
+    if (s.best) {
+      lines.appendChild(statLine('🎯', 'Dein bester Tipp',
+        (s.best.home || '?') + ' – ' + (s.best.away || '?') +
+        ' (Tipp ' + s.best.tip[0] + ':' + s.best.tip[1] +
+        ', Ergebnis ' + s.best.res.home + ':' + s.best.res.away + ') → +' + fmtPts(s.best.pts) + ' Pkt.'));
+    }
+    if (s.fam) {
+      lines.appendChild(statLine('👪', 'Deine Familie',
+        s.fam.name + ' · Platz ' + s.famRank + ' von ' + state.families.length +
+        ' (Ø ' + fmtPts(s.fam.average) + ')'));
+    }
+    // Weltmeister-Tipp
+    const champTipped = p.bonus.champion || '–';
+    const champRight = r.bonusDetail.champion > 0;
+    lines.appendChild(statLine(champRight ? '✅' : '❌', 'Weltmeister-Tipp',
+      champTipped + (champRight ? ' – goldrichtig! (+' + fmtPts(r.bonusDetail.champion) + ')'
+        : ' – Weltmeister wurde ' + state.data.bonus.champion.answer)));
+    // Torjäger
+    if (p.bonus.topscorer) {
+      const g = r.bonusDetail.topscorerGoals || 0;
+      lines.appendChild(statLine('⚽', 'Dein Torjäger-Tipp',
+        window.Scoring.canonicalScorer(p.bonus.topscorer).name + ' · ' + g +
+        ' Tore → +' + fmtPts(r.bonusDetail.topscorer || 0) + ' Pkt.'));
+    }
+    // Elfmeterschießen
+    if (p.bonus.shootouts != null) {
+      const shootPts = r.bonusDetail.shootouts;
+      const shootAns = state.data.bonus.shootouts.answer;
+      lines.appendChild(statLine('🥅', 'Elfmeterschießen',
+        'getippt: ' + p.bonus.shootouts + ' · tatsächlich: ' + shootAns +
+        (shootPts != null ? ' → ' + (shootPts >= 0 ? '+' : '') + fmtPts(shootPts) + ' Pkt.' : '')));
+    }
+    // KI-Duell
+    if (s.ai && s.ai.name !== name) {
+      const beatAI = r.rank < s.ai.rank;
+      lines.appendChild(statLine('🤖', 'Duell gegen die KI',
+        beatAI ? 'Du hast ChatGPT-Charly geschlagen (Platz ' + s.ai.rank + ')! 🎉'
+          : 'ChatGPT-Charly (Platz ' + s.ai.rank + ') lag diesmal vorn – Revanche beim nächsten Mal!'));
+    }
+    box.appendChild(lines);
+
+    // Abschluss
+    const outro = el('div', 'stats-outro');
+    outro.appendChild(el('p', 'stats-outro-big', 'Bis zum nächsten Mal! 👋'));
+    outro.appendChild(el('p', 'stats-outro-small', 'Vielen Dank an Basti für die Organisation ❤️'));
+    box.appendChild(outro);
+  }
+
+  function statLine(icon, label, text) {
+    const row = el('div', 'stat-line');
+    row.appendChild(el('span', 'stat-line-icon', icon));
+    const body = el('span', 'stat-line-body');
+    body.appendChild(el('span', 'stat-line-label', label));
+    body.appendChild(el('span', 'stat-line-text', text));
+    row.appendChild(body);
+    return row;
+  }
+
+  /* Auffälliger Einstieg (in Spiele-/Wertungs-Ansicht), um die Siegerehrung
+     jederzeit erneut zu öffnen. */
+  function celebrationBanner() {
+    const b = el('button', 'celebrate-banner');
+    b.innerHTML = '<span class="cb-emoji">🏆</span>' +
+      '<span class="cb-text"><strong>Die WM 2026 ist entschieden!</strong>' +
+      '<span>Siegerehrung &amp; persönliche Statistiken ansehen</span></span>' +
+      '<span class="cb-arrow">›</span>';
+    b.addEventListener('click', openCelebration);
+    return b;
+  }
+
   // ------------------------------------------------------------------ Tabs --
 
   function initIcons() {
@@ -1426,8 +1793,13 @@
     $('#sheet-backdrop').addEventListener('click', (e) => {
       if (e.target.id === 'sheet-backdrop') closeSheet();
     });
+    $('#celebrate-backdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'celebrate-backdrop') closeCelebration();
+    });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeSheet();
+      if (e.key !== 'Escape') return;
+      if (!$('#celebrate-backdrop').hidden) closeCelebration();
+      else closeSheet();
     });
   }
 
@@ -1461,6 +1833,8 @@
         moveIndicator();
         scrollToCurrentMatchday();
       });
+      // Nach Turnierende einmalig automatisch die Siegerehrung zeigen.
+      maybeAutoCelebrate();
     } catch (err) {
       showFatal(err);
       return;
